@@ -260,22 +260,22 @@ SEM = "2026-10-05"
 
 def test_fusion_preserve_les_semaines_passees():
     joueurs = {"Alex": {"picks": {"2026-09-28": "COL"}, "out": None}}
-    lignes = [{"Joueur": "Alex", "Pick": "TOR", "En vie": True}]
+    lignes = [{"Joueur": "Alex", "Pick": "TOR", "Statut": pk.AUTO}]
     fusion = pk.merge_pool_week(joueurs, lignes, SEM)
     assert fusion["Alex"]["picks"] == {"2026-09-28": "COL", SEM: "TOR"}
 
 
 def test_fusion_efface_le_pick_de_la_semaine_si_on_le_vide():
     joueurs = {"Alex": {"picks": {"2026-09-28": "COL", SEM: "TOR"}, "out": None}}
-    lignes = [{"Joueur": "Alex", "Pick": "", "En vie": True}]
+    lignes = [{"Joueur": "Alex", "Pick": "", "Statut": pk.AUTO}]
     fusion = pk.merge_pool_week(joueurs, lignes, SEM)
     assert fusion["Alex"]["picks"] == {"2026-09-28": "COL"}
 
 
 def test_fusion_ignore_les_lignes_sans_nom():
-    lignes = [{"Joueur": "", "Pick": "COL", "En vie": True},
-              {"Joueur": None, "Pick": "TOR", "En vie": True},
-              {"Joueur": "  Bob  ", "Pick": "MTL", "En vie": True}]
+    lignes = [{"Joueur": "", "Pick": "COL", "Statut": pk.AUTO},
+              {"Joueur": None, "Pick": "TOR", "Statut": pk.AUTO},
+              {"Joueur": "  Bob  ", "Pick": "MTL", "Statut": pk.AUTO}]
     fusion = pk.merge_pool_week({}, lignes, SEM)
     assert list(fusion) == ["Bob"]
     assert fusion["Bob"]["picks"] == {SEM: "MTL"}
@@ -284,12 +284,12 @@ def test_fusion_ignore_les_lignes_sans_nom():
 def test_fusion_garde_la_date_delimination_dorigine():
     """Sinon la date serait réécrite à chaque enregistrement du registre."""
     joueurs = {"Bob": {"picks": {}, "out": "2026-09-28"}}
-    lignes = [{"Joueur": "Bob", "Pick": "", "En vie": False}]
+    lignes = [{"Joueur": "Bob", "Pick": "", "Statut": pk.DEHORS}]
     assert pk.merge_pool_week(joueurs, lignes, SEM)["Bob"]["out"] == "2026-09-28"
     # nouvellement éliminé : la semaine courante fait foi
     assert pk.merge_pool_week({}, lignes, SEM)["Bob"]["out"] == SEM
     # remis en vie
-    revie = [{"Joueur": "Bob", "Pick": "", "En vie": True}]
+    revie = [{"Joueur": "Bob", "Pick": "", "Statut": pk.AUTO}]
     assert pk.merge_pool_week(joueurs, revie, SEM)["Bob"]["out"] is None
 
 
@@ -297,7 +297,7 @@ def test_fusion_retire_un_joueur_absent_des_lignes():
     """Supprimer une ligne dans l'éditeur retire bien la personne."""
     joueurs = {"Alex": {"picks": {}, "out": None}, "Bob": {"picks": {}, "out": None}}
     fusion = pk.merge_pool_week(joueurs, [{"Joueur": "Alex", "Pick": "",
-                                           "En vie": True}], SEM)
+                                           "Statut": pk.AUTO}], SEM)
     assert list(fusion) == ["Alex"]
 
 
@@ -308,3 +308,60 @@ def test_mes_equipes_brulees_incluent_la_semaine_en_cours():
     assert pk.my_used(picks) == {"VGK", "COL"}
     # après un redépart, seules les équipes du tour comptent
     assert pk.my_used(picks, since=W2) == {"COL"}
+
+
+# ── Élimination automatique ───────────────────────────────────────────────
+
+SEM1, SEM2 = "2026-09-28", "2026-10-05"
+
+
+def test_le_pick_perdu_elimine():
+    j = {"picks": {SEM1: "COL"}}
+    assert pk.statut(j, {(SEM1, "COL"): False}) == (True, SEM1, "auto")
+    assert pk.statut(j, {(SEM1, "COL"): True}) == (False, None, "auto")
+
+
+def test_match_pas_encore_joue_ne_signifie_pas_defaite():
+    """Un match reporté ou à venir laisse le résultat absent. Conclure
+    « éliminé » sur une absence serait le pire des bogues possibles ici."""
+    j = {"picks": {SEM1: "COL"}}
+    assert pk.statut(j, {}) == (False, None, "auto")
+    assert pk.statut(j, {(SEM1, "TOR"): False}) == (False, None, "auto")
+
+
+def test_elimination_a_la_premiere_defaite_pas_la_derniere():
+    j = {"picks": {SEM1: "COL", SEM2: "TOR"}}
+    res = {(SEM1, "COL"): False, (SEM2, "TOR"): False}
+    assert pk.statut(j, res)[1] == SEM1
+
+
+def test_le_manuel_lemporte_sur_les_resultats():
+    """Cotisation impayée, règle maison : on doit pouvoir sortir quelqu'un qui
+    a gagné, et garder quelqu'un qui a perdu."""
+    gagnant = {"picks": {SEM1: "COL"}, "force": pk.DEHORS, "out": SEM1}
+    assert pk.statut(gagnant, {(SEM1, "COL"): True}) == (True, SEM1, "manuel")
+
+    perdant = {"picks": {SEM1: "COL"}, "force": pk.DEDANS}
+    assert pk.statut(perdant, {(SEM1, "COL"): False}) == (False, None, "manuel")
+
+
+def test_ancien_registre_sans_champ_force_reste_elimine():
+    """Compatibilité : les registres écrits avant l'automatique n'ont que la
+    date. Ils ne doivent pas se remettre en vie tout seuls."""
+    vieux = {"picks": {}, "out": "2026-09-21"}
+    assert pk.statut(vieux, {})[0] is True
+
+
+def test_les_resultats_dun_tour_precedent_ne_comptent_plus():
+    j = {"picks": {SEM1: "COL", "2027-01-11": "TOR"}}
+    res = {(SEM1, "COL"): False}
+    assert pk.statut(j, res, since=R)[0] is False    # défaite d'avant le redépart
+
+
+def test_les_vivants_tiennent_compte_des_resultats():
+    etat = pool_etat(Alex={"picks": {SEM1: "COL"}, "out": None},
+                     Bob={"picks": {SEM1: "TOR"}, "out": None})
+    res = {(SEM1, "COL"): True, (SEM1, "TOR"): False}
+    assert pk.pool_alive(etat, resultats=res) == ["Alex"]
+    assert pk.survivors(etat, resultats=res) == 2          # Alex + moi
+    assert pk.popularity(etat, W1, resultats=res) == {"COL": 1}

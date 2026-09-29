@@ -165,6 +165,27 @@ def pick_days_for(version, overrides):
 
 
 @st.cache_data
+def resultats(version, overrides):
+    """{(lundi ISO, équipe): a gagné} pour les matchs de journée de pick joués.
+
+    Un match absent du dictionnaire n'est pas une défaite : il n'est pas
+    encore joué, ou reporté. Seuls les matchs de la journée de pick comptent —
+    une équipe peut jouer d'autres soirs dans la semaine.
+    """
+    jours = pick_days_for(version, overrides) if version else {}
+    autorises = {d: m for m, pd in jours.items() for d in pd.days}
+    out = {}
+    with connect() as c:
+        for g, away, home, away_gagne in form.finished_games(c):
+            m = autorises.get(g)
+            if m is None:
+                continue
+            out[(m.isoformat(), away)] = away_gagne
+            out[(m.isoformat(), home)] = not away_gagne
+    return out
+
+
+@st.cache_data
 def players(version):
     """tricode → meneur de l'équipe, depuis data/players.csv (facultatif)."""
     path = store.DATA_DIR / "players.csv"
@@ -283,12 +304,19 @@ tour = pk.this_round(picks, since)
 # toute la saison ferait garder des équipes pour des semaines qu'on n'atteint
 # jamais. Si le tour dépasse 8 semaines, l'horizon suit, une par semaine.
 horizon = pk.horizon(since, today)
-out = pk.eliminated(state, today)
 overrides = tuple(sorted(day_overrides.items()))   # clé de cache
 all_days = pick_days_for(VERSION, overrides) if VERSION else {}
 this_monday = op.week_start(today)
 from_date, used_set, provisional = pk.planning(picks, today, since)
 used = tuple(sorted(used_set))
+
+RES = resultats(VERSION, overrides) if VERSION else {}
+# Même règle pour moi que pour les autres : le pick perdu élimine, et le
+# bouton de la barre latérale reste prioritaire.
+_moi = {"picks": {p["week"]: p["team"] for p in picks}, "out": state["out"]}
+_out, _sem_out, _origine_out = pk.statut(_moi, RES, since)
+out = (dt.date.fromisoformat(_sem_out) if _out and _sem_out
+       else (this_monday if _out else None))
 
 with st.sidebar:
     st.header("Mes picks")
@@ -526,7 +554,7 @@ def page_pick():
         # pas dans les meilleures : sans ça, son espérance serait introuvable.
         # Popularité chez les adversaires : une équipe que tout le monde prend
         # ne démarque pas. Renseignée dans la section « Le pool ».
-        pris = pk.popularity(state, monday, since) if monday == this_monday else {}
+        pris = pk.popularity(state, monday, since, RES) if monday == this_monday else {}
         alts = alternatives_for(v, from_date, used, overrides, horizon,
                                 (choisi.team,) if choisi else ())
         top_e = alts[0][1]
@@ -547,7 +575,7 @@ def page_pick():
             ("Série en cours", team_form[vedette.team].streak_label or "aucune",
              f"de {vedette.team}"),
         ] + ([("Adversaires sur ce pick", str(pris.get(vedette.team, 0)),
-               f"sur {len(pk.pool_alive(state, since))} en vie")]
+               f"sur {len(pk.pool_alive(state, since, RES))} en vie")]
              if pk.pool(state) else []))
         reasons = []
         for o, _e in alts:
@@ -1020,13 +1048,13 @@ def page_pool():
     semaine = this_monday.isoformat()
     joueurs = pk.pool(state)
     proba = {t: o.p for t, o in options.get(this_monday, {}).items()}
-    pris = pk.popularity(state, this_monday, since)
+    pris = pk.popularity(state, this_monday, since, RES)
     mon_pick = (provisional or {}).get("team") or (current or {}).get("team")
 
     ui.tiles([
-        ("Survivants", str(pk.survivors(state, since, today)),
+        ("Survivants", str(pk.survivors(state, since, today, RES)),
          "moi comprise" if not out else "je suis éliminée"),
-        ("Adversaires en vie", str(len(pk.pool_alive(state, since))),
+        ("Adversaires en vie", str(len(pk.pool_alive(state, since, RES))),
          f"sur {len(joueurs)} inscrits"),
         ("Équipes prises", str(len(pris)),
          "par les adversaires cette semaine"),
@@ -1036,25 +1064,41 @@ def page_pool():
 
     with ui.panel("registre", "Qui joue quoi cette semaine",
                   "Une ligne par adversaire — ne t'ajoute pas, tu es déjà "
-                  "comptée à part. Décoche « En vie » quand quelqu'un tombe : "
-                  "les éliminés cessent de compter dans la popularité et dans "
-                  "le nombre de survivants."):
+                  "comptée à part. Le statut se déduit tout seul des "
+                  "résultats : inutile de suivre qui tombe. Mets « out » ou "
+                  "« in » seulement pour ce qu'aucun match ne dira — une "
+                  "cotisation impayée, une règle maison."):
+        def verdict(j):
+            elimine, sem, origine = pk.statut(j, RES, since)
+            if not elimine:
+                return "en vie" if origine == "manuel" else "en vie"
+            return f"éliminé sem. du {sem}" if sem else "éliminé"
+
         lignes = [{
             "Joueur": nom,
             "Pick": j["picks"].get(semaine, ""),
-            "En vie": not j.get("out"),
+            "Statut": j.get("force") or pk.AUTO,
+            "Réel": verdict(j),
             "Probabilité": 100 * proba[j["picks"][semaine]]
                            if j["picks"].get(semaine) in proba else None,
             "Équipes déjà prises": ", ".join(sorted(pk.pool_used(state, nom, since))),
         } for nom, j in sorted(joueurs.items())]
         edite = st.data_editor(
-            pd.DataFrame(lignes, columns=["Joueur", "Pick", "En vie",
+            pd.DataFrame(lignes, columns=["Joueur", "Pick", "Statut", "Réel",
                                           "Probabilité", "Équipes déjà prises"]),
             num_rows="dynamic", hide_index=True, width="stretch",
             column_config={
                 "Pick": st.column_config.SelectboxColumn(
                     f"Pick du {fr_weekend(this_monday)}",
                     options=sorted(cm.TEAMS), required=False),
+                "Statut": st.column_config.SelectboxColumn(
+                    "Statut", options=[pk.AUTO, pk.DEHORS, pk.DEDANS],
+                    required=False,
+                    help="auto = déduit des résultats ; out = éliminé quoi "
+                         "qu'en disent les matchs ; in = maintenu en vie"),
+                "Réel": st.column_config.TextColumn(
+                    "Réel", disabled=True,
+                    help="Ce que le site retient, une fois le manuel appliqué"),
                 "Probabilité": st.column_config.NumberColumn(
                     format="%.1f %%", disabled=True,
                     help="Calculée, pas modifiable"),
@@ -1112,7 +1156,7 @@ def page_pool():
 
     gens = [("Moi", mes_brulees, not out, mon_pick)]
     gens += [(nom, pk.pool_used(state, nom, since),
-              nom in pk.pool_alive(state, since),
+              nom in pk.pool_alive(state, since, RES),
               joueurs[nom]["picks"].get(semaine))
              for nom in sorted(joueurs)]
 

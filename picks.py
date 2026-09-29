@@ -50,7 +50,9 @@ def _dumps(state):
              "days": dict(sorted(state["days"].items())),
              "resets": sorted(set(state["resets"])), "out": state["out"],
              "pool": {n: {"picks": dict(sorted(j.get("picks", {}).items())),
-                          "out": j.get("out")}
+                          "out": j.get("out"),
+                          "force": (j.get("force")
+                                    or (DEHORS if j.get("out") else AUTO))}
                       for n, j in sorted(state["pool"].items())}}
     return json.dumps(state, indent=2, ensure_ascii=False) + "\n"
 
@@ -145,9 +147,57 @@ def set_pool(state, joueurs):
     for nom, j in joueurs.items():
         nom = str(nom).strip()
         if nom:
+            # Ne pas forcer AUTO quand une date « out » existe sans champ
+            # « force » : ça effacerait une élimination déjà enregistrée.
             propre[nom] = {"picks": {k: v for k, v in j.get("picks", {}).items() if v},
-                           "out": j.get("out")}
+                           "out": j.get("out"),
+                           "force": (j.get("force")
+                                     or (DEHORS if j.get("out") else AUTO))}
     return {**_normalize(state), "pool": propre}
+
+
+# ── Élimination ───────────────────────────────────────────────────────────
+# Par défaut elle se déduit des résultats : si le pick a perdu, c'est fini.
+# Le manuel l'emporte toujours, pour les cas qu'aucun résultat ne dira — une
+# cotisation impayée, une règle maison, une erreur de saisie.
+
+AUTO, DEHORS, DEDANS = "auto", "out", "in"
+
+
+def auto_out(picks_semaine, resultats, since=None):
+    """Première semaine du tour où le pick a perdu, ou None.
+
+    `resultats` : {(lundi ISO, équipe): a gagné}. Une absence veut dire match
+    pas encore joué ou reporté — surtout pas une défaite.
+    """
+    for w in sorted(picks_semaine):
+        if since and w < since.isoformat():
+            continue
+        gagne = resultats.get((w, picks_semaine[w]))
+        if gagne is False:
+            return w
+    return None
+
+
+def statut(joueur, resultats, since=None):
+    """(éliminé ?, semaine, origine) pour un joueur du registre.
+
+    origine : « manuel » si quelqu'un a forcé la valeur, « auto » sinon.
+    """
+    manuel = joueur.get("out")
+    # Une date « out » sans champ « force » vient d'avant l'élimination
+    # automatique : on la traite comme une élimination manuelle, sinon les
+    # registres déjà remplis se remettraient tous en vie d'un coup.
+    force = joueur.get("force") or (DEHORS if manuel else AUTO)
+    if force == DEDANS:
+        return False, None, "manuel"
+    if force == DEHORS:
+        # Élimination d'un tour précédent : le redépart l'efface.
+        if manuel and since and manuel < since.isoformat():
+            return False, None, "manuel"
+        return True, manuel, "manuel"
+    w = auto_out(joueur.get("picks", {}), resultats, since)
+    return w is not None, w, "auto"
 
 
 def merge_pool_week(joueurs, lignes, semaine):
@@ -169,45 +219,53 @@ def merge_pool_week(joueurs, lignes, semaine):
             picks[semaine] = team
         else:
             picks.pop(semaine, None)
-        vivant = bool(ligne.get("En vie", True))
+        # « Statut » remplace l'ancienne case « En vie » : trois états, parce
+        # que l'automatique doit pouvoir être contredit dans les deux sens.
+        force = ligne.get("Statut") or AUTO
         ancien = joueurs.get(nom, {}).get("out")
-        nouveau[nom] = {"picks": picks,
-                        "out": None if vivant else (ancien or semaine)}
+        nouveau[nom] = {
+            "picks": picks,
+            "force": force,
+            "out": (ancien or semaine) if force == DEHORS else None,
+        }
     return nouveau
 
 
-def pool_alive(state, since=None):
-    """Noms encore en vie. Une élimination d'un tour précédent ne compte plus."""
+def pool_alive(state, since=None, resultats=None):
+    """Noms encore en vie, résultats compris. Sans `resultats`, seul le manuel
+    compte — c'est le comportement d'avant, gardé pour les appels qui n'ont
+    pas la base sous la main."""
+    res = resultats or {}
     vivants = []
     for nom, j in pool(state).items():
-        o = j.get("out")
-        if not o or (since and o < since.isoformat()):
+        elimine, _w, _o = statut(j, res, since)
+        if not elimine:
             vivants.append(nom)
     return sorted(vivants)
 
 
-def survivors(state, since=None, today=None):
+def survivors(state, since=None, today=None, resultats=None):
     """Combien de personnes restent, moi comprise."""
     moi = 0 if eliminated(state, today) else 1
-    return moi + len(pool_alive(state, since))
+    return moi + len(pool_alive(state, since, resultats))
 
 
-def pool_picks(state, week, since=None):
+def pool_picks(state, week, since=None, resultats=None):
     """{nom: équipe} pour la semaine `week`, chez les joueurs encore en vie."""
     w = week.isoformat()
-    vivants = set(pool_alive(state, since))
+    vivants = set(pool_alive(state, since, resultats))
     return {n: j["picks"][w] for n, j in pool(state).items()
             if n in vivants and j.get("picks", {}).get(w)}
 
 
-def popularity(state, week, since=None):
+def popularity(state, week, since=None, resultats=None):
     """{équipe: combien d'adversaires la prennent} pour cette semaine.
 
     C'est la mesure qui compte dans un survivor : une équipe que tout le monde
     prend ne te démarque pas, même si elle est la plus probable.
     """
     compte = {}
-    for team in pool_picks(state, week, since).values():
+    for team in pool_picks(state, week, since, resultats).values():
         compte[team] = compte.get(team, 0) + 1
     return compte
 
