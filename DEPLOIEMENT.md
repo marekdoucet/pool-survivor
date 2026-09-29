@@ -4,9 +4,9 @@ Tout ce qui suit est gratuit : dépôt privé GitHub, GitHub Actions (2 000 minu
 par mois pour un dépôt privé ; la collecte en utilise environ 120), The Odds API
 (500 crédits par mois ; la collecte en utilise environ 120) et Streamlit Community Cloud.
 
-## 1. Créer le dépôt GitHub (privé)
+## 1. Créer le dépôt GitHub (public)
 
-1. Sur https://github.com/new : nom `pool-survivor`, **Private**, ne coche rien
+1. Sur https://github.com/new : nom `pool-survivor`, **Public**, ne coche rien
    d'autre (pas de README, pas de .gitignore).
 2. Dans PowerShell :
    ```
@@ -16,8 +16,12 @@ par mois pour un dépôt privé ; la collecte en utilise environ 120), The Odds 
    ```
    La première fois, une fenêtre s'ouvre pour te connecter à GitHub.
 
-Privé, parce que le dépôt contient tes picks et ton plan : les autres
-participants du pool n'ont pas à les voir.
+Public, parce que le plan gratuit de Streamlit Community Cloud ne permet
+qu'une seule app privée. Conséquences : `picks.json` et les données sont
+visibles de tous, et toute personne qui a l'adresse du site peut enregistrer
+ou retirer un pick. La clé The Odds API et le jeton GitHub restent secrets
+(ils ne sont jamais dans le code). Les commits utilisent l'adresse
+« noreply » de GitHub pour ne pas exposer le courriel.
 
 ## 2. Clé The Odds API → secret GitHub
 
