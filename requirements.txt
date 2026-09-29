@@ -1,0 +1,8 @@
+requests
+tzdata
+numpy
+scipy
+pandas
+altair
+streamlit
+pytest

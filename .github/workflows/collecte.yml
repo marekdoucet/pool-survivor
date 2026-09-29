@@ -1,0 +1,54 @@
+# Collecte automatique : MoneyPuck, casinos, Dimers, calendrier → data/
+# Les nouveaux fichiers sont commités ; Streamlit Cloud se met à jour tout seul.
+name: Collecte quotidienne
+
+on:
+  schedule:
+    # Heures en UTC. 11 h UTC = 7 h HE (6 h l'hiver) ; 21 h UTC = 17 h HE,
+    # avant les matchs du soir (cotes à jour, gardiens confirmés).
+    - cron: "0 11 * * *"
+    - cron: "0 21 * * *"
+  workflow_dispatch:        # bouton « Run workflow » pour lancer à la main
+
+permissions:
+  contents: write           # pour pousser les données collectées
+
+concurrency:
+  group: collecte           # jamais deux collectes en même temps
+  cancel-in-progress: false
+
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Collecte
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python daily.py
+
+      # always() : même si une source a échoué, on garde ce qui a été collecté.
+      # L'échec de l'étape précédente marque quand même l'exécution en rouge
+      # (GitHub t'envoie un courriel).
+      - name: Commit des données
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "Aucune nouvelle donnée."
+            exit 0
+          fi
+          git commit -m "Collecte du $(TZ=America/Toronto date +%F)"
+          git pull --rebase    # au cas où un pick a été enregistré entre-temps
+          git push
