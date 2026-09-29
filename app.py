@@ -89,6 +89,13 @@ def alternatives_for(version, from_date, used):
 
 
 @st.cache_data
+def options_for(version, from_date, used):
+    """{lundi: {équipe: meilleur match de la semaine}} pour les semaines restantes."""
+    with connect() as c:
+        return op.build_options(c, from_date, set(used))[0]
+
+
+@st.cache_data
 def history(version):
     with connect() as c:
         return pd.read_sql("SELECT snapshot, game_date, away, home, p_away, source FROM probs", c)
@@ -116,6 +123,14 @@ def accuracy(version):
 def expected(version):
     with connect() as c:
         return form.expected_vs_actual(c)
+
+
+MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.",
+        "oct.", "nov.", "déc."]
+
+
+def fr_date(d):
+    return f"{d.day} {MOIS[d.month - 1]}"
 
 
 def match_label(opt):
@@ -204,9 +219,18 @@ st.caption(
     + f" · {len(used)} équipe(s) utilisée(s)"
 )
 
-tab_pick, tab_plan, tab_evol, tab_form, tab_acc, tab_diff = st.tabs(
-    ["Pick de la semaine", "Plan complet", "Évolution des probabilités",
-     "Équipes en forme", "Précision des sources", "Depuis hier"])
+tab_pick, tab_plan, tab_map, tab_evol, tab_form, tab_acc, tab_diff = st.tabs(
+    ["Pick de la semaine", "Plan complet", "Carte des matchups",
+     "Évolution des probabilités", "Équipes en forme", "Précision des sources",
+     "Depuis hier"])
+options = options_for(v, from_date, used)
+planned = {o.team: m for m, o in plan if o}   # équipe → semaine où le plan l'utilise
+
+
+def best_later(team, after):
+    """Meilleur match de l'équipe après la semaine `after` : (lundi, Option) ou None."""
+    later = [(m, w[team]) for m, w in options.items() if m > after and team in w]
+    return max(later, key=lambda x: x[1].p, default=None)
 team_form = forms(v)
 
 
@@ -235,16 +259,55 @@ with tab_pick:
         st.markdown("**Détail par source** : " + " · ".join(
             f"{SOURCES[s]} {by_src[s]:.1%}" for s in SOURCES if s in by_src))
 
-        st.markdown("#### Autres choix possibles cette semaine")
-        st.caption("Espérance du meilleur plan si je prends cette équipe maintenant. "
-                   "« Coût » = semaines d'espérance perdues par rapport au meilleur choix.")
+        st.markdown("#### Pourquoi pas une autre équipe ?")
+        st.caption("Le plan est optimisé sur toute la saison d'un coup : une équipe "
+                   "forte cette semaine peut être gardée pour une semaine où son "
+                   "match est encore meilleur, ou où aucune autre équipe ne fait mieux.")
         alts = alternatives_for(v, from_date, used)
         top_e = alts[0][1]
-        st.dataframe(pd.DataFrame([{
-            "Équipe": o.team, "Match": match_label(o), "Probabilité": 100 * o.p,
-            "Espérance": e, "Coût": top_e - e, "Série": team_form[o.team].streak_label,
-            "Source": o.source,
-        } for o, e in alts]), hide_index=True, width="stretch", column_config={
+        reasons = []
+        for o, _e in alts:
+            if o.team == best.team:
+                continue
+            pm = planned.get(o.team)
+            if pm and pm != monday:
+                po = options[pm][o.team]
+                later_match = (f"{po.p:.0%} {'vs' if po.home else '@'} {po.opponent} "
+                               f"la semaine du {fr_date(pm)}")
+                if po.p >= o.p:
+                    reasons.append(f"**{o.team}** : {o.p:.0%} cette semaine, mais "
+                                   f"{later_match} → le plan la garde pour ce match.")
+                else:
+                    reasons.append(f"**{o.team}** : {o.p:.0%} cette semaine ; le plan la "
+                                   f"garde pour {later_match}, une semaine où peu "
+                                   f"d'équipes ont un bon match.")
+            elif not pm:
+                reasons.append(f"**{o.team}** : {o.p:.0%} cette semaine, mais une autre "
+                               f"équipe fait mieux chaque semaine où elle joue → hors plan.")
+            if len(reasons) == 4:
+                break
+        st.markdown("\n".join(f"- {x}" for x in reasons))
+
+        st.markdown("#### Tous les choix possibles cette semaine")
+        st.caption("« Espérance » = semaines survécues attendues si je prends cette équipe "
+                   "maintenant (et le meilleur plan ensuite). « Coût » = espérance perdue "
+                   "par rapport au meilleur choix.")
+        rows = []
+        for o, e in alts:
+            later = best_later(o.team, monday)
+            pm = planned.get(o.team)
+            rows.append({
+                "Équipe": o.team, "Match cette semaine": match_label(o),
+                "Probabilité": 100 * o.p,
+                "Meilleur match plus tard": (
+                    f"{later[1].p:.1%} {'vs' if later[1].home else '@'} "
+                    f"{later[1].opponent} ({fr_date(later[0])})" if later else "—"),
+                "Au plan": "cette semaine" if pm == monday else (
+                    f"sem. du {fr_date(pm)}" if pm else "hors plan"),
+                "Espérance": e, "Coût": top_e - e,
+                "Série": team_form[o.team].streak_label,
+            })
+        st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch", column_config={
             "Probabilité": PCT,
             "Espérance": st.column_config.NumberColumn(format="%.2f"),
             "Coût": st.column_config.NumberColumn(format="%.2f"),
@@ -272,6 +335,51 @@ with tab_plan:
                      "Survie cumulée": st.column_config.ProgressColumn(
                          format="%.1f %%", min_value=0.0, max_value=100.0),
                  })
+
+
+# ── Carte des matchups ────────────────────────────────────────────────────
+
+# Rampe séquentielle bleue de la palette de référence (clair → foncé)
+BLUES = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
+
+with tab_map:
+    st.caption("Chaque case : la probabilité de victoire du **meilleur match** de "
+               "l'équipe cette semaine-là (vide = elle ne joue pas). Les cases "
+               "encadrées sont les picks du plan. Une équipe se lit de gauche à "
+               "droite : on voit quand elle vaut le plus.")
+    mondays_all = list(options)
+    n_weeks = st.slider("Semaines affichées", 4, len(mondays_all), min(12, len(mondays_all)))
+    shown = mondays_all[:n_weeks]
+    labels = [fr_date(m) for m in shown]
+    order = sorted(cm.TEAMS - set(used),
+                   key=lambda t: (planned.get(t) or dt.date.max, t))
+    cells = pd.DataFrame([{
+        "Équipe": t, "Semaine": fr_date(m), "Probabilité": o.p,
+        "Match": f"{'vs' if o.home else '@'} {o.opponent} — {o.game_date}",
+        "Au plan": planned.get(t) == m, "Valeur": f"{100 * o.p:.0f}",
+    } for m in shown for t, o in options[m].items()])
+
+    x = alt.X("Semaine:O", sort=labels, title="Semaine du",
+              axis=alt.Axis(orient="top", labelAngle=0))
+    y = alt.Y("Équipe:N", sort=order, title=None)
+    heat = alt.Chart(cells).mark_rect(cornerRadius=3, stroke="white", strokeWidth=2).encode(
+        x=x, y=y,
+        color=alt.Color("Probabilité:Q", title="Probabilité",
+                        scale=alt.Scale(domain=[0.45, 0.85], range=BLUES, clamp=True),
+                        legend=alt.Legend(format="%", orient="bottom")),
+        tooltip=["Équipe:N", "Semaine:O", "Match:N",
+                 alt.Tooltip("Probabilité:Q", format=".1%"), "Au plan:N"],
+    )
+    ring = alt.Chart(cells[cells["Au plan"]]).mark_rect(
+        fill=None, stroke="#1a1a19", strokeWidth=2.5, cornerRadius=3).encode(x=x, y=y)
+    text = alt.Chart(cells[cells["Au plan"]]).mark_text(fontSize=11, fontWeight="bold").encode(
+        x=x, y=y, text="Valeur:N",
+        color=alt.condition("datum.Probabilité > 0.7", alt.value("white"),
+                            alt.value("#1a1a19")))
+    st.altair_chart((heat + ring + text).properties(height=24 * len(order) + 40),
+                    width="stretch")
+    st.caption("Équipes triées par semaine prévue au plan ; celles hors plan à la fin. "
+               "Survole une case pour voir le match.")
 
 
 # ── Évolution des probabilités ────────────────────────────────────────────
