@@ -358,6 +358,7 @@ def page_pick():
     # barre latérale a été retiré : il y avait deux façons d'enregistrer le
     # même pick, avec le risque de ne plus savoir laquelle faisait foi.
     current = next((p for p in picks if p["week"] == this_monday.isoformat()), None)
+    choisi = None            # l'équipe montrée dans « Enregistrer mon pick »
     if current and not provisional:
         st.success(f"Pick verrouillé pour cette semaine : **{current['team']}**. "
                    f"Le plan reprend la semaine du {from_date}.")
@@ -413,8 +414,10 @@ def page_pick():
         game = latest[(latest.game_date == best.game_date)
                       & ((latest.away == best.team) | (latest.home == best.team))]
         by_src = dict(zip(game.source, win_prob(game, best.team)))
-        mon_pick = (provisional or {}).get("team")
-        if best.team != mon_pick or monday != this_monday:
+        # On compare avec l'équipe AFFICHÉE au-dessus, pas avec celle qui est
+        # enregistrée : sans pick sauvegardé, le menu montre déjà la
+        # recommandation, et la carte apparaissait deux fois de suite.
+        if choisi is None or best.team != choisi.team or monday != this_monday:
             ui.hero(best.team,
                     f"Pick recommandé · fin de semaine du {fr_weekend(monday)}",
                     f"contre {ui.name(best.opponent)} · "
@@ -422,7 +425,9 @@ def page_pick():
                     + f" · {fr_day(best.game_date)}",
                     best.p,
                     players(v).get(best.team),
-                    glow=mon_pick is None)
+                    # Jamais la lueur : c est la carte du choix, juste
+                    # au-dessus, qui donne sa couleur au fond de la page.
+                    glow=False)
         # La couleur suit la source, jamais son rang : on indexe dans SOURCES,
         # pas dans la liste filtrée, sinon une source absente repeint les autres.
         # Toutes les sources, même absentes : une case vide dit « pas encore de
