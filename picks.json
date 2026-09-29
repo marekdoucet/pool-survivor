@@ -8,5 +8,69 @@
   ],
   "days": {},
   "resets": [],
-  "out": null
+  "out": null,
+  "pool": {
+    "Adam Bergeron": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Alexandre Deschênes": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Antoine Lague": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Antoine Proulx": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Duval": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Gagy": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Le coach": {
+      "picks": {
+        "2026-09-28": "MTL"
+      },
+      "out": "2026-09-28"
+    },
+    "Louis": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Ludo": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Marc Proulx": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Noah": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Robert Deschênes": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Stéphane Chartier": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Tony Bouch": {
+      "picks": {},
+      "out": "2026-09-28"
+    },
+    "Yohan Chuet": {
+      "picks": {},
+      "out": "2026-09-28"
+    }
+  }
 }
