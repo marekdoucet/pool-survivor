@@ -135,12 +135,18 @@ def pick_days(conn, overrides=None):
     return out
 
 
-def build_options(conn, from_date, used=(), snapshot=None, overrides=None):
-    """{lundi: {équipe: Option}} pour toutes les semaines restantes.
+def build_options(conn, from_date, used=(), snapshot=None, overrides=None,
+                  horizon=None):
+    """{lundi: {équipe: Option}} pour les semaines restantes.
 
     Seuls les matchs de la journée de pick de chaque semaine comptent (voir
     pick_days), et à partir de from_date. Une semaine sans match permis est
     absente : elle est sautée.
+
+    `horizon` : nombre de semaines gardées. Planifier toute la saison fait
+    garder des équipes pour des semaines qu'on n'atteindra pas — dans un
+    survivor, on tombe bien avant. Limiter l'horizon change donc le plan, pas
+    seulement le chiffre affiché.
     """
     known, snapshot = load_known(conn, snapshot=snapshot)
     strength, h = fit_strength(known)
@@ -164,7 +170,10 @@ def build_options(conn, from_date, used=(), snapshot=None, overrides=None):
             best = weeks.setdefault(monday, {}).get(team)
             if best is None or p > best.p:
                 weeks[monday][team] = Option(team, g, opp, is_home, p, src)
-    return dict(sorted(weeks.items())), snapshot, strength, h
+    weeks = dict(sorted(weeks.items()))
+    if horizon:
+        weeks = {m: weeks[m] for m in list(weeks)[:horizon]}
+    return weeks, snapshot, strength, h
 
 
 # ── Optimisation ────────────────────────────────────────────────────────────
@@ -264,27 +273,34 @@ def _matrix(weeks, used):
     return mondays, teams, P
 
 
-def optimize(conn, from_date, used=(), snapshot=None, overrides=None):
-    weeks, snapshot, _strength, _h = build_options(conn, from_date, used, snapshot, overrides)
+def optimize(conn, from_date, used=(), snapshot=None, overrides=None, horizon=None):
+    weeks, snapshot, _strength, _h = build_options(conn, from_date, used, snapshot,
+                                                   overrides, horizon)
     mondays, teams, P = _matrix(weeks, used)
     assign, exp_weeks = solve(P)
     plan = [(m, weeks[m][teams[t]] if t >= 0 else None) for m, t in zip(mondays, assign)]
     return plan, exp_weeks, snapshot
 
 
-def alternatives(conn, from_date, used=(), top=8, snapshot=None, overrides=None):
+def alternatives(conn, from_date, used=(), top=8, snapshot=None, overrides=None,
+                 horizon=None, include=()):
     """Chaque choix possible pour la première semaine, avec l'espérance du
     meilleur plan qui le suit : E = p + p · E(reste sans cette équipe).
 
     Retourne [(Option, espérance)] trié du meilleur au moins bon, limité aux
-    `top` meilleures probabilités de la semaine.
+    `top` meilleures probabilités de la semaine. `include` force la présence
+    d'équipes données, même hors du top — c'est ce qui permet d'afficher
+    l'espérance du pick choisi quand ce n'est pas un des meilleurs.
     """
-    weeks, *_ = build_options(conn, from_date, used, snapshot, overrides)
+    weeks, *_ = build_options(conn, from_date, used, snapshot, overrides, horizon)
     if not weeks:
         return []
     mondays, teams, P = _matrix(weeks, used)
     first = weeks[mondays[0]]
-    candidates = sorted(first.values(), key=lambda o: -o.p)[:top]
+    classes = sorted(first.values(), key=lambda o: -o.p)
+    candidates = classes[:top]
+    forces = [o for o in classes[top:] if o.team in set(include)]
+    candidates = candidates + forces
     result = []
     for opt in candidates:
         rest = np.delete(P[1:], teams.index(opt.team), axis=1)

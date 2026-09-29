@@ -31,20 +31,23 @@ PICKS_PATH = Path("picks.json")
 GITHUB_API = "https://api.github.com/repos/{repo}/contents/{path}"
 
 
+HORIZON = 8     # semaines planifiées par défaut
+
+
 def empty_state():
-    return {"picks": [], "days": {}, "resets": []}
+    return {"picks": [], "days": {}, "resets": [], "out": None}
 
 
 def _normalize(state):
     return {"picks": state.get("picks", []), "days": state.get("days", {}),
-            "resets": state.get("resets", [])}
+            "resets": state.get("resets", []), "out": state.get("out")}
 
 
 def _dumps(state):
     state = _normalize(state)
     state = {"picks": sorted(state["picks"], key=lambda p: p["week"]),
              "days": dict(sorted(state["days"].items())),
-             "resets": sorted(set(state["resets"]))}
+             "resets": sorted(set(state["resets"])), "out": state["out"]}
     return json.dumps(state, indent=2, ensure_ascii=False) + "\n"
 
 
@@ -123,6 +126,48 @@ def this_round(picks, since):
     return [p for p in picks if since is None or p["week"] >= since.isoformat()]
 
 
+def round_week(since, today):
+    """Numéro de la semaine en cours dans le tour (1 = celle du redépart)."""
+    debut = since or op.week_start(today)
+    return max(1, (op.week_start(today) - debut).days // 7 + 1)
+
+
+def horizon(since, today, base=HORIZON):
+    """Nombre de semaines à planifier.
+
+    `base` semaines normalement : survivre plus longtemps serait étonnant, et
+    optimiser sur toute la saison fait garder des équipes pour des semaines
+    qu'on n'atteindra jamais. Si le tour dépasse quand même cette longueur,
+    l'horizon suit — une semaine de plus par semaine — jusqu'au prochain
+    redépart.
+    """
+    return max(base, round_week(since, today))
+
+
+def eliminated(state, today=None):
+    """Date de l'élimination si elle vaut encore pour le tour en cours.
+
+    Un redépart efface l'élimination : on repart tous de zéro.
+    """
+    out = _normalize(state)["out"]
+    if not out:
+        return None
+    depart = last_reset(_normalize(state)["resets"], today)
+    if depart and out < depart.isoformat():
+        return None            # élimination d'un tour précédent
+    return dt.date.fromisoformat(out)
+
+
+def mark_out(state, day):
+    """Je suis éliminé : plus rien à optimiser jusqu'au prochain redépart."""
+    return {**_normalize(state), "out": day.isoformat()}
+
+
+def back_in(state):
+    """Annule l'élimination (erreur de clic)."""
+    return {**_normalize(state), "out": None}
+
+
 def reset(state, week):
     """Fait repartir le pool à partir du lundi `week`.
 
@@ -131,7 +176,9 @@ def reset(state, week):
     équipes. Annulable avec undo_reset.
     """
     state = _normalize(state)
-    return {**state, "resets": sorted(set(state["resets"]) | {week.isoformat()})}
+    # "out": None — un redépart remet tout le monde en vie.
+    return {**state, "out": None,
+            "resets": sorted(set(state["resets"]) | {week.isoformat()})}
 
 
 def undo_reset(state, week):

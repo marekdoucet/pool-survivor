@@ -99,22 +99,24 @@ def snapshots(version):
 
 
 @st.cache_data
-def plan_for(version, from_date, used, overrides, snapshot=None):
+def plan_for(version, from_date, used, overrides, horizon, snapshot=None):
     with connect() as c:
-        return op.optimize(c, from_date, set(used), snapshot, dict(overrides))
+        return op.optimize(c, from_date, set(used), snapshot, dict(overrides), horizon)
 
 
 @st.cache_data
-def alternatives_for(version, from_date, used, overrides):
+def alternatives_for(version, from_date, used, overrides, horizon, include=()):
     with connect() as c:
-        return op.alternatives(c, from_date, set(used), overrides=dict(overrides))
+        return op.alternatives(c, from_date, set(used), overrides=dict(overrides),
+                               horizon=horizon, include=include)
 
 
 @st.cache_data
-def options_for(version, from_date, used, overrides):
-    """{lundi: {équipe: meilleur match de la journée de pick}} pour les semaines restantes."""
+def options_for(version, from_date, used, overrides, horizon):
+    """{lundi: {équipe: meilleur match de la journée de pick}} sur l'horizon."""
     with connect() as c:
-        return op.build_options(c, from_date, set(used), overrides=dict(overrides))[0]
+        return op.build_options(c, from_date, set(used), overrides=dict(overrides),
+                                horizon=horizon)[0]
 
 
 @st.cache_data
@@ -238,6 +240,11 @@ picks, day_overrides = state["picks"], state["days"]
 # des tours précédents restent dans picks.json, mais ne bloquent plus rien.
 since = pk.last_reset(state["resets"], today)
 tour = pk.this_round(picks, since)
+# 8 semaines de base : survivre plus longtemps serait étonnant, et optimiser
+# toute la saison ferait garder des équipes pour des semaines qu'on n'atteint
+# jamais. Si le tour dépasse 8 semaines, l'horizon suit, une par semaine.
+horizon = pk.horizon(since, today)
+out = pk.eliminated(state, today)
 overrides = tuple(sorted(day_overrides.items()))   # clé de cache
 all_days = pick_days_for(VERSION, overrides) if VERSION else {}
 this_monday = op.week_start(today)
@@ -283,6 +290,14 @@ with st.sidebar:
         if st.button(f"Annuler le redépart du {since}", width="stretch"):
             save_state(pk.undo_reset(state, since),
                        f"Redépart du {since} annulé")
+    if out:
+        st.caption(f"Éliminé depuis la semaine du {out}.")
+        if st.button("Je suis encore en vie", width="stretch"):
+            save_state(pk.back_in(state), "Élimination annulée")
+    elif st.button("Je suis éliminé", width="stretch",
+                   help="Arrête le calcul du plan jusqu'au prochain redépart"):
+        save_state(pk.mark_out(state, this_monday),
+                   f"Éliminé (semaine du {this_monday})")
 
     st.subheader("Journée de pick")
     ties = [m for m, d in all_days.items() if d.how == "égalité" and m >= op.week_start(today)]
@@ -330,7 +345,25 @@ if not snaps:
     st.error("Aucune donnée. Lance d'abord `python daily.py`.")
     st.stop()
 
-plan, exp_weeks, snapshot = plan_for(v, from_date, used, overrides)
+if out:
+    # Coupé ici, avant plan_for : l'optimisation est de loin le plus gros
+    # calcul de la page, et il n'y a plus rien à planifier une fois éliminé.
+    with ui.panel("elimine", "Tu es éliminé",
+                  f"Depuis la semaine du {out}. Aucun plan n'est calculé "
+                  f"jusqu'au prochain redépart."):
+        st.markdown(
+            "Le pool recommence quand il ne reste **qu'une personne en vie** : "
+            "toutes les équipes redeviennent alors disponibles, et le plan "
+            "repart de la semaine en cours.")
+        st.markdown("Dans la barre latérale : **Faire repartir le pool** quand "
+                    "ce moment arrive, ou **Je suis encore en vie** si c'est "
+                    "une fausse manœuvre.")
+        if tour:
+            st.caption("Tes picks de ce tour : "
+                       + ", ".join(f"{p['team']} (sem. du {p['week']})" for p in tour))
+    st.stop()
+
+plan, exp_weeks, snapshot = plan_for(v, from_date, used, overrides, horizon)
 hist = history(v)
 latest = hist[hist.snapshot == snapshot]
 counts = latest.groupby("source").size()
@@ -340,7 +373,7 @@ st.caption(
     + f" · {len(used)} équipe(s) utilisée(s)"
 )
 
-options = options_for(v, from_date, used, overrides)
+options = options_for(v, from_date, used, overrides, horizon)
 planned = {o.team: m for m, o in plan if o}   # équipe → semaine où le plan l'utilise
 
 
@@ -450,18 +483,28 @@ def page_pick():
             else:
                 st.info(f"Journée de pick : **{txt}** ({n_games} matchs)"
                         + (" — choisie par toi" if pd_week.how == "choisi" else ""))
-        ui.tiles([
-            ("Espérance", f"{exp_weeks:.2f}", f"semaines survécues sur {len(plan)}"),
-            ("Journée de pick", fr_day(best.game_date).split()[0].capitalize(),
-             fr_date(dt.date.fromisoformat(best.game_date))),
-            ("Match", "Domicile" if best.home else "Visiteur",
-             f"contre {best.opponent}"),
-            ("Série en cours", team_form[best.team].streak_label or "aucune",
-             "de l'équipe recommandée"),
-        ])
-
-        alts = alternatives_for(v, from_date, used, overrides)
+        # `include` force l'évaluation de l'équipe choisie même si elle n'est
+        # pas dans les meilleures : sans ça, son espérance serait introuvable.
+        alts = alternatives_for(v, from_date, used, overrides, horizon,
+                                (choisi.team,) if choisi else ())
         top_e = alts[0][1]
+
+        # L'espérance affichée suit MON pick, pas la recommandation : si je
+        # choisis autre chose, le chiffre doit dire ce que CE choix rapporte.
+        mien = next((e for o, e in alts if choisi and o.team == choisi.team), None)
+        exp_montree = mien if mien is not None else exp_weeks
+        vedette = choisi or best
+        ui.tiles([
+            ("Espérance", f"{exp_montree:.2f}",
+             f"semaines survécues sur {len(plan)}"
+             + ("" if mien is None else " avec ce pick")),
+            ("Coût du choix", "—" if mien is None else f"{top_e - mien:+.2f}",
+             "vs le meilleur choix" if mien is not None else "aucun pick choisi"),
+            ("Match", "Domicile" if vedette.home else "Visiteur",
+             f"contre {vedette.opponent} · {fr_day(vedette.game_date)}"),
+            ("Série en cours", team_form[vedette.team].streak_label or "aucune",
+             f"de {vedette.team}"),
+        ])
         reasons = []
         for o, _e in alts:
             if o.team == best.team:
@@ -878,7 +921,10 @@ def page_depuis_hier():
                 "prochaine collecte quotidienne.")
     else:
         prev = snaps[1]
-        prev_plan, prev_exp, _ = plan_for(v, from_date, used, overrides, prev)
+        # snapshot= nommé : un argument positionnel de plus a déjà atterri
+        # dans `horizon` une fois, ce qui plantait sur un découpage.
+        prev_plan, prev_exp, _ = plan_for(v, from_date, used, overrides,
+                                          horizon, snapshot=prev)
         st.caption(f"Comparaison entre la collecte du {prev} et celle du {snapshot}.")
 
         c1, c2 = st.columns(2)

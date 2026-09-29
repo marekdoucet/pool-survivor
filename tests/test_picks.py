@@ -40,7 +40,7 @@ def test_set_day():
 
 
 def test_load_missing_file(tmp_path):
-    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}, "resets": []}
+    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}, "resets": [], "out": None}
 
 
 def test_planning():
@@ -91,7 +91,7 @@ def test_github_picks_roundtrip_and_conflict():
     gh = FakeGitHub()
     me = {"name": "moi", "email": "1+moi@users.noreply.github.com"}
     store = pk.GitHubPicks("moi/pool", "jeton", session=gh, author=me)
-    assert store.load() == {"picks": [], "days": {}, "resets": []}
+    assert store.load() == {"picks": [], "days": {}, "resets": [], "out": None}
     store.save({"picks": pk.add([], W1, "VGK"), "days": {}}, "Pick VGK")
     assert gh.puts[0]["message"] == "Pick VGK" and gh.puts[0]["branch"] == "main"
     assert gh.puts[0]["author"] == gh.puts[0]["committer"] == me   # pas le vrai courriel
@@ -158,3 +158,40 @@ def test_planning_ignore_les_picks_dun_tour_precedent():
     _, used_apres, _ = pk.planning(picks, apres, since=R)
     assert used_avant == {"VGK", "COL"}
     assert used_apres == set()        # tout le monde redevient disponible
+
+
+# ── Horizon et élimination ────────────────────────────────────────────────
+
+def test_horizon_de_base_puis_qui_suit_le_tour():
+    """8 semaines tant qu'on n'a pas dépassé 8 ; ensuite une de plus par semaine."""
+    assert pk.round_week(R, dt.date(2027, 1, 13)) == 1
+    assert pk.horizon(R, dt.date(2027, 1, 13)) == 8        # semaine 1
+    assert pk.horizon(R, R + dt.timedelta(weeks=7)) == 8   # semaine 8
+    assert pk.horizon(R, R + dt.timedelta(weeks=8)) == 9   # semaine 9
+    assert pk.horizon(R, R + dt.timedelta(weeks=12)) == 13
+
+
+def test_horizon_sans_redepart_part_de_la_semaine_courante():
+    today = dt.date(2026, 10, 7)
+    assert pk.round_week(None, today) == 1
+    assert pk.horizon(None, today) == 8
+
+
+def test_elimination_et_retour():
+    etat = pk.mark_out(pk.empty_state(), dt.date(2026, 11, 9))
+    assert pk.eliminated(etat) == dt.date(2026, 11, 9)
+    assert pk.eliminated(pk.back_in(etat)) is None
+
+
+def test_un_redepart_remet_en_vie():
+    """Le pool repart : l'élimination du tour précédent ne compte plus."""
+    etat = pk.mark_out(pk.empty_state(), dt.date(2026, 11, 9))
+    assert pk.reset(etat, R)["out"] is None
+    assert pk.eliminated(pk.reset(etat, R)) is None
+
+
+def test_elimination_dun_tour_precedent_est_ignoree():
+    """Cas tordu : un « out » resté dans le fichier, plus vieux que le tour."""
+    etat = {"picks": [], "days": {}, "resets": [R.isoformat()],
+            "out": "2026-11-09"}
+    assert pk.eliminated(etat, today=dt.date(2027, 2, 1)) is None
