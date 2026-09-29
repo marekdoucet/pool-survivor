@@ -387,13 +387,16 @@ def page_pick():
             else:
                 st.info(f"Journée de pick : **{txt}** ({n_games} matchs)"
                         + (" — choisie par toi" if pd_week.how == "choisi" else ""))
-        st.caption(f"Espérance sur tout le plan : **{exp_weeks:.2f}** semaines "
-                   f"survécues sur {len(plan)}.")
+        ui.tiles([
+            ("Espérance", f"{exp_weeks:.2f}", f"semaines survécues sur {len(plan)}"),
+            ("Journée de pick", fr_day(best.game_date).split()[0].capitalize(),
+             fr_date(dt.date.fromisoformat(best.game_date))),
+            ("Match", "Domicile" if best.home else "Visiteur",
+             f"contre {best.opponent}"),
+            ("Série en cours", team_form[best.team].streak_label or "aucune",
+             "de l'équipe recommandée"),
+        ])
 
-        st.markdown("#### Pourquoi pas une autre équipe ?")
-        st.caption("Le plan est optimisé sur toute la saison d'un coup : une équipe "
-                   "forte cette semaine peut être gardée pour une semaine où son "
-                   "match est encore meilleur, ou où aucune autre équipe ne fait mieux.")
         alts = alternatives_for(v, from_date, used, overrides)
         top_e = alts[0][1]
         reasons = []
@@ -406,28 +409,30 @@ def page_pick():
                 later_match = (f"{po.p:.0%} {'vs' if po.home else '@'} {po.opponent} "
                                f"la semaine du {fr_date(pm)}")
                 if po.p >= o.p:
-                    reasons.append(f"**{o.team}** : {o.p:.0%} cette semaine, mais "
+                    reasons.append(f"{ui.inline(o.team)} : {o.p:.0%} cette semaine, mais "
                                    f"{later_match} → le plan la garde pour ce match.")
                 else:
-                    reasons.append(f"**{o.team}** : {o.p:.0%} cette semaine ; le plan la "
+                    reasons.append(f"{ui.inline(o.team)} : {o.p:.0%} cette semaine ; le plan la "
                                    f"garde pour {later_match}, une semaine où peu "
                                    f"d'équipes ont un bon match.")
             elif not pm:
-                reasons.append(f"**{o.team}** : {o.p:.0%} cette semaine, mais une autre "
+                reasons.append(f"{ui.inline(o.team)} : {o.p:.0%} cette semaine, mais une autre "
                                f"équipe fait mieux chaque semaine où elle joue → hors plan.")
             if len(reasons) == 4:
                 break
-        st.markdown("\n".join(f"- {x}" for x in reasons))
+        with ui.panel("pourquoi", "Pourquoi pas une autre équipe ?",
+                      "Le plan est optimisé sur toute la saison d'un coup : une "
+                      "équipe forte cette semaine peut être gardée pour une semaine "
+                      "où son match est encore meilleur, ou où aucune autre équipe "
+                      "ne fait mieux."):
+            st.markdown("\n".join(f"- {x}" for x in reasons), unsafe_allow_html=True)
 
-        st.markdown("#### Tous les choix possibles cette semaine")
-        st.caption("« Espérance » = semaines survécues attendues si je prends cette équipe "
-                   "maintenant (et le meilleur plan ensuite). « Coût » = espérance perdue "
-                   "par rapport au meilleur choix.")
         rows = []
         for o, e in alts:
             later = best_later(o.team, monday)
             pm = planned.get(o.team)
             rows.append({
+                "": ui.logo(o.team),
                 "Équipe": o.team, "Match cette semaine": match_label(o),
                 "Probabilité": 100 * o.p,
                 "Meilleur match plus tard": (
@@ -438,11 +443,17 @@ def page_pick():
                 "Espérance": e, "Coût": top_e - e,
                 "Série": team_form[o.team].streak_label,
             })
-        st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch", column_config={
-            "Probabilité": PCT,
-            "Espérance": st.column_config.NumberColumn(format="%.2f"),
-            "Coût": st.column_config.NumberColumn(format="%.2f"),
-        })
+        with ui.panel("choix", "Tous les choix possibles cette semaine",
+                      "« Espérance » = semaines survécues attendues si je prends cette "
+                      "équipe maintenant (et le meilleur plan ensuite). « Coût » = "
+                      "espérance perdue par rapport au meilleur choix."):
+            st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
+                         column_config={
+                             "": st.column_config.ImageColumn("", width="small"),
+                             "Probabilité": PCT,
+                             "Espérance": st.column_config.NumberColumn(format="%.2f"),
+                             "Coût": st.column_config.NumberColumn(format="%.2f"),
+                         })
 
 
 # ── Plan complet ──────────────────────────────────────────────────────────
@@ -452,21 +463,34 @@ def page_plan():
     for monday, o in plan:
         alive *= o.p if o else 0.0
         rows.append({
+            "": ui.logo(o.team) if o else "",
             "Semaine du": str(monday),
             "Journée": fr_day(o.game_date) if o else "—", "Équipe": o.team if o else "—",
             "Match": match_label(o) if o else "aucune équipe disponible",
             "Probabilité": 100 * o.p if o else 0.0, "Survie cumulée": 100 * alive,
             "Source": o.source if o else "",
         })
+    jouees = [(o.team, o.p, m) for m, o in plan if o]
+    faible = min(jouees, key=lambda x: x[1]) if jouees else ("—", 0.0, from_date)
     skipped = [m for m, d in all_days.items() if not d.days and m >= op.week_start(from_date)]
     if skipped:
         st.info("Semaine(s) sautée(s), aucun match la fin de semaine : "
                 + ", ".join(f"fin de semaine du {fr_weekend(m)}" for m in skipped))
-    st.caption(f"Espérance : **{exp_weeks:.2f}** semaines survécues sur {len(plan)}. "
-               "« estimé » = au-delà des 49 jours collectés, probabilité tirée du modèle "
-               "de force des équipes. Le plan est recalculé chaque jour.")
+    ui.tiles([
+        ("Espérance", f"{exp_weeks:.2f}", f"semaines survécues sur {len(plan)}"),
+        ("Semaines planifiées", str(len(plan)), "jusqu'à la fin de la saison"),
+        # Le maillon faible plutôt que la survie cumulée : le produit de 27
+        # probabilités tend vers zéro et n'apprend rien ; la semaine la plus
+        # risquée, elle, dit où le plan peut casser.
+        ("Semaine la plus risquée", f"{100 * faible[1]:.0f} %",
+         f"{faible[0]} · semaine du {fr_date(faible[2])}"),
+        ("Équipes déjà prises", str(len(used)), "retirées du plan"),
+    ])
+    st.caption("« estimé » = au-delà des 49 jours collectés, probabilité tirée du "
+               "modèle de force des équipes. Le plan est recalculé chaque jour.")
     st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
                  height=min(38 + 35 * len(rows), 1000), column_config={
+                     "": st.column_config.ImageColumn("", width="small"),
                      "Probabilité": PCT,
                      "Survie cumulée": st.column_config.ProgressColumn(
                          format="%.1f %%", min_value=0.0, max_value=100.0),
@@ -510,12 +534,18 @@ def page_carte():
         tooltip=["Équipe:N", "Semaine:O", "Match:N",
                  alt.Tooltip("Probabilité:Q", format=".1%"), "Au plan:N"],
     )
+    # Encadré des picks du plan : blanc, pas la couleur de la surface. Il
+    # était sombre du temps du fond clair, où il ressortait ; sur fond sombre
+    # il devenait invisible sur les cases de faible probabilité.
     ring = alt.Chart(cells[cells["Au plan"]]).mark_rect(
-        fill=None, stroke="#1a1a19", strokeWidth=2.5, cornerRadius=3).encode(x=x, y=y)
+        fill=None, stroke="#ffffff", strokeWidth=2, cornerRadius=3).encode(x=x, y=y)
     text = alt.Chart(cells[cells["Au plan"]]).mark_text(fontSize=11, fontWeight="bold").encode(
         x=x, y=y, text="Valeur:N",
-        color=alt.condition("datum.Probabilité > 0.7", alt.value("white"),
-                            alt.value("#1a1a19")))
+        # La rampe va du sombre (faible) au clair (fort) : l'encre s'inverse
+        # donc par rapport à la version fond clair, sinon le texte des cases
+        # faibles est sombre sur sombre.
+        color=alt.condition("datum.Probabilité > 0.7", alt.value("#11110f"),
+                            alt.value("#ffffff")))
     st.altair_chart((heat + ring + text).properties(height=24 * len(order) + 40),
                     width="stretch")
     st.caption("Équipes triées par semaine prévue au plan ; celles hors plan à la fin. "

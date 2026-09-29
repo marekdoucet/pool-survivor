@@ -105,18 +105,79 @@ CSS = """
 /* La barre du haut de Streamlit est opaque par défaut et coupait le dégradé. */
 [data-testid="stHeader"] { background: transparent; }
 
-/* Panneau : la surface sur laquelle poser un bloc de contenu. Légèrement
-   translucide pour laisser passer le dégradé, mais assez opaque pour que le
-   texte garde son contraste. */
-.ps-panel {
-  background: rgba(36, 36, 42, 0.72); border: 1px solid #34343d;
-  border-radius: 1rem; padding: 1.15rem 1.35rem; margin-bottom: 1rem;
-  backdrop-filter: blur(8px);
+/* Panneau : la surface sur laquelle poser un bloc de contenu. Translucide
+   pour laisser passer le dégradé, assez opaque pour que le texte garde son
+   contraste.
+   Cible : la classe « st-key-… » que Streamlit ajoute quand on donne une clé
+   à un conteneur. C'est documenté et stable, contrairement aux classes
+   « st-emotion-cache-… » qui changent d'une version à l'autre. */
+[class*="st-key-ps-panel"] {
+  background: rgba(35, 35, 42, 0.62) !important;
+  border: 1px solid #34343d !important;
+  border-radius: 1rem !important;
+  padding: 1.2rem 1.4rem !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
 }
 .ps-panel-title {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #c3c2b7; margin-bottom: 0.7rem;
+  text-transform: uppercase; color: #c3c2b7;
+  margin: 0 0 0.15rem; display: flex; align-items: center; gap: 0.5rem;
 }
+.ps-panel-note { color: #9b9a90; font-size: 0.86rem; margin-bottom: 0.4rem; }
+
+/* Tuiles : un chiffre qui compte, pas une phrase. */
+.ps-tiles {
+  display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 0.2rem 0 0.9rem;
+}
+.ps-tile {
+  flex: 1 1 150px; min-width: 130px;
+  background: rgba(16, 16, 20, 0.5); border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0.85rem; padding: 0.8rem 1rem;
+}
+.ps-tile-label {
+  font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #9b9a90; margin-bottom: 0.25rem;
+}
+.ps-tile-value {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 2.1rem; font-weight: 700; line-height: 1; color: #ffffff;
+}
+.ps-tile-sub { font-size: 0.78rem; color: #9b9a90; margin-top: 0.2rem; }
+.ps-tile-accent { border-left: 3px solid var(--ps-accent, #3987e5); }
+
+/* Tout graphique et tout tableau reçoit la même surface, sans qu'on ait à
+   toucher aux sept sections : :has() cible le conteneur d'élément qui en
+   contient un. Les blocs déjà posés dans un panneau sont neutralisés juste
+   après, sinon on empilerait deux cadres. */
+[data-testid="stElementContainer"]:has(> [data-testid="stVegaLiteChart"]),
+[data-testid="stElementContainer"]:has(> [data-testid="stDataFrame"]),
+[data-testid="stElementContainer"]:has(> [data-testid="stDataFrameResizable"]) {
+  background: rgba(35, 35, 42, 0.62); border: 1px solid #34343d;
+  border-radius: 1rem; padding: 1rem 1.1rem; margin-bottom: 0.9rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+[class*="st-key-ps-panel"] [data-testid="stElementContainer"]:has(> [data-testid="stVegaLiteChart"]),
+[class*="st-key-ps-panel"] [data-testid="stElementContainer"]:has(> [data-testid="stDataFrame"]),
+[class*="st-key-ps-panel"] [data-testid="stElementContainer"]:has(> [data-testid="stDataFrameResizable"]) {
+  background: none; border: 0; border-radius: 0; padding: 0;
+  backdrop-filter: none; box-shadow: none;
+}
+
+/* Les titres de section (#### en markdown) prennent l'allure des libellés de
+   panneau, pour que tout le site parle la même langue. */
+[data-testid="stMarkdownContainer"] h4 {
+  font-size: 0.78rem !important; font-weight: 600; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #c3c2b7; margin: 1.4rem 0 0.3rem;
+}
+
+/* Une équipe dans une phrase : logo + tricode, alignés sur la ligne de base. */
+.ps-team-inline {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  vertical-align: -0.28em;
+}
+.ps-team-inline img { width: 22px; height: 22px; }
 
 /* Bandeau du pick : la photo d'action déborde à droite et se fond dans le
    panneau, une lueur à la couleur de l'équipe derrière. La photo de fond est
@@ -264,6 +325,51 @@ def backdrop(color):
     if color:
         st.markdown(f"<style>:root{{--ps-glow:{rgba(color, 0.26)}}}</style>",
                     unsafe_allow_html=True)
+
+
+_cles = {}
+
+
+def panel(cle, titre=None, note=None):
+    """Conteneur vitré : `with ui.panel("plan", "Titre"):`.
+
+    La clé sert à la fois d'identité pour Streamlit et de prise CSS. Elle doit
+    être unique dans un affichage ; un compteur dédoublonne au besoin, sinon
+    Streamlit lève une erreur de clé répétée.
+    """
+    n = _cles[cle] = _cles.get(cle, 0) + 1
+    box = st.container(border=True, key=f"ps-panel-{cle}-{n}")
+    if titre:
+        box.markdown(f'<div class="ps-panel-title">{html.escape(titre)}</div>',
+                     unsafe_allow_html=True)
+    if note:
+        box.markdown(f'<div class="ps-panel-note">{html.escape(note)}</div>',
+                     unsafe_allow_html=True)
+    return box
+
+
+def tiles(items):
+    """Rangée de tuiles. `items` : (libellé, valeur, précision, couleur|None)."""
+    out = ['<div class="ps-tiles">']
+    for libelle, valeur, *reste in items:
+        sub = reste[0] if reste else ""
+        coul = reste[1] if len(reste) > 1 else None
+        style = f' style="--ps-accent:{coul}"' if coul else ""
+        klass = "ps-tile ps-tile-accent" if coul else "ps-tile"
+        out.append(
+            f'<div class="{klass}"{style}>'
+            f'<div class="ps-tile-label">{html.escape(str(libelle))}</div>'
+            f'<div class="ps-tile-value">{html.escape(str(valeur))}</div>'
+            + (f'<div class="ps-tile-sub">{html.escape(str(sub))}</div>' if sub else "")
+            + '</div>')
+    out.append("</div>")
+    st.markdown("".join(out), unsafe_allow_html=True)
+
+
+def inline(tri):
+    """Logo + tricode, à glisser dans une phrase en markdown."""
+    return (f'<span class="ps-team-inline"><img src="{logo(tri)}" alt="">'
+            f'<b>{html.escape(tri)}</b></span>')
 
 
 def _carte(tri, player):
