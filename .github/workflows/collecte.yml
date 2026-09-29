@@ -6,8 +6,15 @@ on:
   schedule:
     # Heures en UTC. 11 h UTC = 7 h HE (6 h l'hiver) ; 21 h UTC = 17 h HE,
     # avant les matchs du soir (cotes à jour, gardiens confirmés).
-    - cron: "0 11 * * *"
-    - cron: "0 21 * * *"
+    #
+    # Minute 23 plutôt que 0 : GitHub retarde — et finit par abandonner — les
+    # runs planifiés au sommet de l'heure, quand sa file est saturée.
+    # Le second cron de chaque paire rattrape le premier s'il a été sauté ; si
+    # les données n'ont pas bougé, l'étape de commit ne fait rien.
+    - cron: "23 11 * * *"
+    - cron: "23 12 * * *"
+    - cron: "23 21 * * *"
+    - cron: "23 22 * * *"
   workflow_dispatch:        # bouton « Run workflow » pour lancer à la main
 
 permissions:
