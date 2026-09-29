@@ -207,6 +207,12 @@ CSS = """
   background: radial-gradient(760px 300px at 72% -30%, var(--ps-glow), transparent 68%);
 }
 .ps-hero-body { flex: 1 1 260px; min-width: 0; position: relative; }
+/* Carte qui prolonge le panneau juste au-dessus : les deux se lisent comme un
+   seul bloc, au lieu de deux cadres empilés. */
+.ps-hero.ps-hero-suite {
+  margin-top: -0.9rem; border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+}
 .ps-kicker {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
   text-transform: uppercase; color: #c3c2b7; margin-bottom: 0.35rem;
@@ -445,8 +451,15 @@ def _carte(tri, player):
         f'</div></div></div></div>')
 
 
-def hero(tri, kicker, matchup, pct, player=None):
-    """Carte de hockey à gauche, équipe et probabilité de victoire à droite."""
+def hero(tri, kicker, matchup, pct, player=None, glow=True, suite=False):
+    """Carte de hockey à gauche, équipe et probabilité de victoire à droite.
+
+    `glow`  : teinte aussi le fond de la page. Une seule carte par affichage
+              doit le faire, sinon la dernière dessinée l'emporte sans qu'on
+              l'ait décidé.
+    `suite` : la carte prolonge le panneau juste au-dessus (pas d'espace entre
+              les deux), pour qu'ils se lisent comme un seul bloc.
+    """
     coul = (player or {}).get("color") or "#3987e5"
     shot = (player or {}).get("action") or ""
     # url('...') en guillemets SIMPLES : l'attribut style est délimité par des
@@ -454,9 +467,11 @@ def hero(tri, kicker, matchup, pct, player=None):
     # arrivait vide et la photo de fond ne s'affichait jamais.
     style = (f'--ps-glow:{rgba(coul, 0.34)};'
              + (f"--ps-shot:url('{html.escape(shot, quote=True)}');" if shot else ""))
-    backdrop(coul)
+    if glow:
+        backdrop(coul)
+    classe = "ps-hero ps-hero-suite" if suite else "ps-hero"
     st.markdown(
-        f'<div class="ps-hero" style="{style}">{_carte(tri, player)}'
+        f'<div class="{classe}" style="{style}">{_carte(tri, player)}'
         f'<div class="ps-hero-body">'
         f'<div class="ps-kicker">{html.escape(kicker)}</div>'
         f'<h2 class="ps-team">{html.escape(name(tri))}</h2>'

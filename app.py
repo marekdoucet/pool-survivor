@@ -371,30 +371,40 @@ def page_pick():
         if retenu is None and plan and plan[0][1] is not None:
             retenu = plan[0][1].team
         idx = teams_.index(retenu) if retenu in teams_ else 0
+        labels = [f"{o.team} {match_label(o)} — {o.p:.1%}" for o in week_opts]
         with ui.panel("choisir", "Enregistrer mon pick",
                       f"Modifiable jusqu'au "
                       f"{fr_day(pk.pick_deadline(today).isoformat())} à minuit. "
                       f"Passé ce délai, c'est l'équipe affichée ici qui est "
                       f"retenue."):
-            if provisional:
-                st.markdown(f"Enregistré : {ui.inline(provisional['team'])}",
-                            unsafe_allow_html=True)
-            else:
-                st.markdown(f"Rien d'enregistré pour l'instant — "
-                            f"proposition : {ui.inline(teams_[idx])}",
-                            unsafe_allow_html=True)
-            with st.form("choisir-pick"):
-                labels = [f"{o.team} {match_label(o)} — {o.p:.1%}" for o in week_opts]
-                new = st.selectbox("Équipe pour la semaine du "
-                                   f"{fr_weekend(this_monday)}", range(len(week_opts)),
-                                   index=idx, format_func=lambda i, lb=labels: lb[i])
-                libelle = "Remplacer mon pick" if provisional else "Enregistrer mon pick"
-                if st.form_submit_button(libelle, type="primary"):
-                    o = week_opts[new]
-                    save_picks(pk.add(picks, this_monday, o.team, o.game_date,
-                                      since=since),
-                               f"Pick {'modifié' if provisional else 'enregistré'} : "
-                               f"{o.team} (semaine du {this_monday})")
+            # Hors formulaire, exprès : le menu relance l'affichage à chaque
+            # changement, donc la carte dessous montre tout de suite l'équipe
+            # qu'on est en train de considérer, avant même d'enregistrer.
+            new = st.selectbox(f"Équipe pour la fin de semaine du "
+                               f"{fr_weekend(this_monday)}", range(len(week_opts)),
+                               index=idx, format_func=lambda i, lb=labels: lb[i])
+            choisi = week_opts[new]
+            deja = provisional and provisional["team"] == choisi.team
+            st.caption("C'est ton pick enregistré." if deja
+                       else ("Pas encore enregistré — clique pour le confirmer."
+                             if provisional else
+                             "Rien d'enregistré pour cette semaine."))
+            if st.button("Remplacer mon pick" if provisional
+                         else "Enregistrer mon pick",
+                         type="primary", disabled=bool(deja), width="stretch"):
+                save_picks(pk.add(picks, this_monday, choisi.team, choisi.game_date,
+                                  since=since),
+                           f"Pick {'modifié' if provisional else 'enregistré'} : "
+                           f"{choisi.team} (semaine du {this_monday})")
+        # La carte de l'équipe choisie, collée au panneau : c'est elle qui
+        # donne sa couleur au fond de la page, pas la recommandation — le
+        # site doit refléter MON choix.
+        ui.hero(choisi.team,
+                "Mon pick" + (" · enregistré" if deja else " · à confirmer"),
+                f"contre {ui.name(choisi.opponent)} · "
+                + ("à domicile" if choisi.home else "à l'étranger")
+                + f" · {fr_day(choisi.game_date)}",
+                choisi.p, players(v).get(choisi.team), suite=True)
 
     if not plan or plan[0][1] is None:
         st.warning("Aucun match disponible pour la prochaine semaine.")
@@ -403,13 +413,16 @@ def page_pick():
         game = latest[(latest.game_date == best.game_date)
                       & ((latest.away == best.team) | (latest.home == best.team))]
         by_src = dict(zip(game.source, win_prob(game, best.team)))
-        ui.hero(best.team,
-                f"Pick recommandé · fin de semaine du {fr_weekend(monday)}",
-                f"contre {ui.name(best.opponent)} · "
-                + ("à domicile" if best.home else "à l'étranger")
-                + f" · {fr_day(best.game_date)}",
-                best.p,
-                players(v).get(best.team))
+        mon_pick = (provisional or {}).get("team")
+        if best.team != mon_pick or monday != this_monday:
+            ui.hero(best.team,
+                    f"Pick recommandé · fin de semaine du {fr_weekend(monday)}",
+                    f"contre {ui.name(best.opponent)} · "
+                    + ("à domicile" if best.home else "à l'étranger")
+                    + f" · {fr_day(best.game_date)}",
+                    best.p,
+                    players(v).get(best.team),
+                    glow=mon_pick is None)
         # La couleur suit la source, jamais son rang : on indexe dans SOURCES,
         # pas dans la liste filtrée, sinon une source absente repeint les autres.
         # Toutes les sources, même absentes : une case vide dit « pas encore de
@@ -789,6 +802,62 @@ def page_precision():
             "pour une comparaison juste, regarde les deux dernières colonnes, calculées "
             "sur les seuls matchs cotés par les casinos. Il faut environ 100 matchs "
             "avant de tirer des conclusions ; ensuite, on pourra ajuster les poids.")
+
+    # ── Comment se calcule l'espérance ────────────────────────────────────
+    # Construit sur les vraies semaines du plan : un exemple invente
+    # n'apprendrait pas ou le chiffre affiche en haut du site vient.
+    with ui.panel("esperance", "Comment se calcule l'espérance",
+                  "Le chiffre affiché partout sur le site : le nombre de "
+                  "semaines que le plan devrait survivre en moyenne."):
+        st.markdown(
+            "Dans un survivor, **une seule défaite élimine**. Être encore en vie "
+            "à la semaine 3 demande donc de gagner les semaines 1, 2 **et** 3 : "
+            "les probabilités se multiplient, elles ne s'additionnent pas.")
+        st.markdown(
+            "L'espérance additionne, pour chaque semaine, la probabilité d'être "
+            "encore en vie à ce moment-là :")
+        st.latex(r"E = p_1 + p_1 p_2 + p_1 p_2 p_3 + \dots")
+
+        montre = [(m, o) for m, o in plan if o][:4]
+        if montre:
+            lignes, vivant, cumul = [], 1.0, 0.0
+            for i, (m, o) in enumerate(montre, 1):
+                vivant *= o.p
+                cumul += vivant
+                lignes.append({
+                    "Semaine": f"{i} — {fr_date(m)}", "Équipe": o.team,
+                    "Probabilité de gagner": 100 * o.p,
+                    "Encore en vie après": 100 * vivant,
+                    "Espérance cumulée": cumul,
+                })
+            st.markdown(f"Tes {len(montre)} premières semaines, en vrai :")
+            st.dataframe(pd.DataFrame(lignes), hide_index=True, width="stretch",
+                         column_config={
+                             "Probabilité de gagner": PCT,
+                             "Encore en vie après": PCT,
+                             "Espérance cumulée": st.column_config.NumberColumn(
+                                 format="%.2f"),
+                         })
+            # Trois décimales : avec deux, le produit affiché ne retombait pas sur
+            # le pourcentage du tableau, ce qui avait l'air d'une erreur de calcul.
+            detail = " × ".join(f"{o.p:.3f}" for _m, o in montre)
+            st.caption(
+                f"Colonne « encore en vie » : le produit des probabilités depuis "
+                f"le début ({detail} pour la dernière ligne). La colonne de droite "
+                f"les additionne — c'est l'espérance. En continuant sur les "
+                f"{len(plan)} semaines du plan, elle atteint **{exp_weeks:.2f}**.")
+        st.markdown(
+            "**Pourquoi ça change les décisions.** Une semaine proche pèse plus "
+            "lourd qu'une semaine lointaine : si je suis éliminé en semaine 2, "
+            "les semaines 10 à 27 ne rapportent rien, quelle que soit leur "
+            "qualité. L'optimiseur ne cherche donc pas la meilleure équipe "
+            "chaque semaine prise isolément — il peut garder une équipe forte "
+            "pour une semaine où rien d'autre ne tient la route, parce que ça "
+            "fait monter le total.")
+        st.caption(
+            "C'est aussi ce que mesure la colonne « Coût » dans les choix de la "
+            "semaine : l'espérance perdue en prenant cette équipe-là plutôt que "
+            "la meilleure.")
 
 
 # ── Depuis hier ───────────────────────────────────────────────────────────
