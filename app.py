@@ -1089,43 +1089,57 @@ def page_pool():
     # moins de marge pour la suite. On remesure, pour chacune, le meilleur
     # plan encore atteignable avec ce qu'il lui reste.
     plafond = plan_for(v, from_date, (), overrides, horizon)[1]
-    gens = [("Moi", pk.my_used(picks, since), not out)]
+    mes_brulees = pk.my_used(picks, since)
+    ma_survie = plan_for(v, from_date, tuple(sorted(mes_brulees)), overrides,
+                         horizon)[1]
+    gens = [("Moi", mes_brulees, not out)]
     gens += [(nom, pk.pool_used(state, nom, since), nom in pk.pool_alive(state, since))
              for nom in sorted(joueurs)]
 
     lignes = []
     for nom, brulees, vivant in gens:
-        reste = plan_for(v, from_date, tuple(sorted(brulees)), overrides, horizon)[1]
+        survie = plan_for(v, from_date, tuple(sorted(brulees)), overrides, horizon)[1]
         lignes.append({
             "Joueur": nom, "En vie": "oui" if vivant else "non",
-            "Équipes brûlées": len(brulees),
-            "Potentiel restant": reste,
-            "Écart au plafond": reste - plafond,
+            "Chances de survie": survie,
+            # Référence : MOI, pas un plafond abstrait. Un écart positif veut
+            # dire que cette personne est mieux placée que moi pour la suite —
+            # c'est ce qu'on veut voir tout de suite.
+            "Écart vs moi": survie - ma_survie,
+            "Brûlées": len(brulees),
             "Lesquelles": ", ".join(sorted(brulees)) or "—",
         })
-    lignes.sort(key=lambda r: (-r["Potentiel restant"], r["Joueur"]))
+    lignes.sort(key=lambda r: (-r["Chances de survie"], r["Joueur"]))
 
-    with ui.panel("potentiel", "Potentiel restant de chacun",
-                  f"Le meilleur plan encore atteignable sur {horizon} semaines "
-                  f"avec les équipes qu'il reste à chacun. Le plafond, si "
-                  f"personne n'avait rien brûlé, serait de {plafond:.2f}."):
+    with ui.panel("potentiel", "Chances de survie de chacun",
+                  f"L'espérance du meilleur plan encore atteignable sur "
+                  f"{horizon} semaines, avec les équipes qu'il reste à chacun. "
+                  f"Sans rien de brûlé, ce serait {plafond:.2f} ; moi j'en suis "
+                  f"à {ma_survie:.2f}."):
         st.dataframe(pd.DataFrame(lignes), hide_index=True, width="stretch",
                      column_config={
-                         "Potentiel restant": st.column_config.NumberColumn(
+                         "Chances de survie": st.column_config.NumberColumn(
                              format="%.2f",
-                             help="Espérance du meilleur plan possible avec ses "
-                                  "équipes restantes"),
-                         "Écart au plafond": st.column_config.NumberColumn(
+                             help="Semaines survécues attendues à partir de "
+                                  "maintenant, avec ses équipes restantes"),
+                         "Écart vs moi": st.column_config.NumberColumn(
                              format="%+.2f",
-                             help="Ce que ses picks passés lui ont coûté en "
-                                  "marge de manœuvre"),
+                             help="Positif = cette personne est mieux placée "
+                                  "que moi pour la suite"),
                      })
+        st.markdown(
+            "**Survivre ne suffit pas.** Une équipe brûlée ne revient jamais. "
+            "Quelqu'un qui gagne de justesse avec une équipe faible garde les "
+            "gros clubs pour plus tard — ses chances de survie peuvent donc "
+            "dépasser les miennes, même si j'ai pris le favori et gagné "
+            "tranquillement.")
         st.caption(
-            "Deux personnes encore en vie ne sont pas à égalité : celle qui a "
-            "gardé les gros clubs a plus de marge pour les semaines suivantes. "
-            "C'est pour ça que prendre un favori que tout le monde prend peut "
-            "coûter cher — on brûle la même équipe que les autres sans se "
-            "démarquer, et on se retrouve tous avec le même reste.")
+            "Un écart de 0.00 ne veut pas dire que le pick n'a rien coûté : "
+            "il veut dire que l'équipe brûlée n'entrait dans aucun plan "
+            "optimal, donc qu'elle ne manquera pas. Brûler une équipe que le "
+            "plan voulait coûte beaucoup plus cher — et c'est justement le "
+            "risque du favori que tout le monde prend."
+        )
 
 
 
