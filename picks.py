@@ -219,6 +219,17 @@ def pool_used(state, nom, since=None):
             if t and (since is None or w >= since.isoformat())}
 
 
+def my_used(picks, since=None):
+    """Mes équipes brûlées dans le tour, pick de la semaine en cours compris.
+
+    Différent de ce que renvoie planning() : celui-ci libère le pick de la
+    semaine tant qu'il est modifiable, parce qu'il faut pouvoir le replanifier.
+    Pour comparer le potentiel restant de chacun, il faut au contraire la même
+    règle pour tout le monde — sinon je paraîtrais avantagée d'une équipe.
+    """
+    return {p["team"] for p in this_round(picks, since)}
+
+
 def round_week(since, today):
     """Numéro de la semaine en cours dans le tour (1 = celle du redépart)."""
     debut = since or op.week_start(today)

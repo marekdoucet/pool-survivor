@@ -1035,9 +1035,10 @@ def page_pool():
     ])
 
     with ui.panel("registre", "Qui joue quoi cette semaine",
-                  "Ajoute une ligne par personne. Décoche « En vie » quand "
-                  "quelqu'un tombe : les éliminés cessent de compter dans la "
-                  "popularité et dans le nombre de survivants."):
+                  "Une ligne par adversaire — ne t'ajoute pas, tu es déjà "
+                  "comptée à part. Décoche « En vie » quand quelqu'un tombe : "
+                  "les éliminés cessent de compter dans la popularité et dans "
+                  "le nombre de survivants."):
         lignes = [{
             "Joueur": nom,
             "Pick": j["picks"].get(semaine, ""),
@@ -1081,6 +1082,50 @@ def page_pool():
                                "Probabilité": PCT})
     elif joueurs:
         st.caption("Aucun pick saisi pour cette semaine.")
+
+    # ── Potentiel restant ─────────────────────────────────────────────────
+    # Une équipe brûlée ne revient pas. Deux personnes à égalité aujourd'hui
+    # ne valent donc pas la même chose : celle qui a dépensé ses gros clubs a
+    # moins de marge pour la suite. On remesure, pour chacune, le meilleur
+    # plan encore atteignable avec ce qu'il lui reste.
+    plafond = plan_for(v, from_date, (), overrides, horizon)[1]
+    gens = [("Moi", pk.my_used(picks, since), not out)]
+    gens += [(nom, pk.pool_used(state, nom, since), nom in pk.pool_alive(state, since))
+             for nom in sorted(joueurs)]
+
+    lignes = []
+    for nom, brulees, vivant in gens:
+        reste = plan_for(v, from_date, tuple(sorted(brulees)), overrides, horizon)[1]
+        lignes.append({
+            "Joueur": nom, "En vie": "oui" if vivant else "non",
+            "Équipes brûlées": len(brulees),
+            "Potentiel restant": reste,
+            "Écart au plafond": reste - plafond,
+            "Lesquelles": ", ".join(sorted(brulees)) or "—",
+        })
+    lignes.sort(key=lambda r: (-r["Potentiel restant"], r["Joueur"]))
+
+    with ui.panel("potentiel", "Potentiel restant de chacun",
+                  f"Le meilleur plan encore atteignable sur {horizon} semaines "
+                  f"avec les équipes qu'il reste à chacun. Le plafond, si "
+                  f"personne n'avait rien brûlé, serait de {plafond:.2f}."):
+        st.dataframe(pd.DataFrame(lignes), hide_index=True, width="stretch",
+                     column_config={
+                         "Potentiel restant": st.column_config.NumberColumn(
+                             format="%.2f",
+                             help="Espérance du meilleur plan possible avec ses "
+                                  "équipes restantes"),
+                         "Écart au plafond": st.column_config.NumberColumn(
+                             format="%+.2f",
+                             help="Ce que ses picks passés lui ont coûté en "
+                                  "marge de manœuvre"),
+                     })
+        st.caption(
+            "Deux personnes encore en vie ne sont pas à égalité : celle qui a "
+            "gardé les gros clubs a plus de marge pour les semaines suivantes. "
+            "C'est pour ça que prendre un favori que tout le monde prend peut "
+            "coûter cher — on brûle la même équipe que les autres sans se "
+            "démarquer, et on se retrouve tous avec le même reste.")
 
 
 

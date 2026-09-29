@@ -299,3 +299,12 @@ def test_fusion_retire_un_joueur_absent_des_lignes():
     fusion = pk.merge_pool_week(joueurs, [{"Joueur": "Alex", "Pick": "",
                                            "En vie": True}], SEM)
     assert list(fusion) == ["Alex"]
+
+
+def test_mes_equipes_brulees_incluent_la_semaine_en_cours():
+    """planning() libère le pick modifiable ; pour comparer les joueurs entre
+    eux il faut la même règle pour tous, donc on le compte."""
+    picks = pk.add(pk.add([], W1, "VGK"), W2, "COL")
+    assert pk.my_used(picks) == {"VGK", "COL"}
+    # après un redépart, seules les équipes du tour comptent
+    assert pk.my_used(picks, since=W2) == {"COL"}
