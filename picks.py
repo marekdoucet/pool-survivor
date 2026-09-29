@@ -35,13 +35,17 @@ HORIZON = 8     # semaines planifiées par défaut
 
 
 def empty_state():
-    return {"picks": [], "days": {}, "resets": [], "out": None, "pool": {}}
+    return {"picks": [], "days": {}, "resets": [], "out": None,
+            "force": None, "pool": {}}
 
 
 def _normalize(state):
     return {"picks": state.get("picks", []), "days": state.get("days", {}),
             "resets": state.get("resets", []), "out": state.get("out"),
-            "pool": state.get("pool", {})}
+            # mon propre « force » : même mécanique que pour les autres, sinon
+            # « je suis encore en vie » ne pourrait rien contre une
+            # élimination déduite des résultats.
+            "force": state.get("force"), "pool": state.get("pool", {})}
 
 
 def _dumps(state):
@@ -49,6 +53,7 @@ def _dumps(state):
     state = {"picks": sorted(state["picks"], key=lambda p: p["week"]),
              "days": dict(sorted(state["days"].items())),
              "resets": sorted(set(state["resets"])), "out": state["out"],
+             "force": state["force"],
              "pool": {n: {"picks": dict(sorted(j.get("picks", {}).items())),
                           "out": j.get("out"),
                           "force": (j.get("force")
@@ -355,12 +360,12 @@ def eliminated(state, today=None):
 
 def mark_out(state, day):
     """Je suis éliminé : plus rien à optimiser jusqu'au prochain redépart."""
-    return {**_normalize(state), "out": day.isoformat()}
+    return {**_normalize(state), "out": day.isoformat(), "force": DEHORS}
 
 
 def back_in(state):
-    """Annule l'élimination (erreur de clic)."""
-    return {**_normalize(state), "out": None}
+    """Je reste en vie malgré le résultat : règle maison, litige, erreur."""
+    return {**_normalize(state), "out": None, "force": DEDANS}
 
 
 def reset(state, week):
@@ -371,8 +376,8 @@ def reset(state, week):
     équipes. Annulable avec undo_reset.
     """
     state = _normalize(state)
-    # "out": None — un redépart remet tout le monde en vie.
-    return {**state, "out": None,
+    # "out"/"force" remis à zéro : un redépart remet tout le monde en vie.
+    return {**state, "out": None, "force": None,
             "resets": sorted(set(state["resets"]) | {week.isoformat()})}
 
 

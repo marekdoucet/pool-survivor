@@ -232,6 +232,18 @@ MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sep
 JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
 
+def chiffres(df, colonnes):
+    """Force des colonnes en numérique : None y devient une case vide.
+
+    Sans ça, une colonne entièrement vide reste de type texte et Streamlit
+    affiche le mot « None » dans chaque cellule.
+    """
+    for c in colonnes:
+        if c in df:
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+    return df
+
+
 def fr_date(d):
     return f"{d.day} {MOIS[d.month - 1]}"
 
@@ -313,7 +325,8 @@ used = tuple(sorted(used_set))
 RES = resultats(VERSION, overrides) if VERSION else {}
 # Même règle pour moi que pour les autres : le pick perdu élimine, et le
 # bouton de la barre latérale reste prioritaire.
-_moi = {"picks": {p["week"]: p["team"] for p in picks}, "out": state["out"]}
+_moi = {"picks": {p["week"]: p["team"] for p in picks},
+        "out": state["out"], "force": state.get("force")}
 _out, _sem_out, _origine_out = pk.statut(_moi, RES, since)
 out = (dt.date.fromisoformat(_sem_out) if _out and _sem_out
        else (this_monday if _out else None))
@@ -357,14 +370,15 @@ with st.sidebar:
         if st.button(f"Annuler le redépart du {since}", width="stretch"):
             save_state(pk.undo_reset(state, since),
                        f"Redépart du {since} annulé")
+    # Plus de bouton « Je suis éliminé » : le site le déduit du résultat de
+    # mon pick. Reste l'annulation, pour les cas qu'aucun match ne dira.
     if out:
-        st.caption(f"Éliminé depuis la semaine du {out}.")
-        if st.button("Je suis encore en vie", width="stretch"):
+        st.caption(f"Éliminé depuis la semaine du {out}"
+                   + (" (déduit du résultat)" if _origine_out == "auto" else "")
+                   + ".")
+        if st.button("Je suis encore en vie", width="stretch",
+                     help="Passe outre : règle maison, erreur, litige"):
             save_state(pk.back_in(state), "Élimination annulée")
-    elif st.button("Je suis éliminé", width="stretch",
-                   help="Arrête le calcul du plan jusqu'au prochain redépart"):
-        save_state(pk.mark_out(state, this_monday),
-                   f"Éliminé (semaine du {this_monday})")
 
     st.subheader("Journée de pick")
     ties = [m for m, d in all_days.items() if d.how == "égalité" and m >= op.week_start(today)]
@@ -622,7 +636,9 @@ def page_pick():
             rows.append({
                 "": ui.logo(o.team),
                 "Équipe": o.team, "Pris par": pris.get(o.team, 0),
-                "Seule debout": None if seule is None else 100 * seule,
+                # Colonne omise si elle n'est pas calculable : une colonne
+                # entièrement vide n'apprend rien et Streamlit y écrit « None ».
+                **({} if seule is None else {"Seule debout": 100 * seule}),
                 "Match cette semaine": match_label(o),
                 "Probabilité": 100 * o.p,
                 "Meilleur match plus tard": (
@@ -640,13 +656,17 @@ def page_pick():
                       "adversaires tombent. L'arbitrage se lit entre ces deux "
                       "colonnes."):
             if manquants > 0:
-                st.warning(
-                    f"« Seule debout » reste vide : {manquants} adversaire(s) "
-                    f"en vie sur {len(vivants)} n'ont pas de pick saisi pour "
-                    f"cette semaine. Cette colonne mesure la chance qu'ils "
-                    f"tombent **tous** — en ignorer un la rendrait beaucoup "
-                    f"trop optimiste. Complète le registre dans « Le pool ».")
-            st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
+                st.info(
+                    f"La colonne **« Seule debout »** apparaîtra quand les "
+                    f"{manquants} adversaire(s) en vie sur {len(vivants)} qui "
+                    f"n'ont pas encore de pick saisi seront renseignés. Elle "
+                    f"mesure la chance qu'ils tombent **tous** : en ignorer un "
+                    f"la rendrait bien trop optimiste. Ça se remplit dans "
+                    f"« Le pool ».")
+            st.dataframe(chiffres(pd.DataFrame(rows),
+                                  ["Seule debout", "Probabilité", "Espérance",
+                                   "Coût", "Pris par"]),
+                         hide_index=True, width="stretch",
                          column_config={
                              "": st.column_config.ImageColumn("", width="small"),
                              "Pris par": st.column_config.NumberColumn(
@@ -1079,7 +1099,9 @@ def page_pool():
     mon_pick = (provisional or {}).get("team") or (current or {}).get("team")
 
     ui.tiles([
-        ("Survivants", str(pk.survivors(state, since, today, RES)),
+        # Compté ici plutôt qu'avec survivors() : `out` tient déjà compte de
+        # mon élimination déduite des résultats, ce que l'état seul ignore.
+        ("Survivants", str((0 if out else 1) + len(pk.pool_alive(state, since, RES))),
          "moi comprise" if not out else "je suis éliminée"),
         ("Adversaires en vie", str(len(pk.pool_alive(state, since, RES))),
          f"sur {len(joueurs)} inscrits"),
@@ -1111,8 +1133,10 @@ def page_pool():
             "Équipes déjà prises": ", ".join(sorted(pk.pool_used(state, nom, since))),
         } for nom, j in sorted(joueurs.items())]
         edite = st.data_editor(
-            pd.DataFrame(lignes, columns=["Joueur", "Pick", "Statut", "Réel",
-                                          "Probabilité", "Équipes déjà prises"]),
+            chiffres(pd.DataFrame(lignes,
+                                  columns=["Joueur", "Pick", "Statut", "Réel",
+                                           "Probabilité", "Équipes déjà prises"]),
+                     ["Probabilité"]),
             num_rows="dynamic", hide_index=True, width="stretch",
             column_config={
                 "Pick": st.column_config.SelectboxColumn(
@@ -1207,7 +1231,10 @@ def page_pool():
                   "Deux chiffres à ne pas confondre : ce qu'on garde pour plus "
                   "tard, et ce qu'on vaut une fois le risque de cette semaine "
                   "pris en compte."):
-        st.dataframe(pd.DataFrame(lignes), hide_index=True, width="stretch",
+        st.dataframe(chiffres(pd.DataFrame(lignes),
+                              ["Gagne cette semaine", "Potentiel après",
+                               "Survie totale", "Écart vs moi"]),
+                     hide_index=True, width="stretch",
                      column_config={
                          "Gagne cette semaine": PCT,
                          "Potentiel après": st.column_config.NumberColumn(

@@ -40,7 +40,8 @@ def test_set_day():
 
 
 def test_load_missing_file(tmp_path):
-    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}, "resets": [], "out": None, "pool": {}}
+    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}, "resets": [], "out": None,
+                                          "force": None, "pool": {}}
 
 
 def test_planning():
@@ -91,7 +92,8 @@ def test_github_picks_roundtrip_and_conflict():
     gh = FakeGitHub()
     me = {"name": "moi", "email": "1+moi@users.noreply.github.com"}
     store = pk.GitHubPicks("moi/pool", "jeton", session=gh, author=me)
-    assert store.load() == {"picks": [], "days": {}, "resets": [], "out": None, "pool": {}}
+    assert store.load() == {"picks": [], "days": {}, "resets": [], "out": None,
+                                          "force": None, "pool": {}}
     store.save({"picks": pk.add([], W1, "VGK"), "days": {}}, "Pick VGK")
     assert gh.puts[0]["message"] == "Pick VGK" and gh.puts[0]["branch"] == "main"
     assert gh.puts[0]["author"] == gh.puts[0]["committer"] == me   # pas le vrai courriel
