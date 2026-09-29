@@ -43,3 +43,28 @@ def test_les_32_equipes_sont_listees():
     assert len(cpl.TEAMS) == 32
     assert len(set(cpl.TEAMS)) == 32
     assert "UTA" in cpl.TEAMS and all(len(t) == 3 for t in cpl.TEAMS)
+
+
+# ── Couleur d'équipe ───────────────────────────────────────────────────────
+# Extraits réels des logos officiels, pour que le test dise quelque chose.
+
+def test_couleur_ignore_le_blanc_et_le_gris():
+    """Le contour argenté du logo du Colorado est majoritaire sans rien dire."""
+    svg = ('<path fill="#ffffff"/>' * 5 + '<path fill="#c1c6c8"/>' * 5
+           + '<path fill="#236192"/>' * 3 + '<path fill="#010101"/>')
+    assert cpl.team_color(svg) == "#236192"
+
+
+def test_couleur_prend_la_plus_saturee_pas_la_plus_frequente():
+    """Edmonton : marine cinq fois, orange une seule — l'orange gagne."""
+    svg = '<path fill="#00205b"/>' * 5 + '<path fill="#cf4520"/>'
+    assert cpl.team_color(svg) == "#cf4520"
+
+
+def test_couleur_accepte_les_formes_courtes_et_le_style():
+    assert cpl.team_color('<path style="fill:#fc0"/>') == "#ffcc00"
+
+
+def test_logo_sans_couleur_exploitable_donne_le_neutre():
+    assert cpl.team_color('<path fill="#ffffff"/><path fill="#010101"/>') == cpl.NEUTRE
+    assert cpl.team_color("") == cpl.NEUTRE

@@ -1,0 +1,61 @@
+import ui
+
+
+def contraste(a, b):
+    """Rapport de contraste WCAG entre deux couleurs, pour vérifier ink()."""
+    def lum(c):
+        h = c.lstrip("#")
+        ch = []
+        for i in (0, 2, 4):
+            v = int(h[i:i + 2], 16) / 255
+            ch.append(v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4)
+        return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+    l1, l2 = sorted((lum(a), lum(b)), reverse=True)
+    return (l1 + 0.05) / (l2 + 0.05)
+
+
+def test_encre_noire_sur_les_couleurs_claires():
+    assert ui.ink("#ffb81c") == "#11110f"      # or des Bruins
+    assert ui.ink("#fedd00") == "#11110f"      # jaune des Blackhawks
+
+
+def test_encre_blanche_sur_les_couleurs_foncees():
+    assert ui.ink("#00205b") == "#ffffff"      # marine des Maple Leafs
+    assert ui.ink("#a6192e") == "#ffffff"      # rouge du Canadien
+
+
+def test_encre_choisit_toujours_le_meilleur_des_deux():
+    """Propriété qui compte vraiment : sur n'importe quelle couleur d'équipe,
+    ink() ne doit jamais retourner la moins lisible des deux encres."""
+    for bg in ["#ffb81c", "#00205b", "#a6192e", "#fedd00", "#236192",
+               "#cf4520", "#00843d", "#b9975b", "#c8102e", "#3a3a35"]:
+        choisi = ui.ink(bg)
+        autre = "#ffffff" if choisi == "#11110f" else "#11110f"
+        assert contraste(bg, choisi) >= contraste(bg, autre), bg
+
+
+def test_forme_courte_acceptee():
+    assert ui.ink("#fff") == "#11110f"
+    assert ui.ink("#000") == "#ffffff"
+
+
+def test_carte_sans_joueur_retombe_sur_le_logo():
+    html = ui._carte("COL", None)
+    assert "ps-card-logo" in html and "ps-card-shot" not in html
+    assert ui._carte("COL", {"action": ""})  == html   # photo manquante : idem
+
+
+def test_carte_avec_joueur_montre_la_photo_et_la_plaque():
+    html = ui._carte("COL", {"first_name": "Nathan", "last_name": "MacKinnon",
+                             "position": "C", "points": 127, "color": "#236192",
+                             "action": "https://exemple/photo.jpg"})
+    assert "ps-card-shot" in html and "https://exemple/photo.jpg" in html
+    assert "Nathan MacKinnon" in html
+    assert "Centre" in html and "127 pts" in html
+    assert "#236192" in html
+
+
+def test_les_noms_francais_couvrent_les_32_equipes():
+    assert len(ui.TEAMS) == 32
+    assert ui.name("MTL") == "Canadiens de Montréal"
+    assert ui.name("XXX") == "XXX"          # tricode inconnu : on le laisse tel quel

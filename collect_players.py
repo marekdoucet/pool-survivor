@@ -17,6 +17,7 @@ jour à l'autre) : _write_if_changed évite les commits vides.
 
 import csv
 import io
+import re
 import sys
 
 import requests
@@ -25,8 +26,12 @@ import collect_moneypuck as cm
 import store
 
 API = "https://api-web.nhle.com/v1/club-stats/{team}/now"
+LOGO = "https://assets.nhle.com/logos/nhl/svg/{team}_dark.svg"
+SHOT = "https://assets.nhle.com/mugs/actionshots/1296x729/{pid}.jpg"
 COLS = ["team", "player_id", "first_name", "last_name", "position",
-        "games", "goals", "points", "headshot"]
+        "games", "goals", "points", "headshot", "action", "color"]
+NEUTRE = "#3a3a35"          # si le logo ne donne aucune couleur exploitable
+RE_FILL = re.compile(r'fill[:=]"?\s*(#[0-9A-Fa-f]{3,6})')
 
 # Les 32 tricodes, tels qu'ils apparaissent déjà dans le calendrier.
 TEAMS = [
@@ -39,6 +44,36 @@ TEAMS = [
 
 class PlayersError(Exception):
     pass
+
+
+def _hex6(c):
+    c = c.lower().lstrip("#")
+    return "#" + ("".join(x * 2 for x in c) if len(c) == 3 else c)
+
+
+def team_color(svg):
+    """Couleur d'équipe d'un logo SVG : la plus saturée qu'il contient.
+
+    Prise dans le logo officiel, jamais inventée. La plus saturée plutôt que
+    la plus fréquente parce que c'est elle qui porte l'identité : l'or des
+    Bruins, l'orange des Oilers, le rouge du Canadien. Le gris et le blanc
+    d'un contour sont souvent majoritaires sans rien vouloir dire.
+    """
+    seen = {}
+    for i, raw in enumerate(RE_FILL.findall(svg)):
+        c = _hex6(raw)
+        r, g, b = (int(c[j:j + 2], 16) / 255 for j in (1, 3, 5))
+        chroma = max(r, g, b) - min(r, g, b)
+        if chroma >= 0.15:
+            n, first = seen.get(c, (0, i))
+            seen[c] = (n + 1, first)
+    if not seen:
+        return NEUTRE
+    def cle(c):
+        r, g, b = (int(c[j:j + 2], 16) / 255 for j in (1, 3, 5))
+        n, first = seen[c]
+        return (-(max(r, g, b) - min(r, g, b)), -n, first)   # départage stable
+    return min(seen, key=cle)
 
 
 def leader(payload, team):
@@ -64,6 +99,8 @@ def leader(payload, team):
         best.get("goals", 0),
         best["points"],
         best.get("headshot", ""),
+        SHOT.format(pid=best.get("playerId")),
+        "",                 # couleur : remplie par collect_players
     ]
 
 
@@ -80,8 +117,14 @@ def collect_players(teams=TEAMS, data_dir=store.DATA_DIR, session=None):
             row = None
         if row is None:
             failed.append(team)
-        else:
-            rows.append(row)
+            continue
+        try:
+            lg = session.get(LOGO.format(team=team), headers=cm.HEADERS, timeout=30)
+            lg.raise_for_status()
+            row[-1] = team_color(lg.text)
+        except requests.RequestException:
+            row[-1] = NEUTRE
+        rows.append(row)
     if not rows:
         raise PlayersError("aucune équipe n'a répondu (l'API a changé ?)")
     buf = io.StringIO()
