@@ -2,9 +2,11 @@
 Étape 3 du projet Pool Survivor NHL
 Optimise le plan de picks sur les semaines restantes.
 
-Règles : chaque semaine (lundi → dimanche), je choisis UN match d'une équipe ;
-elle doit le gagner (prolongation et tirs de barrage comptent), sinon je suis
-éliminé. Une équipe ne sert qu'une fois.
+Règles : chaque semaine (lundi → dimanche), je choisis UN match d'une équipe,
+joué la journée de fin de semaine qui compte le plus de matchs (samedi ou
+dimanche ; journée modifiable semaine par semaine). L'équipe doit gagner
+(prolongation et tirs de barrage comptent), sinon je suis éliminé. Une équipe
+ne sert qu'une fois. Une fin de semaine sans match est sautée.
 
 Objectif : maximiser l'espérance du nombre de semaines survécues
     E = p1 + p1·p2 + p1·p2·p3 + …
@@ -22,16 +24,17 @@ Utilisation :
 """
 
 import argparse
+import json
 import math
 import sqlite3
 import datetime as dt
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
 import collect_moneypuck as cm
-import schedule as sch
 
 RIDGE = 1.0   # régularisation des forces (évite les valeurs extrêmes)
 
@@ -93,19 +96,63 @@ def week_start(day):
     return day - dt.timedelta(days=day.weekday())   # lundi
 
 
-def build_options(conn, from_date, used=(), snapshot=None):
+@dataclass
+class PickDay:
+    """Journée(s) où l'on peut choisir un match, pour une semaine."""
+    days: tuple        # dates ISO permises (vide = semaine sautée)
+    sat_games: int
+    sun_games: int
+    how: str           # « auto », « égalité », « choisi » ou « aucun match »
+
+
+def pick_days(conn, overrides=None):
+    """{lundi: PickDay} pour chaque semaine du calendrier.
+
+    Par défaut : la journée de fin de semaine qui a le plus de matchs ; en cas
+    d'égalité, les deux jours (à confirmer). `overrides` = {lundi ISO: date ISO}
+    impose la journée d'une semaine.
+    """
+    overrides = overrides or {}
+    counts = dict(conn.execute("SELECT game_date, COUNT(*) FROM schedule GROUP BY game_date"))
+    if not counts:
+        return {}
+    first = week_start(dt.date.fromisoformat(min(counts)))
+    last = week_start(dt.date.fromisoformat(max(counts)))
+    out, monday = {}, first
+    while monday <= last:
+        sat, sun = (monday + dt.timedelta(days=5)).isoformat(), (monday + dt.timedelta(days=6)).isoformat()
+        a, b = counts.get(sat, 0), counts.get(sun, 0)
+        if monday.isoformat() in overrides:
+            days, how = (overrides[monday.isoformat()],), "choisi"
+        elif a == b == 0:
+            days, how = (), "aucun match"
+        elif a == b:
+            days, how = (sat, sun), "égalité"
+        else:
+            days, how = ((sat,) if a > b else (sun,)), "auto"
+        out[monday] = PickDay(days, a, b, how)
+        monday += dt.timedelta(days=7)
+    return out
+
+
+def build_options(conn, from_date, used=(), snapshot=None, overrides=None):
     """{lundi: {équipe: Option}} pour toutes les semaines restantes.
 
-    Pour la semaine en cours, seuls les matchs à partir de from_date comptent.
+    Seuls les matchs de la journée de pick de chaque semaine comptent (voir
+    pick_days), et à partir de from_date. Une semaine sans match permis est
+    absente : elle est sautée.
     """
     known, snapshot = load_known(conn, snapshot=snapshot)
     strength, h = fit_strength(known)
+    allowed = {d for pd in pick_days(conn, overrides).values() for d in pd.days}
     games = conn.execute(
         "SELECT game_date, away, home FROM schedule WHERE game_date >= ? ORDER BY game_date",
         (from_date.isoformat(),)).fetchall()
 
     weeks = {}
     for g, away, home in games:
+        if g not in allowed:
+            continue
         if (g, away, home) in known:
             p_away, src = known[(g, away, home)], "consensus"
         else:
@@ -217,22 +264,22 @@ def _matrix(weeks, used):
     return mondays, teams, P
 
 
-def optimize(conn, from_date, used=(), snapshot=None):
-    weeks, snapshot, _strength, _h = build_options(conn, from_date, used, snapshot)
+def optimize(conn, from_date, used=(), snapshot=None, overrides=None):
+    weeks, snapshot, _strength, _h = build_options(conn, from_date, used, snapshot, overrides)
     mondays, teams, P = _matrix(weeks, used)
     assign, exp_weeks = solve(P)
     plan = [(m, weeks[m][teams[t]] if t >= 0 else None) for m, t in zip(mondays, assign)]
     return plan, exp_weeks, snapshot
 
 
-def alternatives(conn, from_date, used=(), top=8, snapshot=None):
+def alternatives(conn, from_date, used=(), top=8, snapshot=None, overrides=None):
     """Chaque choix possible pour la première semaine, avec l'espérance du
     meilleur plan qui le suit : E = p + p · E(reste sans cette équipe).
 
     Retourne [(Option, espérance)] trié du meilleur au moins bon, limité aux
     `top` meilleures probabilités de la semaine.
     """
-    weeks, *_ = build_options(conn, from_date, used, snapshot)
+    weeks, *_ = build_options(conn, from_date, used, snapshot, overrides)
     if not weeks:
         return []
     mondays, teams, P = _matrix(weeks, used)
@@ -262,8 +309,13 @@ def main():
     from_date = (dt.date.fromisoformat(args.from_date) if args.from_date
                  else dt.datetime.now(cm.TZ).date())
 
+    # Journées imposées dans picks.json (lecture directe : picks importe ce module)
+    overrides = {}
+    if Path("picks.json").exists():
+        overrides = json.loads(Path("picks.json").read_text(encoding="utf-8")).get("days", {})
+
     conn = sqlite3.connect(cm.DB_PATH)
-    plan, exp_weeks, snapshot = optimize(conn, from_date, used)
+    plan, exp_weeks, snapshot = optimize(conn, from_date, used, overrides=overrides)
     conn.close()
 
     print(f"Données du {snapshot} — {len(plan)} semaines restantes, "

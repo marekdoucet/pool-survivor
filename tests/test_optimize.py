@@ -60,33 +60,61 @@ def db(tmp_path):
     sch.init_db(conn)
     conn.executemany("INSERT INTO schedule (game_id, game_date, start_utc, away, home) "
                      "VALUES (?,?,?,?,?)", [
-        (1, "2026-10-05", "x", "VAN", "COL"),   # lundi
-        (2, "2026-10-08", "x", "COL", "CHI"),   # jeudi, même semaine
-        (3, "2026-10-12", "x", "TOR", "VAN"),   # semaine suivante, pas de proba connue
-        (4, "2026-10-13", "x", "COL", "TOR"),
+        (1, "2026-10-07", "x", "COL", "BOS"),   # mercredi : jamais permis
+        (2, "2026-10-10", "x", "VAN", "COL"),   # samedi (2 matchs) : journée de pick
+        (3, "2026-10-10", "x", "SEA", "NYR"),
+        (4, "2026-10-11", "x", "COL", "CHI"),   # dimanche (1 match)
+        (5, "2026-10-17", "x", "TOR", "VAN"),   # samedi (1 match)
+        (6, "2026-10-18", "x", "COL", "TOR"),   # dimanche (2 matchs) : journée de pick
+        (7, "2026-10-18", "x", "DAL", "STL"),
+        (8, "2026-10-20", "x", "EDM", "CGY"),   # semaine sans match la fin de semaine
     ])
     conn.executemany("INSERT INTO probs VALUES (?,?,?,?,?,?,?,?)", [
-        ("2026-10-04", "t", "2026-10-05", "VAN", "COL", 0.30, 0.70, "consensus"),
-        ("2026-10-04", "t", "2026-10-08", "COL", "CHI", 0.62, 0.38, "consensus"),
-        ("2026-10-04", "t", "2026-10-12", "TOR", "VAN", 0.55, 0.45, "moneypuck"),
+        ("2026-10-04", "t", "2026-10-07", "COL", "BOS", 0.90, 0.10, "consensus"),
+        ("2026-10-04", "t", "2026-10-10", "VAN", "COL", 0.30, 0.70, "consensus"),
+        ("2026-10-04", "t", "2026-10-11", "COL", "CHI", 0.62, 0.38, "consensus"),
+        ("2026-10-04", "t", "2026-10-10", "SEA", "NYR", 0.45, 0.55, "consensus"),
     ])
     return conn
 
 
-def test_build_options_best_game_per_week(db):
-    weeks, snap, _s, _h = op.build_options(db, dt.date(2026, 10, 5))
+W1, W2, W3 = dt.date(2026, 10, 5), dt.date(2026, 10, 12), dt.date(2026, 10, 19)
+
+
+def test_pick_days(db):
+    days = op.pick_days(db)
+    assert days[W1] == op.PickDay(("2026-10-10",), 2, 1, "auto")
+    assert days[W2] == op.PickDay(("2026-10-18",), 1, 2, "auto")   # dimanche l'emporte
+    assert days[W3] == op.PickDay((), 0, 0, "aucun match")
+    assert op.pick_days(db, {"2026-10-05": "2026-10-11"})[W1].how == "choisi"
+    db.execute("INSERT INTO schedule (game_id, game_date, start_utc, away, home) "
+               "VALUES (9, '2026-10-11', 'x', 'MTL', 'OTT')")
+    assert op.pick_days(db)[W1] == op.PickDay(("2026-10-10", "2026-10-11"), 2, 2, "égalité")
+
+
+def test_build_options_only_pick_day(db):
+    weeks, snap, _s, _h = op.build_options(db, W1)
     assert snap == "2026-10-04"
-    col = weeks[dt.date(2026, 10, 5)]["COL"]
-    assert (col.game_date, col.opponent, col.home, col.p) == ("2026-10-05", "VAN", True, 0.70)
-    # Pas de consensus pour ce match → estimation du modèle
-    assert weeks[dt.date(2026, 10, 12)]["TOR"].source == "estimé"
+    col = weeks[W1]["COL"]
+    # Le match de mercredi (90 %) et celui de dimanche sont exclus : samedi seulement
+    assert (col.game_date, col.opponent, col.home, col.p) == ("2026-10-10", "VAN", True, 0.70)
+    assert "BOS" not in weeks[W1]
+    # Semaine 2 : dimanche ; pas de consensus pour ce match → estimation du modèle
+    assert weeks[W2]["TOR"].game_date == "2026-10-18"
+    assert weeks[W2]["TOR"].source == "estimé"
+    assert W3 not in weeks   # semaine sautée
 
 
-def test_build_options_from_midweek_and_used(db):
-    weeks, *_ = op.build_options(db, dt.date(2026, 10, 6), used={"TOR"})
-    col = weeks[dt.date(2026, 10, 5)]["COL"]
-    assert col.game_date == "2026-10-08"   # le match de lundi est passé
-    assert "TOR" not in weeks[dt.date(2026, 10, 12)]
+def test_build_options_override_day(db):
+    weeks, *_ = op.build_options(db, W1, overrides={"2026-10-05": "2026-10-11"})
+    col = weeks[W1]["COL"]
+    assert (col.game_date, col.opponent, col.p) == ("2026-10-11", "CHI", 0.62)
+
+
+def test_build_options_after_pick_day_and_used(db):
+    weeks, *_ = op.build_options(db, dt.date(2026, 10, 11), used={"TOR"})
+    assert W1 not in weeks            # samedi passé : la semaine est terminée
+    assert "TOR" not in weeks[W2]
 
 
 def test_optimize_never_reuses_teams(db):

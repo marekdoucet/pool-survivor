@@ -1,8 +1,13 @@
 """
-Mes picks, gardés dans picks.json (petit fichier séparé de survivor.db pour
-que la collecte automatique ne l'écrase jamais).
+Mes picks et mes choix de journée, gardés dans picks.json (petit fichier séparé
+de survivor.db pour que la collecte automatique ne l'écrase jamais).
 
-    {"picks": [{"week": "2026-09-28", "team": "VGK", "game_date": "2026-10-04"}]}
+    {"picks": [{"week": "2026-09-28", "team": "VGK", "game_date": "2026-10-03"}],
+     "days":  {"2026-12-14": "2026-12-20"}}
+
+"days" : journée de pick imposée pour une semaine (lundi → date du samedi ou
+du dimanche). Sans entrée, c'est la journée de fin de semaine qui a le plus
+de matchs (voir optimize.pick_days).
 """
 
 import base64
@@ -17,6 +22,21 @@ import optimize as op
 
 PICKS_PATH = Path("picks.json")
 GITHUB_API = "https://api.github.com/repos/{repo}/contents/{path}"
+
+
+def empty_state():
+    return {"picks": [], "days": {}}
+
+
+def _normalize(state):
+    return {"picks": state.get("picks", []), "days": state.get("days", {})}
+
+
+def _dumps(state):
+    state = _normalize(state)
+    state = {"picks": sorted(state["picks"], key=lambda p: p["week"]),
+             "days": dict(sorted(state["days"].items()))}
+    return json.dumps(state, indent=2, ensure_ascii=False) + "\n"
 
 
 class GitHubPicks:
@@ -41,15 +61,14 @@ class GitHubPicks:
                              params={"ref": self.branch}, timeout=20)
         if r.status_code == 404:
             self.sha = None
-            return []
+            return empty_state()
         r.raise_for_status()
         body = r.json()
         self.sha = body["sha"]
-        return json.loads(base64.b64decode(body["content"]))["picks"]
+        return _normalize(json.loads(base64.b64decode(body["content"])))
 
-    def save(self, picks, message="Mise à jour des picks"):
-        picks = sorted(picks, key=lambda p: p["week"])
-        content = json.dumps({"picks": picks}, indent=2, ensure_ascii=False) + "\n"
+    def save(self, state, message="Mise à jour des picks"):
+        content = _dumps(state)
         payload = {"message": message, "branch": self.branch,
                    "content": base64.b64encode(content.encode("utf-8")).decode()}
         if self.sha:
@@ -63,14 +82,12 @@ class GitHubPicks:
 
 def load(path=PICKS_PATH):
     if not Path(path).exists():
-        return []
-    return json.loads(Path(path).read_text(encoding="utf-8"))["picks"]
+        return empty_state()
+    return _normalize(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
-def save(picks, path=PICKS_PATH):
-    picks = sorted(picks, key=lambda p: p["week"])
-    Path(path).write_text(json.dumps({"picks": picks}, indent=2, ensure_ascii=False),
-                          encoding="utf-8")
+def save(state, path=PICKS_PATH):
+    Path(path).write_text(_dumps(state), encoding="utf-8")
 
 
 def add(picks, week, team, game_date=None):
@@ -85,6 +102,16 @@ def add(picks, week, team, game_date=None):
 
 def remove(picks, week):
     return [p for p in picks if p["week"] != week.isoformat()]
+
+
+def set_day(days, week, day):
+    """Impose la journée de pick d'une semaine ; day=None revient à l'automatique."""
+    days = {k: v for k, v in days.items() if k != week.isoformat()}
+    if day is not None:
+        if op.week_start(day) != week or day.weekday() < 5:
+            raise ValueError(f"{day} n'est pas le samedi ou le dimanche de la semaine du {week}")
+        days[week.isoformat()] = day.isoformat()
+    return days
 
 
 def planning_start(picks, today):

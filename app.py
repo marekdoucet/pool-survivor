@@ -77,22 +77,28 @@ def snapshots(version):
 
 
 @st.cache_data
-def plan_for(version, from_date, used, snapshot=None):
+def plan_for(version, from_date, used, overrides, snapshot=None):
     with connect() as c:
-        return op.optimize(c, from_date, set(used), snapshot)
+        return op.optimize(c, from_date, set(used), snapshot, dict(overrides))
 
 
 @st.cache_data
-def alternatives_for(version, from_date, used):
+def alternatives_for(version, from_date, used, overrides):
     with connect() as c:
-        return op.alternatives(c, from_date, set(used))
+        return op.alternatives(c, from_date, set(used), overrides=dict(overrides))
 
 
 @st.cache_data
-def options_for(version, from_date, used):
-    """{lundi: {équipe: meilleur match de la semaine}} pour les semaines restantes."""
+def options_for(version, from_date, used, overrides):
+    """{lundi: {équipe: meilleur match de la journée de pick}} pour les semaines restantes."""
     with connect() as c:
-        return op.build_options(c, from_date, set(used))[0]
+        return op.build_options(c, from_date, set(used), overrides=dict(overrides))[0]
+
+
+@st.cache_data
+def pick_days_for(version, overrides):
+    with connect() as c:
+        return op.pick_days(c, dict(overrides))
 
 
 @st.cache_data
@@ -129,8 +135,25 @@ MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sep
         "oct.", "nov.", "déc."]
 
 
+JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+
+
 def fr_date(d):
     return f"{d.day} {MOIS[d.month - 1]}"
+
+
+def fr_weekend(monday):
+    """Lundi → '19-20 déc.' (ou '31 oct.-1 nov.')."""
+    sat, sun = monday + dt.timedelta(days=5), monday + dt.timedelta(days=6)
+    if sat.month == sun.month:
+        return f"{sat.day}-{sun.day} {MOIS[sun.month - 1]}"
+    return f"{fr_date(sat)}-{fr_date(sun)}"
+
+
+def fr_day(iso):
+    """'2026-10-03' → 'samedi 3 oct.'"""
+    d = dt.date.fromisoformat(iso)
+    return f"{JOURS[d.weekday()]} {fr_date(d)}"
 
 
 def match_label(opt):
@@ -154,23 +177,30 @@ def picks_backend():
     return None
 
 
-def save_picks(new_picks, message):
+def save_state(new_state, message):
     try:
         if remote:
-            remote.save(new_picks, message)
+            remote.save(new_state, message)
         else:
-            pk.save(new_picks, PICKS_PATH)
+            pk.save(new_state, PICKS_PATH)
     except Exception as e:   # conflit, jeton expiré, réseau…
-        st.sidebar.error(f"Pick non enregistré : {e}")
+        st.sidebar.error(f"Non enregistré : {e}")
         return
     st.rerun()
 
 
+def save_picks(new_picks, message):
+    save_state({**state, "picks": new_picks}, message)
+
+
 today = dt.datetime.now(cm.TZ).date()
 remote = picks_backend()
-picks = remote.load() if remote else pk.load(PICKS_PATH)
+state = remote.load() if remote else pk.load(PICKS_PATH)
+picks, day_overrides = state["picks"], state["days"]
+overrides = tuple(sorted(day_overrides.items()))   # clé de cache
 used = tuple(sorted(p["team"] for p in picks))
 from_date = pk.planning_start(picks, today)
+all_days = pick_days_for(VERSION, overrides) if VERSION else {}
 
 with st.sidebar:
     st.header("Mes picks")
@@ -198,6 +228,41 @@ with st.sidebar:
         if st.form_submit_button("Enregistrer"):
             save_picks(pk.add(picks, week, team), f"Pick : {team} (semaine du {week})")
 
+    st.subheader("Journée de pick")
+    ties = [m for m, d in all_days.items() if d.how == "égalité" and m >= op.week_start(today)]
+    st.caption("Par défaut : la journée de fin de semaine qui a le plus de matchs. "
+               "Change-la ici si l'organisateur en décide autrement.")
+    if ties:
+        st.warning("Égalité samedi/dimanche à confirmer : "
+                   + ", ".join(f"fin de semaine du {fr_weekend(m)}" for m in ties)
+                   + ". En attendant, les deux jours sont permis.")
+    future = [m for m in all_days if m >= op.week_start(today)]
+    if future:
+        with st.form("jour"):
+            wk = st.selectbox(
+                "Semaine du", future,
+                format_func=lambda m: f"{fr_date(m)} — " + (
+                    " ou ".join(fr_day(d) for d in all_days[m].days) or "aucun match")
+                    + (" (choisi)" if all_days[m].how == "choisi" else ""))
+            pd_ = all_days[wk]
+            sat = (wk + dt.timedelta(days=5)).isoformat()
+            sun = (wk + dt.timedelta(days=6)).isoformat()
+            choices = {"Automatique (le plus de matchs)": None,
+                       f"{fr_day(sat)} ({pd_.sat_games} matchs)": sat,
+                       f"{fr_day(sun)} ({pd_.sun_games} matchs)": sun}
+            choice = st.radio("Journée", list(choices))
+            if st.form_submit_button("Enregistrer la journée"):
+                day = choices[choice]
+                new_days = pk.set_day(day_overrides, wk,
+                                      dt.date.fromisoformat(day) if day else None)
+                save_state({**state, "days": new_days},
+                           f"Journée de pick, semaine du {wk} : "
+                           + (fr_day(day) if day else "automatique"))
+        chosen = {m: d for m, d in all_days.items() if d.how == "choisi" and m in future}
+        if chosen:
+            st.caption("Journées choisies : " + ", ".join(
+                f"sem. du {fr_date(m)} → {fr_day(d.days[0])}" for m, d in chosen.items()))
+
 
 # ── En-tête ───────────────────────────────────────────────────────────────
 
@@ -209,7 +274,7 @@ if not snaps:
     st.error("Aucune donnée. Lance d'abord `python daily.py`.")
     st.stop()
 
-plan, exp_weeks, snapshot = plan_for(v, from_date, used)
+plan, exp_weeks, snapshot = plan_for(v, from_date, used, overrides)
 hist = history(v)
 latest = hist[hist.snapshot == snapshot]
 counts = latest.groupby("source").size()
@@ -223,7 +288,7 @@ tab_pick, tab_plan, tab_map, tab_evol, tab_form, tab_acc, tab_diff = st.tabs(
     ["Pick de la semaine", "Plan complet", "Carte des matchups",
      "Évolution des probabilités", "Équipes en forme", "Précision des sources",
      "Depuis hier"])
-options = options_for(v, from_date, used)
+options = options_for(v, from_date, used, overrides)
 planned = {o.team: m for m, o in plan if o}   # équipe → semaine où le plan l'utilise
 
 
@@ -247,6 +312,18 @@ with tab_pick:
     else:
         monday, best = plan[0]
         st.subheader(f"Semaine du {monday}")
+        pd_week = all_days.get(monday)
+        if pd_week:
+            txt = " ou ".join(fr_day(d) for d in pd_week.days)
+            is_sat = pd_week.days[0] == (monday + dt.timedelta(days=5)).isoformat()
+            n_games = pd_week.sat_games if is_sat else pd_week.sun_games
+            if pd_week.how == "égalité":
+                st.warning(f"Journée de pick : **{txt}** — égalité "
+                           f"({pd_week.sat_games} matchs chacun), à confirmer dans la "
+                           f"barre latérale.")
+            else:
+                st.info(f"Journée de pick : **{txt}** ({n_games} matchs)"
+                        + (" — choisie par toi" if pd_week.how == "choisi" else ""))
         c1, c2, c3 = st.columns(3)
         c1.metric("Pick recommandé", best.team)
         c1.caption(match_label(best))
@@ -263,7 +340,7 @@ with tab_pick:
         st.caption("Le plan est optimisé sur toute la saison d'un coup : une équipe "
                    "forte cette semaine peut être gardée pour une semaine où son "
                    "match est encore meilleur, ou où aucune autre équipe ne fait mieux.")
-        alts = alternatives_for(v, from_date, used)
+        alts = alternatives_for(v, from_date, used, overrides)
         top_e = alts[0][1]
         reasons = []
         for o, _e in alts:
@@ -321,11 +398,16 @@ with tab_plan:
     for monday, o in plan:
         alive *= o.p if o else 0.0
         rows.append({
-            "Semaine du": str(monday), "Équipe": o.team if o else "—",
+            "Semaine du": str(monday),
+            "Journée": fr_day(o.game_date) if o else "—", "Équipe": o.team if o else "—",
             "Match": match_label(o) if o else "aucune équipe disponible",
             "Probabilité": 100 * o.p if o else 0.0, "Survie cumulée": 100 * alive,
             "Source": o.source if o else "",
         })
+    skipped = [m for m, d in all_days.items() if not d.days and m >= op.week_start(from_date)]
+    if skipped:
+        st.info("Semaine(s) sautée(s), aucun match la fin de semaine : "
+                + ", ".join(f"fin de semaine du {fr_weekend(m)}" for m in skipped))
     st.caption(f"Espérance : **{exp_weeks:.2f}** semaines survécues sur {len(plan)}. "
                "« estimé » = au-delà des 49 jours collectés, probabilité tirée du modèle "
                "de force des équipes. Le plan est recalculé chaque jour.")
@@ -344,7 +426,8 @@ BLUES = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d3
 
 with tab_map:
     st.caption("Chaque case : la probabilité de victoire du **meilleur match** de "
-               "l'équipe cette semaine-là (vide = elle ne joue pas). Les cases "
+               "l'équipe à la journée de pick de la semaine (vide = elle ne joue pas "
+               "ce jour-là). Les cases "
                "encadrées sont les picks du plan. Une équipe se lit de gauche à "
                "droite : on voit quand elle vaut le plus.")
     mondays_all = list(options)
@@ -589,7 +672,7 @@ with tab_diff:
                 "prochaine collecte quotidienne.")
     else:
         prev = snaps[1]
-        prev_plan, prev_exp, _ = plan_for(v, from_date, used, prev)
+        prev_plan, prev_exp, _ = plan_for(v, from_date, used, overrides, prev)
         st.caption(f"Comparaison entre la collecte du {prev} et celle du {snapshot}.")
 
         c1, c2 = st.columns(2)

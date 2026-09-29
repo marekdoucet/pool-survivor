@@ -17,13 +17,30 @@ def test_add_replace_and_no_reuse(tmp_path):
         pk.add(picks, W2, "XYZ")
 
     path = tmp_path / "p.json"
-    pk.save(pk.add(picks, W2, "COL"), path)
-    assert [p["team"] for p in pk.load(path)] == ["EDM", "COL"]
-    assert pk.remove(pk.load(path), W1)[0]["team"] == "COL"
+    pk.save({"picks": pk.add(picks, W2, "COL"), "days": {}}, path)
+    loaded = pk.load(path)
+    assert [p["team"] for p in loaded["picks"]] == ["EDM", "COL"]
+    assert pk.remove(loaded["picks"], W1)[0]["team"] == "COL"
+
+
+def test_old_file_without_days(tmp_path):
+    path = tmp_path / "p.json"
+    path.write_text('{"picks": [{"week": "2026-09-28", "team": "VGK", "game_date": null}]}')
+    assert pk.load(path)["days"] == {}
+
+
+def test_set_day():
+    days = pk.set_day({}, W1, dt.date(2026, 10, 4))        # dimanche de la semaine 1
+    assert days == {"2026-09-28": "2026-10-04"}
+    assert pk.set_day(days, W1, None) == {}                  # retour à l'automatique
+    with pytest.raises(ValueError):
+        pk.set_day({}, W1, dt.date(2026, 10, 2))           # vendredi
+    with pytest.raises(ValueError):
+        pk.set_day({}, W1, dt.date(2026, 10, 10))          # samedi d'une autre semaine
 
 
 def test_load_missing_file(tmp_path):
-    assert pk.load(tmp_path / "absent.json") == []
+    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}}
 
 
 def test_planning_start():
@@ -66,15 +83,19 @@ class FakeGitHub:
 def test_github_picks_roundtrip_and_conflict():
     gh = FakeGitHub()
     store = pk.GitHubPicks("moi/pool", "jeton", session=gh)
-    assert store.load() == []
-    store.save(pk.add([], W1, "VGK"), "Pick VGK")
+    assert store.load() == {"picks": [], "days": {}}
+    store.save({"picks": pk.add([], W1, "VGK"), "days": {}}, "Pick VGK")
     assert gh.puts[0]["message"] == "Pick VGK" and gh.puts[0]["branch"] == "main"
 
     other = pk.GitHubPicks("moi/pool", "jeton", session=gh)
-    assert [p["team"] for p in other.load()] == ["VGK"]
-    other.save(pk.add(other.load(), W2, "CAR"))
+    state = other.load()
+    assert [p["team"] for p in state["picks"]] == ["VGK"]
+    other.save({"picks": pk.add(state["picks"], W2, "CAR"),
+                "days": pk.set_day(state["days"], W2, dt.date(2026, 10, 11))})
 
     # `store` a une version périmée : on refuse d'écraser le pick de `other`
     with pytest.raises(RuntimeError, match="recharge"):
-        store.save(pk.add([], W2, "COL"))
-    assert [p["team"] for p in pk.GitHubPicks("moi/pool", "j", session=gh).load()] == ["VGK", "CAR"]
+        store.save({"picks": pk.add([], W2, "COL"), "days": {}})
+    final = pk.GitHubPicks("moi/pool", "j", session=gh).load()
+    assert [p["team"] for p in final["picks"]] == ["VGK", "CAR"]
+    assert final["days"] == {"2026-10-05": "2026-10-11"}
