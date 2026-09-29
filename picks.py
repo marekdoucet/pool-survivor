@@ -270,7 +270,7 @@ def popularity(state, week, since=None, resultats=None):
     return compte
 
 
-def alone_odds(mon_equipe, ma_proba, picks_rivaux, probas):
+def alone_odds(mon_equipe, ma_proba, picks_rivaux, probas, n_vivants=None):
     """Probabilité de survivre ET de voir tomber TOUS les adversaires en vie.
 
     C'est la seule mesure qui dit ce que rapporte le fait de se démarquer :
@@ -283,9 +283,14 @@ def alone_odds(mon_equipe, ma_proba, picks_rivaux, probas):
       - si quelqu'un prend la même équipe que moi, je ne peux jamais me
         retrouver seule : c'est 0, pas « presque 0 ».
 
-    Retourne None si un pick adverse n'a pas de probabilité connue : mieux
-    vaut une case vide qu'un chiffre faux.
+    Retourne None si le calcul serait faux plutôt qu'approximatif :
+      - un pick adverse sans probabilité connue ;
+      - des adversaires en vie dont le pick n'est pas saisi (`n_vivants`).
+        Les ignorer donnerait un chiffre bien trop optimiste : c'est la
+        probabilité que TOUS tombent, et on en aurait oublié.
     """
+    if n_vivants is not None and len(picks_rivaux) < n_vivants:
+        return None
     equipes = set(picks_rivaux.values())
     if mon_equipe in equipes:
         return 0.0

@@ -559,6 +559,10 @@ def page_pick():
         # tous les adversaires en vie. Suivre le troupeau donne exactement 0.
         rivaux = (pk.pool_picks(state, monday, since, RES)
                   if monday == this_monday else {})
+        vivants = pk.pool_alive(state, since, RES) if monday == this_monday else []
+        # Sans TOUS les picks des adversaires en vie, la colonne serait
+        # trompeuse : elle mesure la chance qu'ils tombent tous.
+        manquants = len(vivants) - len(rivaux)
         p_semaine = {t: o.p for t, o in options.get(monday, {}).items()}
         alts = alternatives_for(v, from_date, used, overrides, horizon,
                                 (choisi.team,) if choisi else ())
@@ -614,7 +618,7 @@ def page_pick():
         for o, e in alts:
             later = best_later(o.team, monday)
             pm = planned.get(o.team)
-            seule = pk.alone_odds(o.team, o.p, rivaux, p_semaine)
+            seule = pk.alone_odds(o.team, o.p, rivaux, p_semaine, len(vivants))
             rows.append({
                 "": ui.logo(o.team),
                 "Équipe": o.team, "Pris par": pris.get(o.team, 0),
@@ -635,6 +639,13 @@ def page_pick():
                       "échange : la chance de survivre pendant que tous les "
                       "adversaires tombent. L'arbitrage se lit entre ces deux "
                       "colonnes."):
+            if manquants > 0:
+                st.warning(
+                    f"« Seule debout » reste vide : {manquants} adversaire(s) "
+                    f"en vie sur {len(vivants)} n'ont pas de pick saisi pour "
+                    f"cette semaine. Cette colonne mesure la chance qu'ils "
+                    f"tombent **tous** — en ignorer un la rendrait beaucoup "
+                    f"trop optimiste. Complète le registre dans « Le pool ».")
             st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
                          column_config={
                              "": st.column_config.ImageColumn("", width="small"),

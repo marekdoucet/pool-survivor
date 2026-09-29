@@ -409,3 +409,13 @@ def test_se_demarquer_paie_quand_le_groupe_est_gros():
 def test_pick_adverse_sans_probabilite_donne_None():
     """Une équipe qui ne joue pas ce jour-là : on ne devine pas."""
     assert pk.alone_odds("BUF", 0.66, {"Alex": "XXX"}, {"BUF": 0.66}) is None
+
+
+def test_des_picks_adverses_manquants_donnent_None():
+    """Le cas reel : 15 inscrits, un seul pick saisi. Ignorer les 14 autres
+    donnerait un chiffre bien trop optimiste — mieux vaut une case vide."""
+    probas = {"COL": 0.70, "MTL": 0.50}
+    un_seul = {"Le coach": "MTL"}
+    assert pk.alone_odds("COL", 0.70, un_seul, probas, n_vivants=15) is None
+    # tous saisis : le calcul redevient possible
+    assert pk.alone_odds("COL", 0.70, un_seul, probas, n_vivants=1) == pytest.approx(0.35)
