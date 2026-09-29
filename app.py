@@ -106,6 +106,16 @@ def pick_days_for(version, overrides):
 
 
 @st.cache_data
+def players(version):
+    """tricode → meneur de l'équipe, depuis data/players.csv (facultatif)."""
+    path = store.DATA_DIR / "players.csv"
+    if not path.exists():
+        return {}
+    df = pd.read_csv(path)
+    return {r["team"]: r for r in df.to_dict("records")}
+
+
+@st.cache_data
 def history(version):
     with connect() as c:
         return pd.read_sql("SELECT snapshot, game_date, away, home, p_away, source FROM probs", c)
@@ -211,6 +221,20 @@ this_monday = op.week_start(today)
 from_date, used_set, provisional = pk.planning(picks, today)
 used = tuple(sorted(used_set))
 
+# ── Navigation ─────────────────────────────────────────────────────────────
+# Menu dans la barre latérale plutôt qu'une rangée d'onglets : sept sections
+# tenaient mal sur une ligne. Différence de fond avec st.tabs : les onglets
+# exécutent TOUTES les sections à chaque rechargement, le menu une seule.
+# C'est sans danger ici parce que les sections ne se partagent aucune variable.
+SECTIONS = ["Pick de la semaine", "Plan complet", "Carte des matchups",
+            "Évolution des probabilités", "Équipes en forme",
+            "Précision des sources", "Depuis hier"]
+
+with st.sidebar:
+    st.caption("SECTIONS")
+    section = st.radio("Sections", SECTIONS, label_visibility="collapsed")
+    st.divider()
+
 with st.sidebar:
     st.header("Mes picks")
     if not picks:
@@ -293,10 +317,6 @@ st.caption(
     + f" · {len(used)} équipe(s) utilisée(s)"
 )
 
-tab_pick, tab_plan, tab_map, tab_evol, tab_form, tab_acc, tab_diff = st.tabs(
-    ["Pick de la semaine", "Plan complet", "Carte des matchups",
-     "Évolution des probabilités", "Équipes en forme", "Précision des sources",
-     "Depuis hier"])
 options = options_for(v, from_date, used, overrides)
 planned = {o.team: m for m, o in plan if o}   # équipe → semaine où le plan l'utilise
 
@@ -310,7 +330,7 @@ team_form = forms(v)
 
 # ── Pick de la semaine ────────────────────────────────────────────────────
 
-with tab_pick:
+if section == SECTIONS[0]:
     current = next((p for p in picks if p["week"] == this_monday.isoformat()), None)
     if current and not provisional:
         st.success(f"Pick de cette semaine verrouillé : **{current['team']}**. "
@@ -344,12 +364,13 @@ with tab_pick:
                 f"contre {ui.name(best.opponent)} · "
                 + ("à domicile" if best.home else "à l'étranger")
                 + f" · {fr_day(best.game_date)}",
-                best.p)
+                best.p,
+                players(v).get(best.team))
         # La couleur suit la source, jamais son rang : on indexe dans SOURCES,
         # pas dans la liste filtrée, sinon une source absente repeint les autres.
-        shown = [s for s in SOURCES if s in by_src]
-        ui.chips([(SOURCES[s], by_src[s]) for s in shown],
-                 [COLORS[list(SOURCES).index(s)] for s in shown])
+        # Toutes les sources, même absentes : une case vide dit « pas encore de
+        # cote », alors qu'une pastille manquante ne dit rien du tout.
+        ui.chips([(SOURCES[s], by_src.get(s)) for s in SOURCES], COLORS)
         pd_week = all_days.get(monday)
         if pd_week:
             txt = " ou ".join(fr_day(d) for d in pd_week.days)
@@ -422,7 +443,7 @@ with tab_pick:
 
 # ── Plan complet ──────────────────────────────────────────────────────────
 
-with tab_plan:
+if section == SECTIONS[1]:
     rows, alive = [], 1.0
     for monday, o in plan:
         alive *= o.p if o else 0.0
@@ -450,10 +471,13 @@ with tab_plan:
 
 # ── Carte des matchups ────────────────────────────────────────────────────
 
-# Rampe séquentielle bleue de la palette de référence (clair → foncé)
-BLUES = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
+# Rampe séquentielle bleue de la palette de référence, du plus sombre au plus
+# clair : sur fond sombre, c'est le pas sombre qui doit se fondre dans la
+# surface pour dire « proche de zéro ». L'ordre inverse de la version fond
+# clair, mêmes valeurs.
+BLUES = ["#0d366b", "#184f95", "#256abf", "#3987e5", "#6da7ec", "#9ec5f4", "#cde2fb"]
 
-with tab_map:
+if section == SECTIONS[2]:
     st.caption("Chaque case : la probabilité de victoire du **meilleur match** de "
                "l'équipe à la journée de pick de la semaine (vide = elle ne joue pas "
                "ce jour-là). Les cases "
@@ -474,7 +498,7 @@ with tab_map:
     x = alt.X("Semaine:O", sort=labels, title="Semaine du",
               axis=alt.Axis(orient="top", labelAngle=0))
     y = alt.Y("Équipe:N", sort=order, title=None)
-    heat = alt.Chart(cells).mark_rect(cornerRadius=3, stroke="white", strokeWidth=2).encode(
+    heat = alt.Chart(cells).mark_rect(cornerRadius=3, stroke="#1a1a19", strokeWidth=2).encode(
         x=x, y=y,
         color=alt.Color("Probabilité:Q", title="Probabilité",
                         scale=alt.Scale(domain=[0.45, 0.85], range=BLUES, clamp=True),
@@ -496,7 +520,7 @@ with tab_map:
 
 # ── Évolution des probabilités ────────────────────────────────────────────
 
-with tab_evol:
+if section == SECTIONS[3]:
     default_team = plan[0][1].team if plan and plan[0][1] else sorted(cm.TEAMS)[0]
     teams_sorted = sorted(cm.TEAMS)
     c1, c2 = st.columns(2)
@@ -550,7 +574,7 @@ with tab_evol:
 
 # ── Équipes en forme ──────────────────────────────────────────────────────
 
-with tab_form:
+if section == SECTIONS[4]:
     played = any(f.results for f in team_form.values())
     hist_r = strength_hist(v)
     snaps_r = sorted(hist_r.snapshot.unique())
@@ -663,7 +687,7 @@ with tab_form:
 
 # ── Précision des sources ─────────────────────────────────────────────────
 
-with tab_acc:
+if section == SECTIONS[5]:
     st.caption("Poids actuels dans le consensus : " + " · ".join(
         f"{SOURCES[s]} {w:.0%}" for s, w in co.WEIGHTS.items())
         + ". Quand une source n'a pas de probabilité pour un match, les poids des "
@@ -695,7 +719,7 @@ with tab_acc:
 
 # ── Depuis hier ───────────────────────────────────────────────────────────
 
-with tab_diff:
+if section == SECTIONS[6]:
     if len(snaps) < 2:
         st.info("Il faut au moins deux collectes pour comparer. Reviens après la "
                 "prochaine collecte quotidienne.")

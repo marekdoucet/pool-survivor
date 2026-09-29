@@ -22,6 +22,7 @@ import collect_moneypuck as cm
 import collect_odds as co
 import collect_dimers as cd
 import collect_puckcast as cp
+import collect_players as cpl
 import schedule as sch
 import store
 
@@ -68,6 +69,15 @@ def main():
         print(f"{len(cp.collect_puckcast(today=today))} matchs prédits")
     except (requests.RequestException, cp.PuckcastError) as e:
         print(f"⚠ {e}")
+        failed = True
+
+    print("\n── Joueurs vedettes")
+    try:
+        rows, ko = cpl.collect_players()
+        print(f"{len(rows)} meneurs" + (f", {len(ko)} sans statistiques : "
+                                        f"{', '.join(ko)}" if ko else ""))
+    except (requests.RequestException, cpl.PlayersError) as e:
+        print(f"⚠ {e} (on garde les joueurs précédents)")
         failed = True
 
     print("\n── Consensus")

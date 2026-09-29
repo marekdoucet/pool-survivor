@@ -108,6 +108,48 @@ CSS = """
   .ps-hero-num { text-align: left; }
   .ps-pct { font-size: 3rem; }
 }
+/* ── Carte de hockey ──────────────────────────────────────────────────────
+   Proportions d'une vraie carte (5:7), cadre clair, logo en filigrane et
+   joueur détouré par-dessus. Fond neutre volontairement : les couleurs de
+   marque des 32 équipes ne sont pas dans la palette validée, et certaines
+   passeraient sous le seuil de contraste. Le logo porte l'identité. */
+.ps-card {
+  flex: none; width: 190px; aspect-ratio: 5 / 7; border-radius: 0.7rem;
+  padding: 5px; background: linear-gradient(160deg, #4a4a45 0%, #2a2a27 55%, #3a3a35 100%);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.ps-card-inner {
+  position: relative; height: 100%; border-radius: 0.45rem; overflow: hidden;
+  background: radial-gradient(circle at 50% 22%, #2f3f57 0%, #1d2430 60%, #15181f 100%);
+}
+.ps-card-logo {
+  position: absolute; top: 6%; left: 50%; transform: translateX(-50%);
+  width: 78%; opacity: 0.22;
+}
+.ps-card-player {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  width: 104%; max-width: none;
+}
+.ps-card-plate {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 5px 8px;
+  background: rgba(10, 10, 9, 0.82); backdrop-filter: blur(2px);
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 0.92rem; font-weight: 600; letter-spacing: 0.02em;
+  color: #ffffff; text-align: center; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.ps-card-plate .ps-pts { color: #c3c2b7; font-weight: 500; }
+
+/* Carte sans joueur connu : le logo reprend toute la place. */
+.ps-card-inner.ps-nolog .ps-card-logo {
+  top: 50%; transform: translate(-50%, -50%); opacity: 1; width: 66%;
+}
+
+/* Source sans cote : la pastille reste, en retrait. Dire « pas encore de
+   cote » vaut mieux qu'une pastille absente, qui ne dit rien. */
+.ps-chip.ps-vide { opacity: 0.55; }
+.ps-chip.ps-vide .ps-chip-val { color: #c3c2b7; font-weight: 500; }
+
 </style>
 """
 
@@ -117,11 +159,27 @@ def inject_css():
     st.markdown(CSS, unsafe_allow_html=True)
 
 
-def hero(tri, kicker, matchup, pct):
-    """Carte du pick : logo, nom de l'équipe, adversaire, probabilité."""
+def hero(tri, kicker, matchup, pct, player=None):
+    """Carte du pick : carte de hockey à gauche, équipe et probabilité à droite.
+
+    `player` : dict (first_name, last_name, points, headshot) ou None. Sans
+    joueur connu, la carte montre simplement le logo en grand.
+    """
+    if player:
+        plate = (f'<div class="ps-card-plate">{html.escape(player["first_name"])} '
+                 f'{html.escape(player["last_name"])} '
+                 f'<span class="ps-pts">{player["points"]} pts</span></div>')
+        photo = (f'<img class="ps-card-player" src="{html.escape(player["headshot"])}" '
+                 f'alt="" loading="lazy">')
+        klass = "ps-card-inner"
+    else:
+        plate, photo, klass = "", "", "ps-card-inner ps-nolog"
     st.markdown(
         f'<div class="ps-hero">'
-        f'<img src="{logo(tri)}" alt="Logo des {html.escape(name(tri))}">'
+        f'<div class="ps-card"><div class="{klass}">'
+        f'<img class="ps-card-logo" src="{logo(tri)}" '
+        f'alt="Logo des {html.escape(name(tri))}">{photo}{plate}'
+        f'</div></div>'
         f'<div class="ps-hero-body">'
         f'<div class="ps-kicker">{html.escape(kicker)}</div>'
         f'<h2 class="ps-team">{html.escape(name(tri))}</h2>'
@@ -135,14 +193,20 @@ def hero(tri, kicker, matchup, pct):
 
 
 def chips(pairs, colors):
-    """Une pastille par (nom de source, probabilité), dans l'ordre reçu."""
+    """Une pastille par (nom de source, probabilité). `None` = pas de cote.
+
+    La couleur est décorative : le nom de la source est toujours écrit, jamais
+    porté par la couleur seule.
+    """
     out = ['<div class="ps-chips">']
     for i, (label, p) in enumerate(pairs):
+        vide = " ps-vide" if p is None else ""
+        val = "pas encore de cote" if p is None else f"{p * 100:.1f} %"
         out.append(
-            f'<div class="ps-chip">'
+            f'<div class="ps-chip{vide}">'
             f'<span class="ps-dot" style="background:{colors[i % len(colors)]}"></span>'
             f'<span class="ps-chip-name">{html.escape(label)}</span>'
-            f'<span class="ps-chip-val">{p * 100:.1f} %</span>'
+            f'<span class="ps-chip-val">{val}</span>'
             f'</div>')
     out.append('</div>')
     st.markdown("".join(out), unsafe_allow_html=True)
