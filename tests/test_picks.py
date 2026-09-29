@@ -44,15 +44,16 @@ def test_load_missing_file(tmp_path):
 
 
 def test_planning():
-    wed, sat, sun = dt.date(2026, 9, 30), dt.date(2026, 10, 3), dt.date(2026, 10, 4)
+    wed, fri, sat = dt.date(2026, 9, 30), dt.date(2026, 10, 2), dt.date(2026, 10, 3)
     picks = pk.add(pk.add([], dt.date(2026, 9, 21), "EDM"), W1, "VGK")
-    assert pk.planning([], wed, sat) == (wed, set(), None)
-    # Avant la fin de la journée de pick : modifiable, VGK redevient disponible
-    start, used, prov = pk.planning(picks, wed, sat)
+    assert pk.pick_deadline(wed) == fri
+    assert pk.planning([], wed) == (wed, set(), None)
+    # Jusqu'au vendredi minuit : modifiable, VGK redevient disponible
+    start, used, prov = pk.planning(picks, wed)
     assert (start, used, prov["team"]) == (wed, {"EDM"}, "VGK")
-    assert pk.planning(picks, sat, sat)[2]["team"] == "VGK"      # le samedi même
-    # Après : verrouillé, on passe à lundi prochain
-    assert pk.planning(picks, sun, sat) == (W2, {"EDM", "VGK"}, None)
+    assert pk.planning(picks, fri)[2]["team"] == "VGK"      # le vendredi même
+    # Dès samedi : verrouillé, on passe à lundi prochain
+    assert pk.planning(picks, sat) == (W2, {"EDM", "VGK"}, None)
 
 
 class FakeResponse:

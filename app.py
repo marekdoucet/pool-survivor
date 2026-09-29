@@ -204,10 +204,7 @@ picks, day_overrides = state["picks"], state["days"]
 overrides = tuple(sorted(day_overrides.items()))   # clé de cache
 all_days = pick_days_for(VERSION, overrides) if VERSION else {}
 this_monday = op.week_start(today)
-this_days = all_days.get(this_monday)
-last_pick_day = (dt.date.fromisoformat(max(this_days.days))
-                 if this_days and this_days.days else None)
-from_date, used_set, provisional = pk.planning(picks, today, last_pick_day)
+from_date, used_set, provisional = pk.planning(picks, today)
 used = tuple(sorted(used_set))
 
 with st.sidebar:
@@ -319,7 +316,7 @@ with tab_pick:
         mine = options[this_monday].get(provisional["team"])
         st.success(f"Ton pick de la semaine : **{provisional['team']}**"
                    + (f" ({match_label(mine)}, {mine.p:.1%})" if mine else "")
-                   + f". Tu peux le changer jusqu'à la fin de {fr_day(last_pick_day.isoformat())}")
+                   + f". Tu peux le changer jusqu'à {fr_day(pk.pick_deadline(today).isoformat())} minuit")
         with st.form("changer"):
             change_labels = [f"{o.team} {match_label(o)} — {o.p:.1%}" for o in week_opts]
             teams_ = [o.team for o in week_opts]
