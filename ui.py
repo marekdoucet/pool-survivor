@@ -258,10 +258,24 @@ CSS = """
 }
 /* Deux classes, et « height » forcée : Streamlit impose height:auto à toutes
    les images de ses blocs markdown, ce qui laissait la photo occuper le haut
-   de la carte et une bande noire en dessous. */
+   de la carte et une bande noire en dessous.
+   La photo d'action sert de DÉCOR : floutée et assombrie. Le joueur, lui, est
+   le portrait détouré posé par-dessus. Cadrer la photo d'action sur le joueur
+   était impossible — elles ne sont pas centrées sur lui (sur celle de
+   McDavid, c'est le gardien adverse qui occupe le centre). */
 .ps-card-inner .ps-card-shot {
   position: absolute; inset: 0; width: 100%; height: 100% !important;
-  object-fit: cover; object-position: 50% 12%;
+  object-fit: cover; object-position: 50% 30%;
+  filter: blur(3px) brightness(0.55) saturate(0.9);
+  transform: scale(1.06);          /* masque le bord flou */
+}
+/* max-width: none — Streamlit borne toutes ses images à 100 %, ce qui rendait
+   tout élargissement du portrait sans effet. */
+.ps-card-inner .ps-card-face {
+  position: absolute; bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  width: 124%; max-width: none !important; height: auto !important;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
 }
 .ps-card-inner .ps-card-logo {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -440,8 +454,11 @@ def _carte(tri, player):
     return (
         f'<div class="ps-card"><div class="ps-card-inner">'
         f'<img class="ps-card-shot" src="{html.escape(player["action"])}" '
-        f'alt="{html.escape(joueur)}" loading="lazy">'
-        f'<div class="ps-card-plate">'
+        f'alt="" loading="lazy">'
+        + (f'<img class="ps-card-face" src="{html.escape(player["headshot"])}" '
+           f'alt="{html.escape(joueur)}" loading="lazy">'
+           if player.get("headshot") else "")
+        + f'<div class="ps-card-plate">'
         f'<div class="ps-plate-name">{html.escape(joueur)}</div>'
         f'<div class="ps-plate-row">'
         f'<span {chip}>{html.escape(poste)}</span>'

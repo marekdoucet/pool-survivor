@@ -59,3 +59,31 @@ def test_les_noms_francais_couvrent_les_32_equipes():
     assert len(ui.TEAMS) == 32
     assert ui.name("MTL") == "Canadiens de Montréal"
     assert ui.name("XXX") == "XXX"          # tricode inconnu : on le laisse tel quel
+
+
+def test_carte_superpose_le_portrait_sur_la_photo_daction():
+    """Le portrait détouré garantit qu'on voit LE joueur.
+
+    Les photos d'action de la LNH ne sont pas cadrées sur lui : sur celle de
+    McDavid, c'est le gardien adverse qui occupe le centre, et un recadrage
+    en portrait le montrait à sa place.
+    """
+    joueur = {"first_name": "Connor", "last_name": "McDavid", "position": "C",
+              "points": 138, "color": "#cf4520",
+              "action": "https://exemple/action.jpg",
+              "headshot": "https://exemple/portrait.png"}
+    html = ui._carte("EDM", joueur)
+    assert "ps-card-face" in html and "https://exemple/portrait.png" in html
+    assert "ps-card-shot" in html and "https://exemple/action.jpg" in html
+    # le portrait porte le nom pour les lecteurs d'écran, le décor non
+    assert 'alt="Connor McDavid"' in html
+    assert html.index("ps-card-shot") < html.index("ps-card-face")   # décor dessous
+
+
+def test_carte_sans_portrait_garde_la_photo_daction():
+    """Tous les joueurs en ont un aujourd'hui, mais rien ne le garantit."""
+    html = ui._carte("EDM", {"first_name": "A", "last_name": "B", "position": "C",
+                             "points": 1, "color": "#cf4520",
+                             "action": "https://exemple/action.jpg"})
+    assert "ps-card-face" not in html
+    assert "ps-card-shot" in html
