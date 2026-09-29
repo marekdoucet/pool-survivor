@@ -555,6 +555,11 @@ def page_pick():
         # Popularité chez les adversaires : une équipe que tout le monde prend
         # ne démarque pas. Renseignée dans la section « Le pool ».
         pris = pk.popularity(state, monday, since, RES) if monday == this_monday else {}
+        # Ce que rapporte le fait de se démarquer : survivre ET voir tomber
+        # tous les adversaires en vie. Suivre le troupeau donne exactement 0.
+        rivaux = (pk.pool_picks(state, monday, since, RES)
+                  if monday == this_monday else {})
+        p_semaine = {t: o.p for t, o in options.get(monday, {}).items()}
         alts = alternatives_for(v, from_date, used, overrides, horizon,
                                 (choisi.team,) if choisi else ())
         top_e = alts[0][1]
@@ -609,9 +614,11 @@ def page_pick():
         for o, e in alts:
             later = best_later(o.team, monday)
             pm = planned.get(o.team)
+            seule = pk.alone_odds(o.team, o.p, rivaux, p_semaine)
             rows.append({
                 "": ui.logo(o.team),
                 "Équipe": o.team, "Pris par": pris.get(o.team, 0),
+                "Seule debout": None if seule is None else 100 * seule,
                 "Match cette semaine": match_label(o),
                 "Probabilité": 100 * o.p,
                 "Meilleur match plus tard": (
@@ -623,9 +630,11 @@ def page_pick():
                 "Série": team_form[o.team].streak_label,
             })
         with ui.panel("choix", "Tous les choix possibles cette semaine",
-                      "« Espérance » = semaines survécues attendues si je prends cette "
-                      "équipe maintenant (et le meilleur plan ensuite). « Coût » = "
-                      "espérance perdue par rapport au meilleur choix."):
+                      "« Coût » = espérance perdue par rapport au meilleur "
+                      "choix. « Seule debout » = ce que ce choix rapporte en "
+                      "échange : la chance de survivre pendant que tous les "
+                      "adversaires tombent. L'arbitrage se lit entre ces deux "
+                      "colonnes."):
             st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
                          column_config={
                              "": st.column_config.ImageColumn("", width="small"),
@@ -633,6 +642,13 @@ def page_pick():
                                  "Pris par", format="%d",
                                  help="Adversaires en vie qui prennent cette "
                                       "équipe cette semaine"),
+                             "Seule debout": st.column_config.NumberColumn(
+                                 format="%.1f %%",
+                                 help="Chance de survivre ET de voir tomber "
+                                      "tous les adversaires en vie. Une équipe "
+                                      "qu'un adversaire prend aussi donne 0 : "
+                                      "on ne peut pas se démarquer en la "
+                                      "prenant."),
                              "Probabilité": PCT,
                              "Espérance": st.column_config.NumberColumn(format="%.2f"),
                              "Coût": st.column_config.NumberColumn(format="%.2f"),

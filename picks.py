@@ -270,6 +270,34 @@ def popularity(state, week, since=None, resultats=None):
     return compte
 
 
+def alone_odds(mon_equipe, ma_proba, picks_rivaux, probas):
+    """Probabilité de survivre ET de voir tomber TOUS les adversaires en vie.
+
+    C'est la seule mesure qui dit ce que rapporte le fait de se démarquer :
+    survivre en même temps que tout le monde ne fait pas avancer le pool.
+
+    Deux pièges, tous deux gérés ici :
+      - les gens sur la MÊME équipe tombent ensemble. On regroupe donc par
+        équipe avant de multiplier, sinon le même événement compte plusieurs
+        fois et le résultat s'effondre à tort vers zéro.
+      - si quelqu'un prend la même équipe que moi, je ne peux jamais me
+        retrouver seule : c'est 0, pas « presque 0 ».
+
+    Retourne None si un pick adverse n'a pas de probabilité connue : mieux
+    vaut une case vide qu'un chiffre faux.
+    """
+    equipes = set(picks_rivaux.values())
+    if mon_equipe in equipes:
+        return 0.0
+    tous_morts = 1.0
+    for eq in equipes:
+        p = probas.get(eq)
+        if p is None:
+            return None
+        tous_morts *= (1 - p)
+    return ma_proba * tous_morts
+
+
 def pool_used(state, nom, since=None):
     """Équipes déjà utilisées par `nom` dans le tour en cours."""
     j = pool(state).get(nom, {})

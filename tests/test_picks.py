@@ -365,3 +365,47 @@ def test_les_vivants_tiennent_compte_des_resultats():
     assert pk.pool_alive(etat, resultats=res) == ["Alex"]
     assert pk.survivors(etat, resultats=res) == 2          # Alex + moi
     assert pk.popularity(etat, W1, resultats=res) == {"COL": 1}
+
+
+# ── Se démarquer : chance de rester seule debout ──────────────────────────
+
+def test_sans_adversaire_il_suffit_de_survivre():
+    assert pk.alone_odds("COL", 0.70, {}, {"COL": 0.70}) == pytest.approx(0.70)
+
+
+def test_un_adversaire_sur_mon_equipe_annule_tout():
+    """Il survit exactement quand je survis : je ne serai jamais seule."""
+    probas = {"COL": 0.70, "TOR": 0.45}
+    assert pk.alone_odds("COL", 0.70, {"Alex": "COL"}, probas) == 0.0
+    assert pk.alone_odds("COL", 0.70, {"Alex": "COL", "Bob": "TOR"}, probas) == 0.0
+
+
+def test_des_adversaires_groupes_ne_comptent_QU_UNE_fois():
+    """Le piège principal : huit personnes sur Colorado tombent ensemble.
+    Les traiter comme indépendantes donnerait 0.29^8, soit presque zéro."""
+    probas = {"COL": 0.70, "BUF": 0.66}
+    trois = {f"j{i}": "COL" for i in range(3)}
+    huit = {f"j{i}": "COL" for i in range(8)}
+    attendu = 0.66 * (1 - 0.70)
+    assert pk.alone_odds("BUF", 0.66, trois, probas) == pytest.approx(attendu)
+    assert pk.alone_odds("BUF", 0.66, huit, probas) == pytest.approx(attendu)
+
+
+def test_des_adversaires_eparpilles_se_multiplient():
+    probas = {"BUF": 0.66, "EDM": 0.68, "TOR": 0.46}
+    riv = {"Alex": "EDM", "Bob": "TOR"}
+    attendu = 0.66 * (1 - 0.68) * (1 - 0.46)
+    assert pk.alone_odds("BUF", 0.66, riv, probas) == pytest.approx(attendu)
+
+
+def test_se_demarquer_paie_quand_le_groupe_est_gros():
+    """La conclusion utile : suivre le troupeau donne exactement zéro."""
+    probas = {"COL": 0.709, "BUF": 0.667}
+    groupe = {f"j{i}": "COL" for i in range(5)}
+    assert pk.alone_odds("COL", 0.709, groupe, probas) == 0.0
+    assert pk.alone_odds("BUF", 0.667, groupe, probas) == pytest.approx(0.194, abs=1e-3)
+
+
+def test_pick_adverse_sans_probabilite_donne_None():
+    """Une équipe qui ne joue pas ce jour-là : on ne devine pas."""
+    assert pk.alone_odds("BUF", 0.66, {"Alex": "XXX"}, {"BUF": 0.66}) is None
