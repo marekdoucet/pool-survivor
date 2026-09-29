@@ -35,19 +35,23 @@ HORIZON = 8     # semaines planifiées par défaut
 
 
 def empty_state():
-    return {"picks": [], "days": {}, "resets": [], "out": None}
+    return {"picks": [], "days": {}, "resets": [], "out": None, "pool": {}}
 
 
 def _normalize(state):
     return {"picks": state.get("picks", []), "days": state.get("days", {}),
-            "resets": state.get("resets", []), "out": state.get("out")}
+            "resets": state.get("resets", []), "out": state.get("out"),
+            "pool": state.get("pool", {})}
 
 
 def _dumps(state):
     state = _normalize(state)
     state = {"picks": sorted(state["picks"], key=lambda p: p["week"]),
              "days": dict(sorted(state["days"].items())),
-             "resets": sorted(set(state["resets"])), "out": state["out"]}
+             "resets": sorted(set(state["resets"])), "out": state["out"],
+             "pool": {n: {"picks": dict(sorted(j.get("picks", {}).items())),
+                          "out": j.get("out")}
+                      for n, j in sorted(state["pool"].items())}}
     return json.dumps(state, indent=2, ensure_ascii=False) + "\n"
 
 
@@ -124,6 +128,95 @@ def last_reset(resets, today=None):
 def this_round(picks, since):
     """Les picks du tour en cours. `since=None` : tous."""
     return [p for p in picks if since is None or p["week"] >= since.isoformat()]
+
+
+# ── Les autres joueurs du pool ────────────────────────────────────────────
+# {nom: {"picks": {lundi: équipe}, "out": date d'élimination ou None}}
+# Mes picks à moi restent au premier niveau ("picks") : ce sont eux qui
+# pilotent le plan, et les mêler aux autres compliquerait tout pour rien.
+
+def pool(state):
+    return _normalize(state)["pool"]
+
+
+def set_pool(state, joueurs):
+    """Remplace le registre complet (ce que renvoie un éditeur de tableau)."""
+    propre = {}
+    for nom, j in joueurs.items():
+        nom = str(nom).strip()
+        if nom:
+            propre[nom] = {"picks": {k: v for k, v in j.get("picks", {}).items() if v},
+                           "out": j.get("out")}
+    return {**_normalize(state), "pool": propre}
+
+
+def merge_pool_week(joueurs, lignes, semaine):
+    """Fusionne les lignes d'un éditeur de tableau dans le registre.
+
+    L'éditeur ne montre qu'une semaine : les picks des semaines passées
+    doivent survivre. Une ligne sans nom est ignorée (l'éditeur en crée de
+    vides). Décocher « En vie » garde la date d'élimination si elle existait,
+    pour ne pas la réécrire à chaque enregistrement.
+    """
+    nouveau = {}
+    for ligne in lignes:
+        nom = str(ligne.get("Joueur") or "").strip()
+        if not nom:
+            continue
+        picks = dict(joueurs.get(nom, {}).get("picks", {}))
+        team = ligne.get("Pick") or ""
+        if team:
+            picks[semaine] = team
+        else:
+            picks.pop(semaine, None)
+        vivant = bool(ligne.get("En vie", True))
+        ancien = joueurs.get(nom, {}).get("out")
+        nouveau[nom] = {"picks": picks,
+                        "out": None if vivant else (ancien or semaine)}
+    return nouveau
+
+
+def pool_alive(state, since=None):
+    """Noms encore en vie. Une élimination d'un tour précédent ne compte plus."""
+    vivants = []
+    for nom, j in pool(state).items():
+        o = j.get("out")
+        if not o or (since and o < since.isoformat()):
+            vivants.append(nom)
+    return sorted(vivants)
+
+
+def survivors(state, since=None, today=None):
+    """Combien de personnes restent, moi comprise."""
+    moi = 0 if eliminated(state, today) else 1
+    return moi + len(pool_alive(state, since))
+
+
+def pool_picks(state, week, since=None):
+    """{nom: équipe} pour la semaine `week`, chez les joueurs encore en vie."""
+    w = week.isoformat()
+    vivants = set(pool_alive(state, since))
+    return {n: j["picks"][w] for n, j in pool(state).items()
+            if n in vivants and j.get("picks", {}).get(w)}
+
+
+def popularity(state, week, since=None):
+    """{équipe: combien d'adversaires la prennent} pour cette semaine.
+
+    C'est la mesure qui compte dans un survivor : une équipe que tout le monde
+    prend ne te démarque pas, même si elle est la plus probable.
+    """
+    compte = {}
+    for team in pool_picks(state, week, since).values():
+        compte[team] = compte.get(team, 0) + 1
+    return compte
+
+
+def pool_used(state, nom, since=None):
+    """Équipes déjà utilisées par `nom` dans le tour en cours."""
+    j = pool(state).get(nom, {})
+    return {t for w, t in j.get("picks", {}).items()
+            if t and (since is None or w >= since.isoformat())}
 
 
 def round_week(since, today):

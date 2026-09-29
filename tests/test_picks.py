@@ -40,7 +40,7 @@ def test_set_day():
 
 
 def test_load_missing_file(tmp_path):
-    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}, "resets": [], "out": None}
+    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}, "resets": [], "out": None, "pool": {}}
 
 
 def test_planning():
@@ -91,7 +91,7 @@ def test_github_picks_roundtrip_and_conflict():
     gh = FakeGitHub()
     me = {"name": "moi", "email": "1+moi@users.noreply.github.com"}
     store = pk.GitHubPicks("moi/pool", "jeton", session=gh, author=me)
-    assert store.load() == {"picks": [], "days": {}, "resets": [], "out": None}
+    assert store.load() == {"picks": [], "days": {}, "resets": [], "out": None, "pool": {}}
     store.save({"picks": pk.add([], W1, "VGK"), "days": {}}, "Pick VGK")
     assert gh.puts[0]["message"] == "Pick VGK" and gh.puts[0]["branch"] == "main"
     assert gh.puts[0]["author"] == gh.puts[0]["committer"] == me   # pas le vrai courriel
@@ -195,3 +195,107 @@ def test_elimination_dun_tour_precedent_est_ignoree():
     etat = {"picks": [], "days": {}, "resets": [R.isoformat()],
             "out": "2026-11-09"}
     assert pk.eliminated(etat, today=dt.date(2027, 2, 1)) is None
+
+
+# ── Le registre du pool ───────────────────────────────────────────────────
+
+def pool_etat(**joueurs):
+    return pk.set_pool(pk.empty_state(), joueurs)
+
+
+def test_registre_garde_les_joueurs_et_leurs_picks():
+    etat = pool_etat(
+        Alex={"picks": {"2026-09-28": "COL"}, "out": None},
+        Marie={"picks": {"2026-09-28": "TOR"}, "out": None})
+    assert sorted(pk.pool(etat)) == ["Alex", "Marie"]
+    assert pk.pool_picks(etat, W1) == {"Alex": "COL", "Marie": "TOR"}
+
+
+def test_noms_vides_ignores_et_picks_vides_nettoyes():
+    """Un éditeur de tableau renvoie des lignes vides : elles ne doivent pas
+    créer de joueur fantôme."""
+    etat = pk.set_pool(pk.empty_state(), {
+        "  ": {"picks": {}, "out": None},
+        "Alex": {"picks": {"2026-09-28": "COL", "2026-10-05": ""}, "out": None}})
+    assert list(pk.pool(etat)) == ["Alex"]
+    assert pk.pool(etat)["Alex"]["picks"] == {"2026-09-28": "COL"}
+
+
+def test_un_elimine_ne_compte_plus_ni_dans_les_vivants_ni_dans_la_popularite():
+    etat = pool_etat(
+        Alex={"picks": {"2026-09-28": "COL"}, "out": None},
+        Bob={"picks": {"2026-09-28": "COL"}, "out": "2026-09-21"},
+        Marie={"picks": {"2026-09-28": "TOR"}, "out": None})
+    assert pk.pool_alive(etat) == ["Alex", "Marie"]
+    assert pk.popularity(etat, W1) == {"COL": 1, "TOR": 1}   # Bob exclu
+
+
+def test_survivants_incluent_moi():
+    etat = pool_etat(Alex={"picks": {}, "out": None},
+                     Bob={"picks": {}, "out": None})
+    assert pk.survivors(etat) == 3                       # eux deux + moi
+    assert pk.survivors(pk.mark_out(etat, W1)) == 2      # moi éliminée
+
+
+def test_une_elimination_dun_tour_precedent_ne_compte_plus():
+    """Après un redépart, tout le monde repart en vie."""
+    etat = pool_etat(Bob={"picks": {}, "out": "2026-11-09"})
+    assert pk.pool_alive(etat) == []
+    assert pk.pool_alive(etat, since=R) == ["Bob"]        # R est postérieur
+
+
+def test_equipes_deja_prises_par_un_joueur():
+    etat = pool_etat(Alex={"picks": {"2026-09-28": "COL", "2027-01-18": "TOR"},
+                           "out": None})
+    assert pk.pool_used(etat, "Alex") == {"COL", "TOR"}
+    assert pk.pool_used(etat, "Alex", since=R) == {"TOR"}   # tour en cours
+    assert pk.pool_used(etat, "Inconnu") == set()
+
+
+# ── Fusion des lignes de l'éditeur ────────────────────────────────────────
+# L'éditeur ne montre qu'une semaine : le risque est d'effacer les autres.
+
+SEM = "2026-10-05"
+
+
+def test_fusion_preserve_les_semaines_passees():
+    joueurs = {"Alex": {"picks": {"2026-09-28": "COL"}, "out": None}}
+    lignes = [{"Joueur": "Alex", "Pick": "TOR", "En vie": True}]
+    fusion = pk.merge_pool_week(joueurs, lignes, SEM)
+    assert fusion["Alex"]["picks"] == {"2026-09-28": "COL", SEM: "TOR"}
+
+
+def test_fusion_efface_le_pick_de_la_semaine_si_on_le_vide():
+    joueurs = {"Alex": {"picks": {"2026-09-28": "COL", SEM: "TOR"}, "out": None}}
+    lignes = [{"Joueur": "Alex", "Pick": "", "En vie": True}]
+    fusion = pk.merge_pool_week(joueurs, lignes, SEM)
+    assert fusion["Alex"]["picks"] == {"2026-09-28": "COL"}
+
+
+def test_fusion_ignore_les_lignes_sans_nom():
+    lignes = [{"Joueur": "", "Pick": "COL", "En vie": True},
+              {"Joueur": None, "Pick": "TOR", "En vie": True},
+              {"Joueur": "  Bob  ", "Pick": "MTL", "En vie": True}]
+    fusion = pk.merge_pool_week({}, lignes, SEM)
+    assert list(fusion) == ["Bob"]
+    assert fusion["Bob"]["picks"] == {SEM: "MTL"}
+
+
+def test_fusion_garde_la_date_delimination_dorigine():
+    """Sinon la date serait réécrite à chaque enregistrement du registre."""
+    joueurs = {"Bob": {"picks": {}, "out": "2026-09-28"}}
+    lignes = [{"Joueur": "Bob", "Pick": "", "En vie": False}]
+    assert pk.merge_pool_week(joueurs, lignes, SEM)["Bob"]["out"] == "2026-09-28"
+    # nouvellement éliminé : la semaine courante fait foi
+    assert pk.merge_pool_week({}, lignes, SEM)["Bob"]["out"] == SEM
+    # remis en vie
+    revie = [{"Joueur": "Bob", "Pick": "", "En vie": True}]
+    assert pk.merge_pool_week(joueurs, revie, SEM)["Bob"]["out"] is None
+
+
+def test_fusion_retire_un_joueur_absent_des_lignes():
+    """Supprimer une ligne dans l'éditeur retire bien la personne."""
+    joueurs = {"Alex": {"picks": {}, "out": None}, "Bob": {"picks": {}, "out": None}}
+    fusion = pk.merge_pool_week(joueurs, [{"Joueur": "Alex", "Pick": "",
+                                           "En vie": True}], SEM)
+    assert list(fusion) == ["Alex"]

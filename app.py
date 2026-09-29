@@ -485,6 +485,9 @@ def page_pick():
                         + (" — choisie par toi" if pd_week.how == "choisi" else ""))
         # `include` force l'évaluation de l'équipe choisie même si elle n'est
         # pas dans les meilleures : sans ça, son espérance serait introuvable.
+        # Popularité chez les adversaires : une équipe que tout le monde prend
+        # ne démarque pas. Renseignée dans la section « Le pool ».
+        pris = pk.popularity(state, monday, since) if monday == this_monday else {}
         alts = alternatives_for(v, from_date, used, overrides, horizon,
                                 (choisi.team,) if choisi else ())
         top_e = alts[0][1]
@@ -504,7 +507,9 @@ def page_pick():
              f"contre {vedette.opponent} · {fr_day(vedette.game_date)}"),
             ("Série en cours", team_form[vedette.team].streak_label or "aucune",
              f"de {vedette.team}"),
-        ])
+        ] + ([("Adversaires sur ce pick", str(pris.get(vedette.team, 0)),
+               f"sur {len(pk.pool_alive(state, since))} en vie")]
+             if pk.pool(state) else []))
         reasons = []
         for o, _e in alts:
             if o.team == best.team:
@@ -539,7 +544,8 @@ def page_pick():
             pm = planned.get(o.team)
             rows.append({
                 "": ui.logo(o.team),
-                "Équipe": o.team, "Match cette semaine": match_label(o),
+                "Équipe": o.team, "Pris par": pris.get(o.team, 0),
+                "Match cette semaine": match_label(o),
                 "Probabilité": 100 * o.p,
                 "Meilleur match plus tard": (
                     f"{later[1].p:.1%} {'vs' if later[1].home else '@'} "
@@ -556,6 +562,10 @@ def page_pick():
             st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch",
                          column_config={
                              "": st.column_config.ImageColumn("", width="small"),
+                             "Pris par": st.column_config.NumberColumn(
+                                 "Pris par", format="%d",
+                                 help="Adversaires en vie qui prennent cette "
+                                      "équipe cette semaine"),
                              "Probabilité": PCT,
                              "Espérance": st.column_config.NumberColumn(format="%.2f"),
                              "Coût": st.column_config.NumberColumn(format="%.2f"),
@@ -965,6 +975,76 @@ def page_depuis_hier():
             })
 
 
+# ── Le pool ───────────────────────────────────────────────────────────────
+
+def page_pool():
+    semaine = this_monday.isoformat()
+    joueurs = pk.pool(state)
+    proba = {t: o.p for t, o in options.get(this_monday, {}).items()}
+    pris = pk.popularity(state, this_monday, since)
+    mon_pick = (provisional or {}).get("team") or (current or {}).get("team")
+
+    ui.tiles([
+        ("Survivants", str(pk.survivors(state, since, today)),
+         "moi comprise" if not out else "je suis éliminée"),
+        ("Adversaires en vie", str(len(pk.pool_alive(state, since))),
+         f"sur {len(joueurs)} inscrits"),
+        ("Équipes prises", str(len(pris)),
+         "par les adversaires cette semaine"),
+        ("Mon pick", mon_pick or "—",
+         f"pris par {pris.get(mon_pick, 0)} autre(s)" if mon_pick else "à choisir"),
+    ])
+
+    with ui.panel("registre", "Qui joue quoi cette semaine",
+                  "Ajoute une ligne par personne. Décoche « En vie » quand "
+                  "quelqu'un tombe : les éliminés cessent de compter dans la "
+                  "popularité et dans le nombre de survivants."):
+        lignes = [{
+            "Joueur": nom,
+            "Pick": j["picks"].get(semaine, ""),
+            "En vie": not j.get("out"),
+            "Probabilité": 100 * proba[j["picks"][semaine]]
+                           if j["picks"].get(semaine) in proba else None,
+            "Équipes déjà prises": ", ".join(sorted(pk.pool_used(state, nom, since))),
+        } for nom, j in sorted(joueurs.items())]
+        edite = st.data_editor(
+            pd.DataFrame(lignes, columns=["Joueur", "Pick", "En vie",
+                                          "Probabilité", "Équipes déjà prises"]),
+            num_rows="dynamic", hide_index=True, width="stretch",
+            column_config={
+                "Pick": st.column_config.SelectboxColumn(
+                    f"Pick du {fr_weekend(this_monday)}",
+                    options=sorted(cm.TEAMS), required=False),
+                "Probabilité": st.column_config.NumberColumn(
+                    format="%.1f %%", disabled=True,
+                    help="Calculée, pas modifiable"),
+                "Équipes déjà prises": st.column_config.TextColumn(disabled=True),
+            })
+        if st.button("Enregistrer le registre", type="primary", width="stretch"):
+            nouveau = pk.merge_pool_week(joueurs, edite.to_dict("records"),
+                                         semaine)
+            save_state(pk.set_pool(state, nouveau),
+                       f"Registre du pool ({len(nouveau)} joueur(s))")
+
+    if pris:
+        with ui.panel("popularite", "Popularité des équipes cette semaine",
+                      "Une équipe que beaucoup prennent ne te démarque pas : si "
+                      "elle gagne, vous restez tous en vie. Si elle perd, vous "
+                      "tombez tous. C'est en prenant autre chose qu'on finit "
+                      "seul debout."):
+            rangs = sorted(pris.items(), key=lambda kv: (-kv[1], kv[0]))
+            st.dataframe(pd.DataFrame([{
+                "": ui.logo(t), "Équipe": t, "Adversaires": n,
+                "Probabilité": 100 * proba[t] if t in proba else None,
+                "Aussi mon pick": "oui" if t == mon_pick else "",
+            } for t, n in rangs]), hide_index=True, width="stretch",
+                column_config={"": st.column_config.ImageColumn("", width="small"),
+                               "Probabilité": PCT})
+    elif joueurs:
+        st.caption("Aucun pick saisi pour cette semaine.")
+
+
+
 # ── Navigation ─────────────────────────────────────────────────────────────
 # st.navigation plutôt qu'une rangée d'onglets ou un bouton radio : ça donne
 # une vraie navigation de site — des liens groupés dans la barre latérale,
@@ -979,6 +1059,8 @@ st.navigation({
                 icon=":material/sports_hockey:", url_path="pick", default=True),
         st.Page(page_plan, title="Plan complet",
                 icon=":material/calendar_month:", url_path="plan"),
+        st.Page(page_pool, title="Le pool",
+                icon=":material/groups:", url_path="pool"),
     ],
     "Analyse": [
         st.Page(page_carte, title="Carte des matchups",
