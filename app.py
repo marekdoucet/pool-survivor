@@ -202,9 +202,13 @@ remote = picks_backend()
 state = remote.load() if remote else pk.load(PICKS_PATH)
 picks, day_overrides = state["picks"], state["days"]
 overrides = tuple(sorted(day_overrides.items()))   # clé de cache
-used = tuple(sorted(p["team"] for p in picks))
-from_date = pk.planning_start(picks, today)
 all_days = pick_days_for(VERSION, overrides) if VERSION else {}
+this_monday = op.week_start(today)
+this_days = all_days.get(this_monday)
+last_pick_day = (dt.date.fromisoformat(max(this_days.days))
+                 if this_days and this_days.days else None)
+from_date, used_set, provisional = pk.planning(picks, today, last_pick_day)
+used = tuple(sorted(used_set))
 
 with st.sidebar:
     st.header("Mes picks")
@@ -306,10 +310,26 @@ team_form = forms(v)
 # ── Pick de la semaine ────────────────────────────────────────────────────
 
 with tab_pick:
-    current = next((p for p in picks if p["week"] == op.week_start(today).isoformat()), None)
-    if current:
-        st.success(f"Pick de cette semaine déjà enregistré : **{current['team']}**. "
+    current = next((p for p in picks if p["week"] == this_monday.isoformat()), None)
+    if current and not provisional:
+        st.success(f"Pick de cette semaine verrouillé : **{current['team']}**. "
                    f"Le plan commence la semaine du {from_date}.")
+    if provisional and this_monday in options:
+        week_opts = sorted(options[this_monday].values(), key=lambda o: -o.p)
+        mine = options[this_monday].get(provisional["team"])
+        st.success(f"Ton pick de la semaine : **{provisional['team']}**"
+                   + (f" ({match_label(mine)}, {mine.p:.1%})" if mine else "")
+                   + f". Tu peux le changer jusqu'à la fin de {fr_day(last_pick_day.isoformat())}")
+        with st.form("changer"):
+            change_labels = [f"{o.team} {match_label(o)} — {o.p:.1%}" for o in week_opts]
+            teams_ = [o.team for o in week_opts]
+            idx = teams_.index(provisional["team"]) if provisional["team"] in teams_ else 0
+            new = st.selectbox("Changer mon pick pour", range(len(week_opts)),
+                               index=idx, format_func=lambda i, lb=change_labels: lb[i])
+            if st.form_submit_button("Remplacer mon pick"):
+                o = week_opts[new]
+                save_picks(pk.add(picks, this_monday, o.team, o.game_date),
+                           f"Pick modifié : {o.team} (semaine du {this_monday})")
 
     if not plan or plan[0][1] is None:
         st.warning("Aucun match disponible pour la prochaine semaine.")

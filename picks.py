@@ -120,9 +120,19 @@ def set_day(days, week, day):
     return days
 
 
-def planning_start(picks, today):
-    """Si la semaine en cours a déjà un pick, on planifie à partir de lundi prochain."""
+def planning(picks, today, last_pick_day=None):
+    """Point de départ du plan : (date de départ, équipes utilisées, pick provisoire).
+
+    Le pick de la semaine en cours reste modifiable jusqu'à la fin de sa journée
+    de pick (`last_pick_day`) : on planifie alors encore cette semaine, avec
+    cette équipe de nouveau disponible. Ensuite il est verrouillé et le plan
+    commence lundi prochain.
+    """
     monday = op.week_start(today)
-    if any(p["week"] == monday.isoformat() for p in picks):
-        return monday + dt.timedelta(days=7)
-    return today
+    current = next((p for p in picks if p["week"] == monday.isoformat()), None)
+    used = {p["team"] for p in picks}
+    if current is None:
+        return today, used, None
+    if last_pick_day is not None and today <= last_pick_day:
+        return today, used - {current["team"]}, current
+    return monday + dt.timedelta(days=7), used, None

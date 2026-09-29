@@ -43,10 +43,16 @@ def test_load_missing_file(tmp_path):
     assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}}
 
 
-def test_planning_start():
-    wed = dt.date(2026, 9, 30)
-    assert pk.planning_start([], wed) == wed
-    assert pk.planning_start(pk.add([], W1, "VGK"), wed) == W2
+def test_planning():
+    wed, sat, sun = dt.date(2026, 9, 30), dt.date(2026, 10, 3), dt.date(2026, 10, 4)
+    picks = pk.add(pk.add([], dt.date(2026, 9, 21), "EDM"), W1, "VGK")
+    assert pk.planning([], wed, sat) == (wed, set(), None)
+    # Avant la fin de la journée de pick : modifiable, VGK redevient disponible
+    start, used, prov = pk.planning(picks, wed, sat)
+    assert (start, used, prov["team"]) == (wed, {"EDM"}, "VGK")
+    assert pk.planning(picks, sat, sat)[2]["team"] == "VGK"      # le samedi même
+    # Après : verrouillé, on passe à lundi prochain
+    assert pk.planning(picks, sun, sat) == (W2, {"EDM", "VGK"}, None)
 
 
 class FakeResponse:
