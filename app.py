@@ -1088,58 +1088,83 @@ def page_pool():
     # ne valent donc pas la même chose : celle qui a dépensé ses gros clubs a
     # moins de marge pour la suite. On remesure, pour chacune, le meilleur
     # plan encore atteignable avec ce qu'il lui reste.
-    plafond = plan_for(v, from_date, (), overrides, horizon)[1]
+    # Le pick de la semaine est DÉJÀ JOUÉ pour chacun : son plan futur commence
+    # donc la semaine suivante, pas celle-ci. Planifier à partir de cette
+    # semaine leur attribuait une équipe qu'ils ne peuvent plus prendre, ce qui
+    # gonflait leur potentiel et inversait le classement.
+    suivante = this_monday + dt.timedelta(days=7)
+    horizon_suite = max(1, horizon - 1)
+
+    def evalue(brulees, equipe):
+        """(potentiel après cette semaine, survie totale).
+
+        Survie totale = p(gagner cette semaine) × (1 + potentiel après), la
+        même formule que pour comparer les choix d'une semaine : il faut passer
+        la semaine avant de profiter de ce qu'on a gardé.
+        """
+        apres = plan_for(v, suivante, tuple(sorted(brulees)), overrides,
+                         horizon_suite)[1]
+        p = proba.get(equipe)
+        return apres, (None if p is None else p * (1 + apres))
+
     mes_brulees = pk.my_used(picks, since)
-    ma_survie = plan_for(v, from_date, tuple(sorted(mes_brulees)), overrides,
-                         horizon)[1]
-    gens = [("Moi", mes_brulees, not out)]
-    gens += [(nom, pk.pool_used(state, nom, since), nom in pk.pool_alive(state, since))
+    _, ma_survie = evalue(mes_brulees, mon_pick)
+
+    gens = [("Moi", mes_brulees, not out, mon_pick)]
+    gens += [(nom, pk.pool_used(state, nom, since),
+              nom in pk.pool_alive(state, since),
+              joueurs[nom]["picks"].get(semaine))
              for nom in sorted(joueurs)]
 
     lignes = []
-    for nom, brulees, vivant in gens:
-        survie = plan_for(v, from_date, tuple(sorted(brulees)), overrides, horizon)[1]
+    for nom, brulees, vivant, equipe in gens:
+        apres, total = evalue(brulees, equipe)
         lignes.append({
             "Joueur": nom, "En vie": "oui" if vivant else "non",
-            "Chances de survie": survie,
-            # Référence : MOI, pas un plafond abstrait. Un écart positif veut
-            # dire que cette personne est mieux placée que moi pour la suite —
-            # c'est ce qu'on veut voir tout de suite.
-            "Écart vs moi": survie - ma_survie,
-            "Brûlées": len(brulees),
-            "Lesquelles": ", ".join(sorted(brulees)) or "—",
+            "Pick": equipe or "—",
+            "Gagne cette semaine": 100 * proba[equipe] if equipe in proba else None,
+            "Potentiel après": apres,
+            "Survie totale": total,
+            "Écart vs moi": (None if total is None or ma_survie is None
+                             else total - ma_survie),
+            "Brûlées": ", ".join(sorted(brulees)) or "—",
         })
-    lignes.sort(key=lambda r: (-r["Chances de survie"], r["Joueur"]))
+    lignes.sort(key=lambda r: (-(r["Survie totale"] if r["Survie totale"]
+                                 is not None else -1), r["Joueur"]))
 
     with ui.panel("potentiel", "Chances de survie de chacun",
-                  f"L'espérance du meilleur plan encore atteignable sur "
-                  f"{horizon} semaines, avec les équipes qu'il reste à chacun. "
-                  f"Sans rien de brûlé, ce serait {plafond:.2f} ; moi j'en suis "
-                  f"à {ma_survie:.2f}."):
+                  "Deux chiffres à ne pas confondre : ce qu'on garde pour plus "
+                  "tard, et ce qu'on vaut une fois le risque de cette semaine "
+                  "pris en compte."):
         st.dataframe(pd.DataFrame(lignes), hide_index=True, width="stretch",
                      column_config={
-                         "Chances de survie": st.column_config.NumberColumn(
+                         "Gagne cette semaine": PCT,
+                         "Potentiel après": st.column_config.NumberColumn(
                              format="%.2f",
-                             help="Semaines survécues attendues à partir de "
-                                  "maintenant, avec ses équipes restantes"),
+                             help="Meilleur plan atteignable À PARTIR DE LA "
+                                  "SEMAINE PROCHAINE, avec ses équipes "
+                                  "restantes. Garder un gros club le fait "
+                                  "monter."),
+                         "Survie totale": st.column_config.NumberColumn(
+                             format="%.2f",
+                             help="p(gagner cette semaine) × (1 + potentiel "
+                                  "après). Il faut passer la semaine avant de "
+                                  "profiter de ce qu'on a gardé."),
                          "Écart vs moi": st.column_config.NumberColumn(
                              format="%+.2f",
-                             help="Positif = cette personne est mieux placée "
-                                  "que moi pour la suite"),
+                             help="Positif = mieux placé que moi"),
                      })
         st.markdown(
-            "**Survivre ne suffit pas.** Une équipe brûlée ne revient jamais. "
-            "Quelqu'un qui gagne de justesse avec une équipe faible garde les "
-            "gros clubs pour plus tard — ses chances de survie peuvent donc "
-            "dépasser les miennes, même si j'ai pris le favori et gagné "
-            "tranquillement.")
+            "**Garder un gros club vaut quelque chose — mais moins qu'on "
+            "pense.** Prendre une équipe faible pour se réserver Colorado fait "
+            "bien monter la colonne « Potentiel après ». Il faut pourtant "
+            "survivre à cette semaine-là d'abord, et un pile ou face coûte "
+            "presque toujours plus que la marge gagnée.")
         st.caption(
-            "Un écart de 0.00 ne veut pas dire que le pick n'a rien coûté : "
-            "il veut dire que l'équipe brûlée n'entrait dans aucun plan "
-            "optimal, donc qu'elle ne manquera pas. Brûler une équipe que le "
-            "plan voulait coûte beaucoup plus cher — et c'est justement le "
-            "risque du favori que tout le monde prend."
-        )
+            "Le pick de la semaine est déjà joué : le potentiel se calcule "
+            "donc à partir de la semaine suivante. Une personne sans pick "
+            "saisi n'a pas de survie totale — remplis sa ligne dans le "
+            "registre au-dessus.")
 
 
 
