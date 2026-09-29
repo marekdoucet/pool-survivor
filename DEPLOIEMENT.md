@@ -70,6 +70,29 @@ L'app se met à jour toute seule après chaque collecte (nouveau commit).
 Elle s'endort après quelques jours sans visite ; la première visite la
 réveille en une trentaine de secondes.
 
+### Quand il faut redémarrer l'app à la main
+
+Streamlit rejoue `app.py` à chaque interaction, mais **ne recharge jamais les
+modules importés** (`ui.py`, `picks.py`, `optimize.py`…) : ils restent en
+mémoire tels qu'ils étaient au démarrage du processus.
+
+Conséquence : si un commit change à la fois `app.py` et un de ces modules,
+Streamlit Cloud peut se retrouver avec le nouvel `app.py` et l'ancien module.
+Le site plante alors avec un `TypeError` en appelant une fonction dont la
+signature a changé — et la trace ne montre **aucune ligne du module**,
+justement parce que l'erreur a lieu à l'appel, pas à l'intérieur. C'est le
+signe qui permet de reconnaître ce cas.
+
+Le correctif : **Manage app → Reboot app**. Un rafraîchissement de page ne
+suffit pas, il faut relancer le processus. Même chose en local : `Ctrl+C`
+puis relancer `streamlit run` ; le bouton « Rerun » ne suffit pas.
+
+Ça ne concerne que les changements de code. Les commits de collecte ne
+touchent que `data/`, donc ils ne posent jamais ce problème.
+
+Le thème (`.streamlit/config.toml`) est lu lui aussi au démarrage : un
+changement de couleurs ou de police demande le même redémarrage.
+
 Dans la barre latérale, sous « Mes picks », tu dois voir
 « Sauvegardés dans GitHub (marekdoucet/pool-survivor) ». Enregistre un pick :
 un commit « Pick : … » apparaît dans le dépôt.
