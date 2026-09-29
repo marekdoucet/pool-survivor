@@ -18,6 +18,7 @@ import pandas as pd
 import streamlit as st
 
 import collect_moneypuck as cm
+import collect_odds as co
 import form
 import optimize as op
 import picks as pk
@@ -103,6 +104,12 @@ def forms(version):
 def strength_hist(version):
     with connect() as c:
         return pd.DataFrame(form.strength_history(c), columns=["snapshot", "team", "rating"])
+
+
+@st.cache_data
+def accuracy(version):
+    with connect() as c:
+        return form.source_accuracy(c, list(SOURCES))
 
 
 @st.cache_data
@@ -197,9 +204,9 @@ st.caption(
     + f" · {len(used)} équipe(s) utilisée(s)"
 )
 
-tab_pick, tab_plan, tab_evol, tab_form, tab_diff = st.tabs(
+tab_pick, tab_plan, tab_evol, tab_form, tab_acc, tab_diff = st.tabs(
     ["Pick de la semaine", "Plan complet", "Évolution des probabilités",
-     "Équipes en forme", "Depuis hier"])
+     "Équipes en forme", "Précision des sources", "Depuis hier"])
 team_form = forms(v)
 
 
@@ -432,6 +439,38 @@ with tab_form:
                             legend=alt.Legend(orient="bottom", title=None)),
             tooltip=["Match:Q", "Série:N", alt.Tooltip("Victoires:Q", format=".1f")],
         ).properties(height=320), width="stretch")
+
+
+# ── Précision des sources ─────────────────────────────────────────────────
+
+with tab_acc:
+    st.caption("Poids actuels dans le consensus : " + " · ".join(
+        f"{SOURCES[s]} {w:.0%}" for s, w in co.WEIGHTS.items())
+        + ". Quand une source n'a pas de probabilité pour un match, les poids des "
+          "autres sont répartis entre elles.")
+    acc = [row for row in accuracy(v) if row[1]]
+    if not acc:
+        st.info("Disponible après les premiers matchs joués : chaque source sera "
+                "jugée sur ses probabilités d'avant-match.")
+    else:
+        st.dataframe(pd.DataFrame([{
+            "Source": SOURCES[s], "Matchs jugés": n, "Score de Brier": brier,
+            "Favoris gagnants": None if hits is None else 100 * hits,
+            "Brier (matchs cotés)": brier_c, "Casinos, mêmes matchs": brier_m,
+        } for s, n, brier, hits, brier_c, brier_m in sorted(acc, key=lambda r: r[2])]),
+            hide_index=True, width="stretch", column_config={
+                "Score de Brier": st.column_config.NumberColumn(format="%.4f"),
+                "Favoris gagnants": PCT,
+                "Brier (matchs cotés)": st.column_config.NumberColumn(format="%.4f"),
+                "Casinos, mêmes matchs": st.column_config.NumberColumn(format="%.4f"),
+            })
+        st.caption(
+            "**Score de Brier** : moyenne de (probabilité − résultat)². 0,25 = pile ou "
+            "face ; plus c'est bas, mieux c'est. Les sources ne couvrent pas les mêmes "
+            "matchs (Dimers : la veille seulement ; casinos : quelques jours avant) : "
+            "pour une comparaison juste, regarde les deux dernières colonnes, calculées "
+            "sur les seuls matchs cotés par les casinos. Il faut environ 100 matchs "
+            "avant de tirer des conclusions ; ensuite, on pourra ajuster les poids.")
 
 
 # ── Depuis hier ───────────────────────────────────────────────────────────

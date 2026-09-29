@@ -33,7 +33,7 @@ API_URL = "https://api.the-odds-api.com/v4/sports/icehockey_nhl/odds"
 REGIONS = "us,eu"   # « eu » inclut Pinnacle, le casino de référence du marché
 # Poids de chaque source dans le consensus (renormalisés selon les sources
 # disponibles pour un match). Le marché des casinos est en général le plus précis.
-WEIGHTS = {"market": 0.55, "moneypuck": 0.15, "dimers": 0.15, "puckcast": 0.15}
+WEIGHTS = {"market": 0.55, "moneypuck": 0.2, "dimers": 0.15, "puckcast": 0.1}
 
 TEAM_CODES = {
     "anaheim ducks": "ANA", "boston bruins": "BOS", "buffalo sabres": "BUF",

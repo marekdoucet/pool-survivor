@@ -57,3 +57,21 @@ def test_expected_vs_actual_uses_last_pregame_snapshot(db):
     assert [(g, round(p, 2), w) for g, _o, p, w in ev["EDM"]] == [
         ("2026-10-01", 0.75, True), ("2026-10-03", 0.60, True)]
     assert ev["VAN"] == [("2026-10-01", "EDM", 0.25, False)]
+
+
+def test_source_accuracy(db):
+    rows = [  # (collecte, date, visiteur, local, p_visiteur, source)
+        ("2026-09-30", "2026-10-01", "VAN", "EDM", 0.20, "moneypuck"),   # EDM gagne : bon
+        ("2026-09-30", "2026-10-01", "VAN", "EDM", 0.60, "puckcast"),    # mauvais favori
+        ("2026-09-30", "2026-10-01", "VAN", "EDM", 0.30, "market"),
+        ("2026-10-02", "2026-10-03", "EDM", "CGY", 0.70, "moneypuck"),   # EDM gagne : bon
+    ]
+    db.executemany("INSERT INTO probs VALUES (?,'t',?,?,?,?,1-?,?)",
+                   [(s, g, a, h, p, p, src) for s, g, a, h, p, src in rows])
+    acc = {r[0]: r[1:] for r in form.source_accuracy(db, ["moneypuck", "puckcast", "market", "dimers"])}
+    n, brier, hits, brier_c, brier_m = acc["moneypuck"]
+    assert n == 2 and hits == 1.0
+    assert brier == pytest.approx((0.2 ** 2 + 0.3 ** 2) / 2)
+    assert brier_c == pytest.approx(0.04) and brier_m == pytest.approx(0.09)
+    assert acc["puckcast"][2] == 0.0          # 0 favori gagnant sur 1
+    assert acc["dimers"] == (0, None, None, None, None)
