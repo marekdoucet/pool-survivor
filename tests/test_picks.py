@@ -40,7 +40,7 @@ def test_set_day():
 
 
 def test_load_missing_file(tmp_path):
-    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}}
+    assert pk.load(tmp_path / "absent.json") == {"picks": [], "days": {}, "resets": []}
 
 
 def test_planning():
@@ -91,7 +91,7 @@ def test_github_picks_roundtrip_and_conflict():
     gh = FakeGitHub()
     me = {"name": "moi", "email": "1+moi@users.noreply.github.com"}
     store = pk.GitHubPicks("moi/pool", "jeton", session=gh, author=me)
-    assert store.load() == {"picks": [], "days": {}}
+    assert store.load() == {"picks": [], "days": {}, "resets": []}
     store.save({"picks": pk.add([], W1, "VGK"), "days": {}}, "Pick VGK")
     assert gh.puts[0]["message"] == "Pick VGK" and gh.puts[0]["branch"] == "main"
     assert gh.puts[0]["author"] == gh.puts[0]["committer"] == me   # pas le vrai courriel
@@ -108,3 +108,53 @@ def test_github_picks_roundtrip_and_conflict():
     final = pk.GitHubPicks("moi/pool", "j", session=gh).load()
     assert [p["team"] for p in final["picks"]] == ["VGK", "CAR"]
     assert final["days"] == {"2026-10-05": "2026-10-11"}
+
+
+# ── Tours : le pool repart quand il ne reste qu'une personne en vie ────────
+
+R = dt.date(2027, 1, 11)          # lundi du redépart
+
+
+def test_sans_reset_rien_ne_change():
+    assert pk.last_reset([]) is None
+    assert pk.this_round([{"week": "2026-09-28"}], None) == [{"week": "2026-09-28"}]
+
+
+def test_reset_libere_les_equipes_deja_prises():
+    picks = pk.add(pk.add([], W1, "VGK"), W2, "COL")
+    # sans redépart, VGK reste bloquée
+    with pytest.raises(ValueError, match="déjà"):
+        pk.add(picks, R, "VGK")
+    # après le redépart, elle redevient disponible
+    assert [p["team"] for p in pk.add(picks, R, "VGK", since=R)] == ["VGK", "COL", "VGK"]
+
+
+def test_reset_narchive_pas_les_anciens_picks():
+    """Le fichier garde tout : un redépart ne doit rien effacer."""
+    etat = {"picks": pk.add([], W1, "VGK"), "days": {}, "resets": []}
+    apres = pk.reset(etat, R)
+    assert apres["resets"] == ["2027-01-11"]
+    assert [p["team"] for p in apres["picks"]] == ["VGK"]      # toujours là
+    assert pk.undo_reset(apres, R)["resets"] == []             # annulable
+
+
+def test_reset_deux_fois_ne_duplique_pas():
+    etat = pk.reset(pk.reset(pk.empty_state(), R), R)
+    assert etat["resets"] == ["2027-01-11"]
+
+
+def test_last_reset_prend_le_plus_recent_et_ignore_le_futur():
+    resets = ["2026-11-02", "2027-01-11"]
+    assert pk.last_reset(resets) == R
+    # un redépart préparé pour plus tard ne libère pas encore les équipes
+    assert pk.last_reset(resets, today=dt.date(2026, 12, 1)) == dt.date(2026, 11, 2)
+    assert pk.last_reset(resets, today=dt.date(2026, 10, 1)) is None
+
+
+def test_planning_ignore_les_picks_dun_tour_precedent():
+    picks = pk.add(pk.add([], W1, "VGK"), W2, "COL")
+    apres = dt.date(2027, 1, 13)      # mercredi de la semaine du redépart
+    _, used_avant, _ = pk.planning(picks, apres)
+    _, used_apres, _ = pk.planning(picks, apres, since=R)
+    assert used_avant == {"VGK", "COL"}
+    assert used_apres == set()        # tout le monde redevient disponible

@@ -233,37 +233,56 @@ today = dt.datetime.now(cm.TZ).date()
 remote = picks_backend()
 state = remote.load() if remote else pk.load(PICKS_PATH)
 picks, day_overrides = state["picks"], state["days"]
+# Tour en cours : quand il ne reste qu'une personne en vie, le pool repart de
+# la semaine courante et toutes les équipes redeviennent disponibles. Les picks
+# des tours précédents restent dans picks.json, mais ne bloquent plus rien.
+since = pk.last_reset(state["resets"], today)
+tour = pk.this_round(picks, since)
 overrides = tuple(sorted(day_overrides.items()))   # clé de cache
 all_days = pick_days_for(VERSION, overrides) if VERSION else {}
 this_monday = op.week_start(today)
-from_date, used_set, provisional = pk.planning(picks, today)
+from_date, used_set, provisional = pk.planning(picks, today, since)
 used = tuple(sorted(used_set))
 
 with st.sidebar:
     st.header("Mes picks")
-    if not picks:
-        st.caption("Aucun pick enregistré.")
+    if not tour:
+        st.caption("Aucun pick dans ce tour.")
     if remote:
         st.caption(f"Sauvegardés dans GitHub ({remote.repo})")
-    for p in picks:
+    for p in tour:
         col1, col2 = st.columns([4, 1])
         col1.markdown(f"**{p['team']}** — semaine du {p['week']}")
         if col2.button("✕", key=f"del-{p['week']}", help="Retirer ce pick"):
             save_picks(pk.remove(picks, dt.date.fromisoformat(p["week"])),
                        f"Pick retiré : {p['team']} (semaine du {p['week']})")
 
-    st.subheader("Enregistrer un pick")
-    mondays = []
-    m = op.week_start(dt.date(2026, 9, 29))
-    while m <= op.week_start(today):
-        mondays.append(m)
-        m += dt.timedelta(days=7)
-    with st.form("pick"):
-        week = st.selectbox("Semaine du", mondays[::-1], format_func=str)
-        free = sorted(cm.TEAMS - {p["team"] for p in picks if p["week"] != week.isoformat()})
-        team = st.selectbox("Équipe", free)
-        if st.form_submit_button("Enregistrer"):
-            save_picks(pk.add(picks, week, team), f"Pick : {team} (semaine du {week})")
+    st.subheader("Tour en cours")
+    archive = len(picks) - len(tour)
+    if since:
+        st.caption(f"Reparti la semaine du {since}."
+                   + (f" {archive} pick(s) des tours précédents en archive."
+                      if archive else ""))
+    else:
+        st.caption("Premier tour de la saison.")
+    with st.popover("Faire repartir le pool", width="stretch"):
+        st.markdown("Quand il ne reste **qu'une personne en vie**, le pool "
+                    "recommence à partir de la semaine en cours : toutes les "
+                    "équipes redeviennent disponibles.")
+        st.caption("Rien n'est effacé — les picks des tours précédents restent "
+                   "dans le fichier et l'opération est annulable.")
+        depart = st.date_input("Repartir à partir de la semaine du",
+                               value=this_monday, format="YYYY-MM-DD")
+        lundi = op.week_start(depart)
+        if lundi != depart:
+            st.caption(f"Ramené au lundi de cette semaine : {lundi}.")
+        if st.button("Confirmer le redépart", type="primary", width="stretch"):
+            save_state(pk.reset(state, lundi),
+                       f"Pool reparti à la semaine du {lundi}")
+    if since:
+        if st.button(f"Annuler le redépart du {since}", width="stretch"):
+            save_state(pk.undo_reset(state, since),
+                       f"Redépart du {since} annulé")
 
     st.subheader("Journée de pick")
     ties = [m for m, d in all_days.items() if d.how == "égalité" and m >= op.week_start(today)]
@@ -335,26 +354,47 @@ team_form = forms(v)
 # ── Pick de la semaine ────────────────────────────────────────────────────
 
 def page_pick():
+    # Un seul endroit pour choisir, ici. Le formulaire qui doublonnait dans la
+    # barre latérale a été retiré : il y avait deux façons d'enregistrer le
+    # même pick, avec le risque de ne plus savoir laquelle faisait foi.
     current = next((p for p in picks if p["week"] == this_monday.isoformat()), None)
     if current and not provisional:
-        st.success(f"Pick de cette semaine verrouillé : **{current['team']}**. "
-                   f"Le plan commence la semaine du {from_date}.")
-    if provisional and this_monday in options:
+        st.success(f"Pick verrouillé pour cette semaine : **{current['team']}**. "
+                   f"Le plan reprend la semaine du {from_date}.")
+    elif this_monday in options:
         week_opts = sorted(options[this_monday].values(), key=lambda o: -o.p)
-        mine = options[this_monday].get(provisional["team"])
-        st.success(f"Ton pick de la semaine : **{provisional['team']}**"
-                   + (f" ({match_label(mine)}, {mine.p:.1%})" if mine else "")
-                   + f". Tu peux le changer jusqu'à {fr_day(pk.pick_deadline(today).isoformat())} minuit")
-        with st.form("changer"):
-            change_labels = [f"{o.team} {match_label(o)} — {o.p:.1%}" for o in week_opts]
-            teams_ = [o.team for o in week_opts]
-            idx = teams_.index(provisional["team"]) if provisional["team"] in teams_ else 0
-            new = st.selectbox("Changer mon pick pour", range(len(week_opts)),
-                               index=idx, format_func=lambda i, lb=change_labels: lb[i])
-            if st.form_submit_button("Remplacer mon pick"):
-                o = week_opts[new]
-                save_picks(pk.add(picks, this_monday, o.team, o.game_date),
-                           f"Pick modifié : {o.team} (semaine du {this_monday})")
+        teams_ = [o.team for o in week_opts]
+        # Ce que le site retient : le pick déjà enregistré s'il y en a un,
+        # sinon la recommandation. C'est CE choix qui se verrouille vendredi
+        # minuit, qu'on y retouche ou non.
+        retenu = (provisional or {}).get("team")
+        if retenu is None and plan and plan[0][1] is not None:
+            retenu = plan[0][1].team
+        idx = teams_.index(retenu) if retenu in teams_ else 0
+        with ui.panel("choisir", "Enregistrer mon pick",
+                      f"Modifiable jusqu'au "
+                      f"{fr_day(pk.pick_deadline(today).isoformat())} à minuit. "
+                      f"Passé ce délai, c'est l'équipe affichée ici qui est "
+                      f"retenue."):
+            if provisional:
+                st.markdown(f"Enregistré : {ui.inline(provisional['team'])}",
+                            unsafe_allow_html=True)
+            else:
+                st.markdown(f"Rien d'enregistré pour l'instant — "
+                            f"proposition : {ui.inline(teams_[idx])}",
+                            unsafe_allow_html=True)
+            with st.form("choisir-pick"):
+                labels = [f"{o.team} {match_label(o)} — {o.p:.1%}" for o in week_opts]
+                new = st.selectbox("Équipe pour la semaine du "
+                                   f"{fr_weekend(this_monday)}", range(len(week_opts)),
+                                   index=idx, format_func=lambda i, lb=labels: lb[i])
+                libelle = "Remplacer mon pick" if provisional else "Enregistrer mon pick"
+                if st.form_submit_button(libelle, type="primary"):
+                    o = week_opts[new]
+                    save_picks(pk.add(picks, this_monday, o.team, o.game_date,
+                                      since=since),
+                               f"Pick {'modifié' if provisional else 'enregistré'} : "
+                               f"{o.team} (semaine du {this_monday})")
 
     if not plan or plan[0][1] is None:
         st.warning("Aucun match disponible pour la prochaine semaine.")

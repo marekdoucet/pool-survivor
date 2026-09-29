@@ -10,6 +10,7 @@ pas de ses noms internes, qui changent d'une version à l'autre.
 
 import html
 
+import altair as alt
 import streamlit as st
 
 # Logos officiels de la LNH, en SVG (nets à n'importe quelle taille).
@@ -315,9 +316,56 @@ CSS = """
 """
 
 
+SURFACE = "#1a1a19"        # même valeur que backgroundColor dans config.toml
+ENCRE = "#ffffff"
+ENCRE_2 = "#c3c2b7"
+GRILLE = "#2e2e36"
+
+
+def altair_theme():
+    """Habillage commun des graphiques : grille discrète, axes en retrait.
+
+    Ne touche PAS aux couleurs des séries : elles viennent de
+    theme.chartCategoricalColors dans config.toml, c'est-à-dire de la palette
+    validée. Un thème Altair qui redéfinirait `range` entrerait en conflit
+    avec elle et casserait les garanties de lisibilité pour le daltonisme.
+    """
+    @alt.theme.register("pool-survivor", enable=True)
+    def _theme():
+        axe = {
+            "labelColor": ENCRE_2, "titleColor": ENCRE_2,
+            "labelFontSize": 12, "titleFontSize": 12, "titleFontWeight": 500,
+            "gridColor": GRILLE, "gridOpacity": 0.7, "gridWidth": 1,
+            "domainColor": GRILLE, "tickColor": GRILLE,
+            "labelPadding": 6, "titlePadding": 10,
+        }
+        return {"config": {
+            # transparent : c'est le panneau vitré qui fournit la surface
+            "background": "transparent",
+            "view": {"stroke": None, "continuousWidth": 400, "continuousHeight": 300},
+            "axis": axe,
+            "axisX": {"grid": False},        # la grille verticale n'apporte rien
+            "axisY": {"domain": False, "ticks": False},
+            "legend": {
+                "labelColor": ENCRE_2, "titleColor": ENCRE_2,
+                "labelFontSize": 12, "titleFontSize": 11,
+                "symbolType": "circle", "symbolSize": 90,
+                "orient": "bottom", "direction": "horizontal",
+                "offset": 12, "padding": 4, "titlePadding": 6,
+            },
+            "title": {"color": ENCRE, "fontSize": 14, "fontWeight": 600,
+                      "anchor": "start", "offset": 10},
+            "text": {"color": ENCRE_2},
+            "line": {"strokeWidth": 2},
+            "point": {"size": 70, "filled": True},
+            "rect": {"cornerRadius": 3},
+        }}
+
+
 def inject_css():
     """À appeler une fois, juste après st.set_page_config."""
     st.markdown(CSS, unsafe_allow_html=True)
+    altair_theme()
 
 
 def backdrop(color):
