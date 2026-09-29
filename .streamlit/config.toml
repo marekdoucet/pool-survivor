@@ -1,2 +1,42 @@
+# Thème sombre « diffusion sportive ».
+#
+# Les couleurs de graphique ne sont PAS choisies à l'œil : ce sont les pas
+# calibrés pour fond sombre de la palette de référence, dont l'ordre est
+# prouvé sûr pour le daltonisme. Ne pas réordonner, ne pas éclaircir : les
+# garanties tiennent à l'ordre exact et aux pas exacts.
+# Les mêmes teintes en version fond clair vivent dans app.py (TEAM_COLORS).
+
 [theme]
-primaryColor = "#2a78d6"
+base = "dark"
+backgroundColor = "#1a1a19"          # surface de référence pour fond sombre
+secondaryBackgroundColor = "#242422"  # cartes, en-têtes de tableau
+textColor = "#ffffff"
+primaryColor = "#3987e5"              # bleu, pas « fond sombre »
+borderColor = "#33332f"
+baseRadius = "0.7rem"
+headingFontWeights = [700, 700, 650, 600, 600, 600]
+
+# Huit teintes catégorielles, dans l'ordre validé. Altair et Plotly les
+# reprennent automatiquement : aucun graphique n'a besoin de les redéclarer.
+chartCategoricalColors = [
+  "#3987e5",  # 1 bleu
+  "#d95926",  # 2 orange
+  "#199e70",  # 3 aqua
+  "#c98500",  # 4 jaune
+  "#d55181",  # 5 magenta
+  "#008300",  # 6 vert
+  "#9085e9",  # 7 violet
+  "#e66767",  # 8 rouge
+]
+
+# Rampe séquentielle (magnitude continue : carte des matchups). Une seule
+# teinte, du plus sombre — qui se fond dans le fond, donc « proche de zéro » —
+# au plus clair. Streamlit en exige exactement dix.
+chartSequentialColors = [
+  "#0d366b", "#104281", "#184f95", "#1c5cab", "#256abf",
+  "#2a78d6", "#3987e5", "#6da7ec", "#9ec5f4", "#cde2fb",
+]
+
+[theme.sidebar]
+backgroundColor = "#0e0e0d"          # presque noir, comme la colonne de gauche
+borderColor = "#2a2a27"

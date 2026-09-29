@@ -23,6 +23,7 @@ import form
 import optimize as op
 import picks as pk
 import store
+import ui
 
 PICKS_PATH = Path(os.environ.get("SURVIVOR_PICKS", pk.PICKS_PATH))
 CACHE_DB = Path(".cache") / "survivor.db"
@@ -31,11 +32,14 @@ SOURCES = {"consensus": "Consensus", "market": "Casinos", "moneypuck": "MoneyPuc
            "dimers": "Dimers", "puckcast": "Puckcast"}
 # Palette catégorielle de référence (8 couleurs), dans un ordre fixe :
 # la couleur suit la source, ou l'équipe (au plus 8 équipes comparées à la fois).
-TEAM_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100",
-               "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
+# Pas calibrés pour fond sombre — mêmes teintes et même ordre que la version
+# fond clair, mais re-choisis pour la surface sombre, pas éclaircis au hasard.
+TEAM_COLORS = ["#3987e5", "#d95926", "#199e70", "#c98500",
+               "#d55181", "#008300", "#9085e9", "#e66767"]
 COLORS = TEAM_COLORS[:len(SOURCES)]
 
 st.set_page_config(page_title="Pool survivor NHL", page_icon="🏒", layout="wide")
+ui.inject_css()
 
 PCT = st.column_config.NumberColumn(format="%.1f %%")   # valeurs déjà × 100
 
@@ -332,7 +336,20 @@ with tab_pick:
         st.warning("Aucun match disponible pour la prochaine semaine.")
     else:
         monday, best = plan[0]
-        st.subheader(f"Semaine du {monday}")
+        game = latest[(latest.game_date == best.game_date)
+                      & ((latest.away == best.team) | (latest.home == best.team))]
+        by_src = dict(zip(game.source, win_prob(game, best.team)))
+        ui.hero(best.team,
+                f"Pick recommandé · fin de semaine du {fr_weekend(monday)}",
+                f"contre {ui.name(best.opponent)} · "
+                + ("à domicile" if best.home else "à l'étranger")
+                + f" · {fr_day(best.game_date)}",
+                best.p)
+        # La couleur suit la source, jamais son rang : on indexe dans SOURCES,
+        # pas dans la liste filtrée, sinon une source absente repeint les autres.
+        shown = [s for s in SOURCES if s in by_src]
+        ui.chips([(SOURCES[s], by_src[s]) for s in shown],
+                 [COLORS[list(SOURCES).index(s)] for s in shown])
         pd_week = all_days.get(monday)
         if pd_week:
             txt = " ou ".join(fr_day(d) for d in pd_week.days)
@@ -345,17 +362,8 @@ with tab_pick:
             else:
                 st.info(f"Journée de pick : **{txt}** ({n_games} matchs)"
                         + (" — choisie par toi" if pd_week.how == "choisi" else ""))
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Pick recommandé", best.team)
-        c1.caption(match_label(best))
-        c2.metric("Probabilité de victoire", f"{best.p:.1%}")
-        c3.metric("Semaines survécues (espérance)", f"{exp_weeks:.2f}")
-
-        game = latest[(latest.game_date == best.game_date)
-                      & ((latest.away == best.team) | (latest.home == best.team))]
-        by_src = dict(zip(game.source, win_prob(game, best.team)))
-        st.markdown("**Détail par source** : " + " · ".join(
-            f"{SOURCES[s]} {by_src[s]:.1%}" for s in SOURCES if s in by_src))
+        st.caption(f"Espérance sur tout le plan : **{exp_weeks:.2f}** semaines "
+                   f"survécues sur {len(plan)}.")
 
         st.markdown("#### Pourquoi pas une autre équipe ?")
         st.caption("Le plan est optimisé sur toute la saison d'un coup : une équipe "
