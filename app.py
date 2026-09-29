@@ -397,15 +397,17 @@ def page_pick():
                                   since=since),
                            f"Pick {'modifié' if provisional else 'enregistré'} : "
                            f"{choisi.team} (semaine du {this_monday})")
-        # La carte de l'équipe choisie, collée au panneau : c'est elle qui
-        # donne sa couleur au fond de la page, pas la recommandation — le
-        # site doit refléter MON choix.
+        # La carte de l'équipe choisie. C'est elle qui doit donner sa couleur
+        # au fond de la page, pas la recommandation : le site reflète MON
+        # choix. Comme ui.hero() pose la lueur lui-même et que la
+        # recommandation est dessinée après, on repose la bonne teinte à la
+        # fin (voir plus bas) — une feuille de style plus tardive l'emporte.
         ui.hero(choisi.team,
                 "Mon pick" + (" · enregistré" if deja else " · à confirmer"),
                 f"contre {ui.name(choisi.opponent)} · "
                 + ("à domicile" if choisi.home else "à l'étranger")
                 + f" · {fr_day(choisi.game_date)}",
-                choisi.p, players(v).get(choisi.team), suite=True)
+                choisi.p, players(v).get(choisi.team))
 
     if not plan or plan[0][1] is None:
         st.warning("Aucun match disponible pour la prochaine semaine.")
@@ -424,10 +426,13 @@ def page_pick():
                     + ("à domicile" if best.home else "à l'étranger")
                     + f" · {fr_day(best.game_date)}",
                     best.p,
-                    players(v).get(best.team),
-                    # Jamais la lueur : c est la carte du choix, juste
-                    # au-dessus, qui donne sa couleur au fond de la page.
-                    glow=False)
+                    players(v).get(best.team))
+        if choisi is not None:
+            # ui.hero() pose la lueur pour chaque carte qu'il dessine ; sans
+            # ceci, la dernière dessinée — la recommandation — l'emporterait.
+            # Une feuille de style plus tardive gagne, donc on repose la teinte
+            # du choix ici, à la fin.
+            ui.backdrop((players(v).get(choisi.team) or {}).get("color"))
         # La couleur suit la source, jamais son rang : on indexe dans SOURCES,
         # pas dans la liste filtrée, sinon une source absente repeint les autres.
         # Toutes les sources, même absentes : une case vide dit « pas encore de
