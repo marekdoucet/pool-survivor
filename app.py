@@ -9,8 +9,10 @@ Picks : picks.json local, ou directement dans le dépôt GitHub si la section
 """
 
 import hashlib
+import importlib
 import os
 import sqlite3
+import sys
 import datetime as dt
 from pathlib import Path
 
@@ -25,6 +27,43 @@ import optimize as op
 import picks as pk
 import store
 import ui
+
+
+# ── Modules à jour ─────────────────────────────────────────────────────────
+# Streamlit relit app.py à chaque affichage mais ne recharge JAMAIS les
+# modules importés. Sur Streamlit Cloud, un déploiement échange les fichiers
+# sans relancer le processus : on se retrouve avec le nouvel app.py et
+# l'ancien picks.py, et la page plante sur une fonction qui n'existe pas
+# encore (« module 'picks' has no attribute 'pool' »). C'est arrivé trois
+# fois ; le bouton « Reboot app » corrige, mais il ne faut pas en dépendre.
+#
+# On compare donc la date du fichier à celle retenue au dernier chargement.
+# Le repère est posé SUR le module, qui survit d'un affichage à l'autre — une
+# variable de app.py serait réinitialisée à chaque fois. Sans changement :
+# huit appels à stat(), soit quelques microsecondes.
+_MODULES = ("collect_moneypuck", "schedule", "collect_odds", "form",
+            "optimize", "store", "picks", "ui")
+
+
+def _recharge_les_modules_modifies():
+    for nom in _MODULES:
+        mod = sys.modules.get(nom)
+        fichier = getattr(mod, "__file__", None)
+        if not fichier:
+            continue
+        try:
+            date = os.stat(fichier).st_mtime
+        except OSError:
+            continue
+        if getattr(mod, "_date_chargement", None) != date:
+            try:
+                importlib.reload(mod)
+            except Exception:      # un module cassé ne doit pas tuer la page
+                continue
+            sys.modules[nom]._date_chargement = date
+
+
+_recharge_les_modules_modifies()
 
 PICKS_PATH = Path(os.environ.get("SURVIVOR_PICKS", pk.PICKS_PATH))
 CACHE_DB = Path(".cache") / "survivor.db"
