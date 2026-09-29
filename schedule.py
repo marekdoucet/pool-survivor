@@ -1,6 +1,7 @@
 """
 Calendrier complet de la saison régulière (API publique de la LNH, gratuite, sans clé).
-Sert à l'optimiseur pour les semaines au-delà des 49 jours couverts par MoneyPuck.
+Sert à l'optimiseur pour les semaines au-delà des 49 jours couverts par MoneyPuck,
+et donne les résultats des matchs joués (séries de victoires, forme des équipes).
 
     python schedule.py
 """
@@ -17,16 +18,30 @@ SEASON_START = dt.date(2026, 9, 29)
 SEASON_END = dt.date(2027, 4, 10)
 
 
+COLS = ["game_id", "game_date", "start_utc", "away", "home",
+        "away_score", "home_score", "last_period"]
+FINAL_STATES = {"OFF", "FINAL"}
+
+
 def init_db(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS schedule (
-            game_id    INTEGER PRIMARY KEY,
-            game_date  TEXT NOT NULL,   -- date du match (heure de l'Est)
-            start_utc  TEXT NOT NULL,
-            away       TEXT NOT NULL,
-            home       TEXT NOT NULL
+            game_id     INTEGER PRIMARY KEY,
+            game_date   TEXT NOT NULL,   -- date du match (heure de l'Est)
+            start_utc   TEXT NOT NULL,
+            away        TEXT NOT NULL,
+            home        TEXT NOT NULL,
+            away_score  INTEGER,         -- NULL tant que le match n'est pas terminé
+            home_score  INTEGER,
+            last_period TEXT             -- REG, OT ou SO
         )
     """)
+    # Bases créées avant l'ajout des résultats
+    existing = {r[1] for r in conn.execute("PRAGMA table_info(schedule)")}
+    for col, typ in (("away_score", "INTEGER"), ("home_score", "INTEGER"),
+                     ("last_period", "TEXT")):
+        if col not in existing:
+            conn.execute(f"ALTER TABLE schedule ADD COLUMN {col} {typ}")
 
 
 def parse_week(payload):
@@ -36,8 +51,12 @@ def parse_week(payload):
             if g.get("gameType") != 2:   # 2 = saison régulière
                 continue
             start = dt.datetime.fromisoformat(g["startTimeUTC"].replace("Z", "+00:00"))
+            final = g.get("gameState") in FINAL_STATES
             games.append((g["id"], start.astimezone(cm.TZ).date().isoformat(),
-                          g["startTimeUTC"], g["awayTeam"]["abbrev"], g["homeTeam"]["abbrev"]))
+                          g["startTimeUTC"], g["awayTeam"]["abbrev"], g["homeTeam"]["abbrev"],
+                          g["awayTeam"].get("score") if final else None,
+                          g["homeTeam"].get("score") if final else None,
+                          (g.get("gameOutcome") or {}).get("lastPeriodType") if final else None))
     return games
 
 
@@ -61,7 +80,8 @@ def update_schedule(db_path=cm.DB_PATH, session=None):
     init_db(conn)
     with conn:   # remplace tout : gère les matchs reportés/déplacés
         conn.execute("DELETE FROM schedule")
-        conn.executemany("INSERT OR REPLACE INTO schedule VALUES (?,?,?,?,?)", games)
+        conn.executemany(f"INSERT OR REPLACE INTO schedule ({','.join(COLS)}) "
+                         f"VALUES ({','.join('?' * len(COLS))})", games)
     conn.close()
     return len(games)
 

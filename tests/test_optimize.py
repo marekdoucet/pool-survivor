@@ -58,7 +58,8 @@ def db(tmp_path):
     conn = sqlite3.connect(tmp_path / "t.db")
     cm.init_db(conn)
     sch.init_db(conn)
-    conn.executemany("INSERT INTO schedule VALUES (?,?,?,?,?)", [
+    conn.executemany("INSERT INTO schedule (game_id, game_date, start_utc, away, home) "
+                     "VALUES (?,?,?,?,?)", [
         (1, "2026-10-05", "x", "VAN", "COL"),   # lundi
         (2, "2026-10-08", "x", "COL", "CHI"),   # jeudi, même semaine
         (3, "2026-10-12", "x", "TOR", "VAN"),   # semaine suivante, pas de proba connue

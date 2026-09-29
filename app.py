@@ -18,6 +18,7 @@ import pandas as pd
 import streamlit as st
 
 import collect_moneypuck as cm
+import form
 import optimize as op
 import picks as pk
 import store
@@ -29,6 +30,8 @@ SOURCES = {"consensus": "Consensus", "market": "Casinos", "moneypuck": "MoneyPuc
            "dimers": "Dimers"}
 # Palette catégorielle de référence, dans un ordre fixe : la couleur suit la source.
 COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
+# Les 8 couleurs de la palette : au plus 8 équipes comparées à la fois.
+TEAM_COLORS = COLORS + ["#e87ba4", "#008300", "#4a3aa7", "#e34948"]
 
 st.set_page_config(page_title="Pool survivor NHL", page_icon="🏒", layout="wide")
 
@@ -87,6 +90,24 @@ def alternatives_for(version, from_date, used):
 def history(version):
     with connect() as c:
         return pd.read_sql("SELECT snapshot, game_date, away, home, p_away, source FROM probs", c)
+
+
+@st.cache_data
+def forms(version):
+    with connect() as c:
+        return form.team_forms(c)
+
+
+@st.cache_data
+def strength_hist(version):
+    with connect() as c:
+        return pd.DataFrame(form.strength_history(c), columns=["snapshot", "team", "rating"])
+
+
+@st.cache_data
+def expected(version):
+    with connect() as c:
+        return form.expected_vs_actual(c)
 
 
 def match_label(opt):
@@ -175,8 +196,10 @@ st.caption(
     + f" · {len(used)} équipe(s) utilisée(s)"
 )
 
-tab_pick, tab_plan, tab_evol, tab_diff = st.tabs(
-    ["Pick de la semaine", "Plan complet", "Évolution des probabilités", "Depuis hier"])
+tab_pick, tab_plan, tab_evol, tab_form, tab_diff = st.tabs(
+    ["Pick de la semaine", "Plan complet", "Évolution des probabilités",
+     "Équipes en forme", "Depuis hier"])
+team_form = forms(v)
 
 
 # ── Pick de la semaine ────────────────────────────────────────────────────
@@ -211,7 +234,8 @@ with tab_pick:
         top_e = alts[0][1]
         st.dataframe(pd.DataFrame([{
             "Équipe": o.team, "Match": match_label(o), "Probabilité": 100 * o.p,
-            "Espérance": e, "Coût": top_e - e, "Source": o.source,
+            "Espérance": e, "Coût": top_e - e, "Série": team_form[o.team].streak_label,
+            "Source": o.source,
         } for o, e in alts]), hide_index=True, width="stretch", column_config={
             "Probabilité": PCT,
             "Espérance": st.column_config.NumberColumn(format="%.2f"),
@@ -294,6 +318,119 @@ with tab_evol:
                          .assign(Probabilité=lambda d: 100 * d.Probabilité)
                          .rename(columns={"snapshot": "Collecte"}),
                          hide_index=True, column_config={"Probabilité": PCT})
+
+
+# ── Équipes en forme ──────────────────────────────────────────────────────
+
+with tab_form:
+    played = any(f.results for f in team_form.values())
+    hist_r = strength_hist(v)
+    snaps_r = sorted(hist_r.snapshot.unique())
+    first = hist_r[hist_r.snapshot == snaps_r[0]].set_index("team").rating
+    last = hist_r[hist_r.snapshot == snaps_r[-1]].set_index("team").rating
+    st.caption("« Force » = chances de battre une équipe moyenne en terrain neutre, "
+               "selon le consensus de chaque collecte. Une série de victoires est déjà "
+               "en bonne partie intégrée dans les cotes : cet onglet aide à comprendre "
+               "le plan, pas à le contredire.")
+
+    # Séries en cours
+    st.subheader("Séries de victoires")
+    if not played:
+        st.info("Aucun match joué pour l'instant : les séries apparaîtront après les "
+                "premiers matchs (saison dès le 29 septembre).")
+    else:
+        n_min = st.slider("Victoires d'affilée, au moins", 2, 10, 4)
+        hot = sorted((f for f in team_form.values() if f.streak >= n_min),
+                     key=lambda f: -f.streak)
+        if not hot:
+            best = max(team_form.values(), key=lambda f: f.streak)
+            st.caption(f"Aucune équipe sur une série de {n_min} victoires ou plus "
+                       f"(meilleure série actuelle : {best.team}, {best.streak_label}).")
+        else:
+            st.dataframe(pd.DataFrame([{
+                "Équipe": f.team, "Série": f.streak_label, "Fiche": f"{f.wins}-{f.losses}",
+                "10 derniers": f.last10, "Force actuelle": 100 * last.get(f.team, 0.5),
+                "Disponible": "Déjà utilisée" if f.team in used else "Oui",
+            } for f in hot]), hide_index=True, width="stretch",
+                column_config={"Force actuelle": PCT})
+
+    # Progression de la force
+    st.subheader("Progression : projection initiale vs maintenant")
+    rise = (last - first).sort_values(ascending=False)
+    default = [t for t in rise.index if t not in used and rise[t] >= 0.01][:5]
+    if not default:   # pas encore de vraie progression : les plus fortes
+        default = [t for t in last.sort_values(ascending=False).index if t not in used][:5]
+    chosen = st.multiselect("Équipes (8 au maximum)", sorted(cm.TEAMS), default=default,
+                            max_selections=8,
+                            help="Par défaut : les équipes pas encore utilisées qui ont "
+                                 "le plus progressé depuis la première collecte.")
+    if chosen:
+        data = hist_r[hist_r.team.isin(chosen)].assign(
+            Collecte=lambda d: pd.to_datetime(d.snapshot), Force=lambda d: d.rating,
+            Équipe=lambda d: d.team)
+        color = alt.Color("Équipe:N", scale=alt.Scale(domain=chosen,
+                                                      range=TEAM_COLORS[:len(chosen)]),
+                          legend=alt.Legend(orient="bottom", title=None))
+        base = alt.Chart(data).encode(
+            x=alt.X("Collecte:T", title="Date de collecte",
+                    axis=alt.Axis(format="%d/%m", tickCount={"interval": "day", "step": 1})),
+            y=alt.Y("Force:Q", title="Force", axis=alt.Axis(format="%"),
+                    scale=alt.Scale(zero=False)),
+            color=color,
+            tooltip=[alt.Tooltip("Équipe:N"), alt.Tooltip("Collecte:T", format="%Y-%m-%d"),
+                     alt.Tooltip("Force:Q", format=".1%")],
+        )
+        labels = alt.Chart(data[data.snapshot == snaps_r[-1]]).mark_text(
+            align="left", dx=8, fontSize=12).encode(
+            x="Collecte:T", y="Force:Q", text="Équipe:N", color=color)
+        chart = base.mark_line(strokeWidth=2) + base.mark_point(size=64, filled=True)
+        if len(chosen) <= 4:   # au-delà, les étiquettes se chevauchent : légende seule
+            chart += labels
+        st.altair_chart(chart.properties(height=380), width="stretch")
+        if len(snaps_r) < 2:
+            st.caption("Une seule collecte pour l'instant : la progression se dessinera "
+                       "au fil des jours.")
+        st.dataframe(pd.DataFrame([{
+            "Équipe": t, "Projection initiale": 100 * first[t], "Maintenant": 100 * last[t],
+            "Écart (points)": 100 * (last[t] - first[t]),
+            "Fiche": f"{team_form[t].wins}-{team_form[t].losses}",
+            "Série": team_form[t].streak_label,
+            "Disponible": "Déjà utilisée" if t in used else "Oui",
+        } for t in chosen]), hide_index=True, width="stretch", column_config={
+            "Projection initiale": PCT, "Maintenant": PCT,
+            "Écart (points)": st.column_config.NumberColumn(format="%+.1f")})
+
+    # Victoires réelles vs attendues
+    st.subheader("Victoires réelles vs attendues")
+    ev = expected(v)
+    if not ev:
+        st.info("Disponible après les premiers matchs joués.")
+    else:
+        table = pd.DataFrame([{
+            "Équipe": t, "Matchs": len(g), "Victoires": sum(w for *_x, w in g),
+            "Attendues": sum(p for _d, _o, p, _w in g),
+        } for t, g in ev.items()]).assign(Écart=lambda d: d.Victoires - d.Attendues)
+        table = table.sort_values("Écart", ascending=False)
+        st.caption("« Attendues » = somme des probabilités d'avant-match. Un écart positif : "
+                   "l'équipe gagne plus que prévu (forme réelle ou chance).")
+        c1, c2 = st.columns([2, 3])
+        c1.dataframe(table, hide_index=True, width="stretch", column_config={
+            "Attendues": st.column_config.NumberColumn(format="%.1f"),
+            "Écart": st.column_config.NumberColumn(format="%+.1f")})
+        pick_t = c2.selectbox("Détail pour", list(table.Équipe))
+        games = ev[pick_t]
+        cum = pd.DataFrame({"Match": range(1, len(games) + 1),
+                            "Réelles": pd.Series([w for *_x, w in games]).cumsum(),
+                            "Attendues": pd.Series([p for _d, _o, p, _w in games]).cumsum()})
+        long = cum.melt("Match", var_name="Série", value_name="Victoires")
+        c2.altair_chart(alt.Chart(long).mark_line(strokeWidth=2, point=True).encode(
+            x=alt.X("Match:Q", title="Matchs joués", axis=alt.Axis(tickMinStep=1)),
+            y=alt.Y("Victoires:Q", title=f"Victoires cumulées de {pick_t}"),
+            color=alt.Color("Série:N", scale=alt.Scale(domain=["Réelles", "Attendues"],
+                                                       range=COLORS[:2]),
+                            legend=alt.Legend(orient="bottom", title=None)),
+            tooltip=["Match:Q", "Série:N", alt.Tooltip("Victoires:Q", format=".1f")],
+        ).properties(height=320), width="stretch")
 
 
 # ── Depuis hier ───────────────────────────────────────────────────────────

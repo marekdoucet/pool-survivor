@@ -13,7 +13,9 @@ def make_db(path):
     ])
     conn.execute("INSERT INTO odds VALUES ('2026-09-29','t2','2026-10-01','VAN','EDM',"
                  "'pinnacle',3.9,1.3,0.25,0.75)")
-    conn.execute("INSERT INTO schedule VALUES (2026020010,'2026-10-01','x','VAN','EDM')")
+    conn.execute("INSERT INTO schedule VALUES (2026020010,'2026-10-01','x','VAN','EDM',2,4,'OT')")
+    conn.execute("INSERT INTO schedule (game_id, game_date, start_utc, away, home) "
+                 "VALUES (2026020011,'2026-10-02','x','EDM','CGY')")
     conn.commit()
     return conn
 

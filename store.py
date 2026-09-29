@@ -32,7 +32,6 @@ TABLES = {  # table → colonnes, dans l'ordre du CREATE TABLE
     "odds": ["snapshot", "collected_at", "game_date", "away", "home", "book",
              "price_away", "price_home", "p_away", "p_home"],
 }
-SCHEDULE_COLS = ["game_id", "game_date", "start_utc", "away", "home"]
 
 
 def init_db(conn):
@@ -76,9 +75,10 @@ def export_snapshot(conn, snapshot, data_dir=DATA_DIR):
 
 def export_schedule(conn, data_dir=DATA_DIR):
     rows = conn.execute(
-        f"SELECT {','.join(SCHEDULE_COLS)} FROM schedule ORDER BY game_date, game_id").fetchall()
+        f"SELECT {','.join(sch.COLS)} FROM schedule ORDER BY game_date, game_id").fetchall()
+    rows = [["" if v is None else v for v in row] for row in rows]
     path = Path(data_dir) / "schedule.csv"
-    return [path] if rows and _write_if_changed(path, _csv_bytes(SCHEDULE_COLS, rows)) else []
+    return [path] if rows and _write_if_changed(path, _csv_bytes(sch.COLS, rows)) else []
 
 
 def export_all(conn, data_dir=DATA_DIR):
@@ -111,7 +111,9 @@ def build_db(db_path=cm.DB_PATH, data_dir=DATA_DIR):
                 n += len(rows)
         if (data_dir / "schedule.csv").exists():
             cols, rows = _read_csv(data_dir / "schedule.csv")
-            conn.executemany(f"INSERT INTO schedule ({','.join(cols)}) VALUES (?,?,?,?,?)", rows)
+            rows = [[None if v == "" else v for v in row] for row in rows]   # match non joué
+            conn.executemany(f"INSERT INTO schedule ({','.join(cols)}) "
+                             f"VALUES ({','.join('?' * len(cols))})", rows)
     conn.close()
     tmp.replace(db_path)
     return n
