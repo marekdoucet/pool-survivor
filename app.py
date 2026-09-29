@@ -8,6 +8,7 @@ Picks : picks.json local, ou directement dans le dépôt GitHub si la section
 [github] est présente dans .streamlit/secrets.toml (voir DEPLOIEMENT.md).
 """
 
+import hashlib
 import os
 import sqlite3
 import datetime as dt
@@ -46,11 +47,28 @@ PCT = st.column_config.NumberColumn(format="%.1f %%")   # valeurs déjà × 100
 
 # ── Données ────────────────────────────────────────────────────────────────
 # La base est reconstruite depuis data/ quand un fichier y change. `version`
-# (liste des fichiers) fait partie de la clé de chaque cache ci-dessous.
+# (un condensé des fichiers) fait partie de la clé de chaque cache ci-dessous.
 
+# ttl=10 : data/ ne bouge qu'aux deux collectes de la journée, alors que le
+# script est rejoué à chaque clic. Sans ce cache, chaque affichage relit tout
+# le dossier — 66 ms en fin de saison.
+@st.cache_data(ttl=10)
 def data_version():
-    files = sorted(store.DATA_DIR.rglob("*.csv*"))
-    return tuple((str(f), f.stat().st_size, f.stat().st_mtime) for f in files)
+    """Condensé de l'état de data/ : change dès qu'un fichier change.
+
+    Un condensé court plutôt que la liste des fichiers : cette valeur sert de
+    clé à une dizaine de caches, que Streamlit rehache à chaque affichage. La
+    liste atteint 380 entrées en fin de saison (deux fichiers par jour), ce
+    qui mesurait 134 ms de hachage par affichage ; le condensé les ramène à
+    quelques microsecondes.
+    """
+    h = hashlib.sha256()
+    vide = True
+    for f in sorted(store.DATA_DIR.rglob("*.csv*")):
+        info = f.stat()
+        h.update(f"{f}|{info.st_size}|{info.st_mtime}".encode())
+        vide = False
+    return "" if vide else h.hexdigest()
 
 
 @st.cache_data
@@ -221,20 +239,6 @@ this_monday = op.week_start(today)
 from_date, used_set, provisional = pk.planning(picks, today)
 used = tuple(sorted(used_set))
 
-# ── Navigation ─────────────────────────────────────────────────────────────
-# Menu dans la barre latérale plutôt qu'une rangée d'onglets : sept sections
-# tenaient mal sur une ligne. Différence de fond avec st.tabs : les onglets
-# exécutent TOUTES les sections à chaque rechargement, le menu une seule.
-# C'est sans danger ici parce que les sections ne se partagent aucune variable.
-SECTIONS = ["Pick de la semaine", "Plan complet", "Carte des matchups",
-            "Évolution des probabilités", "Équipes en forme",
-            "Précision des sources", "Depuis hier"]
-
-with st.sidebar:
-    st.caption("SECTIONS")
-    section = st.radio("Sections", SECTIONS, label_visibility="collapsed")
-    st.divider()
-
 with st.sidebar:
     st.header("Mes picks")
     if not picks:
@@ -330,7 +334,7 @@ team_form = forms(v)
 
 # ── Pick de la semaine ────────────────────────────────────────────────────
 
-if section == SECTIONS[0]:
+def page_pick():
     current = next((p for p in picks if p["week"] == this_monday.isoformat()), None)
     if current and not provisional:
         st.success(f"Pick de cette semaine verrouillé : **{current['team']}**. "
@@ -443,7 +447,7 @@ if section == SECTIONS[0]:
 
 # ── Plan complet ──────────────────────────────────────────────────────────
 
-if section == SECTIONS[1]:
+def page_plan():
     rows, alive = [], 1.0
     for monday, o in plan:
         alive *= o.p if o else 0.0
@@ -477,7 +481,7 @@ if section == SECTIONS[1]:
 # clair, mêmes valeurs.
 BLUES = ["#0d366b", "#184f95", "#256abf", "#3987e5", "#6da7ec", "#9ec5f4", "#cde2fb"]
 
-if section == SECTIONS[2]:
+def page_carte():
     st.caption("Chaque case : la probabilité de victoire du **meilleur match** de "
                "l'équipe à la journée de pick de la semaine (vide = elle ne joue pas "
                "ce jour-là). Les cases "
@@ -520,7 +524,7 @@ if section == SECTIONS[2]:
 
 # ── Évolution des probabilités ────────────────────────────────────────────
 
-if section == SECTIONS[3]:
+def page_evolution():
     default_team = plan[0][1].team if plan and plan[0][1] else sorted(cm.TEAMS)[0]
     teams_sorted = sorted(cm.TEAMS)
     c1, c2 = st.columns(2)
@@ -574,7 +578,7 @@ if section == SECTIONS[3]:
 
 # ── Équipes en forme ──────────────────────────────────────────────────────
 
-if section == SECTIONS[4]:
+def page_forme():
     played = any(f.results for f in team_form.values())
     hist_r = strength_hist(v)
     snaps_r = sorted(hist_r.snapshot.unique())
@@ -687,7 +691,7 @@ if section == SECTIONS[4]:
 
 # ── Précision des sources ─────────────────────────────────────────────────
 
-if section == SECTIONS[5]:
+def page_precision():
     st.caption("Poids actuels dans le consensus : " + " · ".join(
         f"{SOURCES[s]} {w:.0%}" for s, w in co.WEIGHTS.items())
         + ". Quand une source n'a pas de probabilité pour un match, les poids des "
@@ -719,7 +723,7 @@ if section == SECTIONS[5]:
 
 # ── Depuis hier ───────────────────────────────────────────────────────────
 
-if section == SECTIONS[6]:
+def page_depuis_hier():
     if len(snaps) < 2:
         st.info("Il faut au moins deux collectes pour comparer. Reviens après la "
                 "prochaine collecte quotidienne.")
@@ -764,3 +768,35 @@ if section == SECTIONS[6]:
                 "Avant": PCT, "Maintenant": PCT,
                 "Hausse (points)": st.column_config.NumberColumn(format="+%.1f"),
             })
+
+
+# ── Navigation ─────────────────────────────────────────────────────────────
+# st.navigation plutôt qu'une rangée d'onglets ou un bouton radio : ça donne
+# une vraie navigation de site — des liens groupés dans la barre latérale,
+# une URL par section (donc le bouton Retour du navigateur fonctionne), et le
+# chevron de Streamlit ouvre et ferme le panneau.
+# Comme avec le menu précédent, une seule section s'exécute par affichage,
+# contrairement à st.tabs qui les exécutait toutes.
+
+st.navigation({
+    "Le pick": [
+        st.Page(page_pick, title="Pick de la semaine",
+                icon=":material/sports_hockey:", url_path="pick", default=True),
+        st.Page(page_plan, title="Plan complet",
+                icon=":material/calendar_month:", url_path="plan"),
+    ],
+    "Analyse": [
+        st.Page(page_carte, title="Carte des matchups",
+                icon=":material/grid_on:", url_path="carte"),
+        st.Page(page_evolution, title="Évolution des probabilités",
+                icon=":material/show_chart:", url_path="evolution"),
+        st.Page(page_forme, title="Équipes en forme",
+                icon=":material/trending_up:", url_path="forme"),
+    ],
+    "Fiabilité": [
+        st.Page(page_precision, title="Précision des sources",
+                icon=":material/target:", url_path="precision"),
+        st.Page(page_depuis_hier, title="Depuis hier",
+                icon=":material/update:", url_path="depuis-hier"),
+    ],
+}, expanded=True).run()
