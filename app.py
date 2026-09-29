@@ -173,7 +173,11 @@ def picks_backend():
     except FileNotFoundError:
         gh = None
     if gh:
-        return pk.GitHubPicks(gh["repo"], gh["token"], gh.get("branch", "main"))
+        author = {"name": gh.get("author_name", "marekdoucet"),
+                  "email": gh.get("author_email",
+                                  "183759644+marekdoucet@users.noreply.github.com")}
+        return pk.GitHubPicks(gh["repo"], gh["token"], gh.get("branch", "main"),
+                              author=author)
     return None
 
 

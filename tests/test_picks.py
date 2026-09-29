@@ -82,10 +82,12 @@ class FakeGitHub:
 
 def test_github_picks_roundtrip_and_conflict():
     gh = FakeGitHub()
-    store = pk.GitHubPicks("moi/pool", "jeton", session=gh)
+    me = {"name": "moi", "email": "1+moi@users.noreply.github.com"}
+    store = pk.GitHubPicks("moi/pool", "jeton", session=gh, author=me)
     assert store.load() == {"picks": [], "days": {}}
     store.save({"picks": pk.add([], W1, "VGK"), "days": {}}, "Pick VGK")
     assert gh.puts[0]["message"] == "Pick VGK" and gh.puts[0]["branch"] == "main"
+    assert gh.puts[0]["author"] == gh.puts[0]["committer"] == me   # pas le vrai courriel
 
     other = pk.GitHubPicks("moi/pool", "jeton", session=gh)
     state = other.load()

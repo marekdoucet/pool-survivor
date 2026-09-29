@@ -46,8 +46,12 @@ class GitHubPicks:
     chaque redémarrage. Chaque enregistrement devient un commit.
     """
 
-    def __init__(self, repo, token, branch="main", path="picks.json", session=None):
+    def __init__(self, repo, token, branch="main", path="picks.json", session=None,
+                 author=None):
         self.repo, self.branch, self.path = repo, branch, path
+        # {"name", "email"} des commits ; sans ça, GitHub met le courriel du compte,
+        # visible de tous dans un dépôt public.
+        self.author = author
         self.session = session or requests.Session()
         self.headers = {"Authorization": f"Bearer {token}",
                         "Accept": "application/vnd.github+json"}
@@ -73,6 +77,8 @@ class GitHubPicks:
                    "content": base64.b64encode(content.encode("utf-8")).decode()}
         if self.sha:
             payload["sha"] = self.sha
+        if self.author:
+            payload["author"] = payload["committer"] = self.author
         r = self.session.put(self._url(), headers=self.headers, json=payload, timeout=20)
         if r.status_code in (409, 422):
             raise RuntimeError("picks.json a changé ailleurs entre-temps : recharge la page.")
