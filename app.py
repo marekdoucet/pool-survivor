@@ -27,11 +27,12 @@ PICKS_PATH = Path(os.environ.get("SURVIVOR_PICKS", pk.PICKS_PATH))
 CACHE_DB = Path(".cache") / "survivor.db"
 
 SOURCES = {"consensus": "Consensus", "market": "Casinos", "moneypuck": "MoneyPuck",
-           "dimers": "Dimers"}
-# Palette catégorielle de référence, dans un ordre fixe : la couleur suit la source.
-COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
-# Les 8 couleurs de la palette : au plus 8 équipes comparées à la fois.
-TEAM_COLORS = COLORS + ["#e87ba4", "#008300", "#4a3aa7", "#e34948"]
+           "dimers": "Dimers", "puckcast": "Puckcast"}
+# Palette catégorielle de référence (8 couleurs), dans un ordre fixe :
+# la couleur suit la source, ou l'équipe (au plus 8 équipes comparées à la fois).
+TEAM_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100",
+               "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
+COLORS = TEAM_COLORS[:len(SOURCES)]
 
 st.set_page_config(page_title="Pool survivor NHL", page_icon="🏒", layout="wide")
 

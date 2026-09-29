@@ -1,6 +1,6 @@
 """
 Collecte quotidienne complète :
-MoneyPuck → cotes des casinos → Dimers → calendrier → consensus.
+MoneyPuck → cotes des casinos → Dimers → calendrier → Puckcast → consensus.
 
     python daily.py
 
@@ -21,6 +21,7 @@ import requests
 import collect_moneypuck as cm
 import collect_odds as co
 import collect_dimers as cd
+import collect_puckcast as cp
 import schedule as sch
 import store
 
@@ -60,6 +61,13 @@ def main():
         print(f"{sch.update_schedule()} matchs de saison régulière")
     except (requests.RequestException, ValueError) as e:
         print(f"⚠ {e} (on garde le calendrier précédent)")
+        failed = True
+
+    print("\n── Puckcast")   # après le calendrier : il sert à orienter visiteur/local
+    try:
+        print(f"{len(cp.collect_puckcast(today=today))} matchs prédits")
+    except (requests.RequestException, cp.PuckcastError) as e:
+        print(f"⚠ {e}")
         failed = True
 
     print("\n── Consensus")

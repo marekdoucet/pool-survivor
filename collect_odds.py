@@ -8,7 +8,7 @@ Tables écrites :
     odds   : cotes brutes et probabilités sans marge, par casino
     probs  : source='market'    moyenne des casinos pour chaque match
              source='consensus' moyenne pondérée (WEIGHTS) des sources disponibles
-                                (marché, MoneyPuck, Dimers) pour chaque match
+                                (marché, MoneyPuck, Dimers, Puckcast) pour chaque match
 
 Coût : 1 requête par exécution = 1 crédit par région (REGIONS) → 2 crédits/jour,
 soit ~60 des 500 crédits gratuits par mois.
@@ -33,7 +33,7 @@ API_URL = "https://api.the-odds-api.com/v4/sports/icehockey_nhl/odds"
 REGIONS = "us,eu"   # « eu » inclut Pinnacle, le casino de référence du marché
 # Poids de chaque source dans le consensus (renormalisés selon les sources
 # disponibles pour un match). Le marché des casinos est en général le plus précis.
-WEIGHTS = {"market": 0.6, "moneypuck": 0.2, "dimers": 0.2}
+WEIGHTS = {"market": 0.55, "moneypuck": 0.15, "dimers": 0.15, "puckcast": 0.15}
 
 TEAM_CODES = {
     "anaheim ducks": "ANA", "boston bruins": "BOS", "buffalo sabres": "BUF",
