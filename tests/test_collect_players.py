@@ -68,3 +68,37 @@ def test_couleur_accepte_les_formes_courtes_et_le_style():
 def test_logo_sans_couleur_exploitable_donne_le_neutre():
     assert cpl.team_color('<path fill="#ffffff"/><path fill="#010101"/>') == cpl.NEUTRE
     assert cpl.team_color("") == cpl.NEUTRE
+
+
+# ── Debut de saison ───────────────────────────────────────────────────────
+# Le 29 septembre 2026, la saison a commence : club-stats renvoyait la
+# nouvelle saison avec ZERO joueur pour 30 equipes sur 32, et players.csv est
+# tombe a deux lignes. Plus de joueur, donc plus de photo sur la carte.
+
+def test_saison_precedente():
+    assert cpl.saison_precedente(20262027) == 20252026
+    assert cpl.saison_precedente("20252026") == 20242025
+
+
+def test_une_saison_vide_ne_suffit_pas():
+    """Le cas exact du 29 septembre : l'equipe n'a pas encore joue."""
+    assert cpl.assez_joue({"skaters": []}) is False
+    assert cpl.assez_joue({}) is False
+
+
+def test_un_seul_match_ne_suffit_pas():
+    """Sinon le « meneur » est le premier a marquer, avec 1 point."""
+    payload = {"skaters": [skater(1, "Premier", "Buteur", 1, games=1)]}
+    assert cpl.assez_joue(payload) is False
+
+
+def test_une_saison_entamee_suffit():
+    payload = {"skaters": [skater(1, "A", "B", 25, games=30),
+                           skater(2, "C", "D", 12, games=28)]}
+    assert cpl.assez_joue(payload) is True
+
+
+def test_le_seuil_se_regle():
+    payload = {"skaters": [skater(1, "A", "B", 3, games=5)]}
+    assert cpl.assez_joue(payload, mini=3) is True
+    assert cpl.assez_joue(payload, mini=20) is False

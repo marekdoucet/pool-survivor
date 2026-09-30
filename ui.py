@@ -42,6 +42,19 @@ TEAMS = {
 }
 
 
+def saison_libelle(player):
+    """« 127 points en 2025-26 » — d'où viennent les points affichés.
+
+    En début de saison, le meneur vient de l'année précédente : sans cette
+    précision, « 127 pts » se lirait comme la saison en cours.
+    """
+    s = str(player.get("season") or "")
+    pts = player.get("points", "")
+    if len(s) == 8:
+        return f"{pts} points en {s[2:4]}-{s[6:8]}"
+    return f"{pts} points"
+
+
 def logo(tri, mode="dark"):
     return LOGO_URL.format(tri=tri, mode=mode)
 
@@ -464,7 +477,8 @@ def _carte(tri, player):
         f'<span {chip}>{html.escape(poste)}</span>'
         f'<span class="ps-plate-badge">'
         f'<img src="{logo(tri, "light")}" alt=""></span>'
-        f'<span {chip}>{player["points"]} pts</span>'
+        f'<span {chip} title="{html.escape(saison_libelle(player))}">'
+        f'{player["points"]} pts</span>'
         f'</div></div></div></div>')
 
 

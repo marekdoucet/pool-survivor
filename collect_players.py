@@ -26,10 +26,15 @@ import collect_moneypuck as cm
 import store
 
 API = "https://api-web.nhle.com/v1/club-stats/{team}/now"
+API_SAISON = "https://api-web.nhle.com/v1/club-stats/{team}/{saison}/2"
+# Matchs joués avant qu'un meneur de la saison en cours veuille dire quelque
+# chose. En dessous, on prend celui de la saison précédente : au premier match,
+# le « meneur » est le premier à marquer, et trente équipes n'ont rien du tout.
+SAISON_MIN = 20
 LOGO = "https://assets.nhle.com/logos/nhl/svg/{team}_dark.svg"
 SHOT = "https://assets.nhle.com/mugs/actionshots/1296x729/{pid}.jpg"
 COLS = ["team", "player_id", "first_name", "last_name", "position",
-        "games", "goals", "points", "headshot", "action", "color"]
+        "games", "goals", "points", "headshot", "action", "color", "season"]
 NEUTRE = "#3a3a35"          # si le logo ne donne aucune couleur exploitable
 RE_FILL = re.compile(r'fill[:=]"?\s*(#[0-9A-Fa-f]{3,6})')
 
@@ -44,6 +49,18 @@ TEAMS = [
 
 class PlayersError(Exception):
     pass
+
+
+def saison_precedente(saison):
+    """20262027 → 20252026."""
+    s = str(saison)
+    return int(f"{int(s[:4]) - 1}{int(s[4:]) - 1}")
+
+
+def assez_joue(payload, mini=SAISON_MIN):
+    """Le meneur de cette saison veut-il déjà dire quelque chose ?"""
+    joues = [s.get("gamesPlayed") or 0 for s in payload.get("skaters") or []]
+    return max(joues, default=0) >= mini
 
 
 def _hex6(c):
@@ -101,6 +118,7 @@ def leader(payload, team):
         best.get("headshot", ""),
         SHOT.format(pid=best.get("playerId")),
         "",                 # couleur : remplie par collect_players
+        payload.get("season", ""),
     ]
 
 
@@ -112,7 +130,16 @@ def collect_players(teams=TEAMS, data_dir=store.DATA_DIR, session=None):
         try:
             r = session.get(API.format(team=team), headers=cm.HEADERS, timeout=30)
             r.raise_for_status()
-            row = leader(r.json(), team)
+            payload = r.json()
+            if not assez_joue(payload):
+                # Début de saison : on garde le meneur de l'an dernier, sinon
+                # la carte n'a plus ni joueur ni photo pendant des semaines.
+                avant = saison_precedente(payload.get("season") or 0)
+                r2 = session.get(API_SAISON.format(team=team, saison=avant),
+                                 headers=cm.HEADERS, timeout=30)
+                r2.raise_for_status()
+                payload = r2.json()
+            row = leader(payload, team)
         except (requests.RequestException, ValueError, KeyError):
             row = None
         if row is None:
@@ -121,9 +148,11 @@ def collect_players(teams=TEAMS, data_dir=store.DATA_DIR, session=None):
         try:
             lg = session.get(LOGO.format(team=team), headers=cm.HEADERS, timeout=30)
             lg.raise_for_status()
-            row[-1] = team_color(lg.text)
+            # par nom, pas par position : une colonne ajoutee a la fin a
+            # deja fait ecrire la couleur par-dessus la saison.
+            row[COLS.index("color")] = team_color(lg.text)
         except requests.RequestException:
-            row[-1] = NEUTRE
+            row[COLS.index("color")] = NEUTRE
         rows.append(row)
     if not rows:
         raise PlayersError("aucune équipe n'a répondu (l'API a changé ?)")
