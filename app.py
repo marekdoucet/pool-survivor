@@ -82,6 +82,10 @@ st.set_page_config(page_title="Pool survivor NHL", page_icon="🏒", layout="wid
 ui.inject_css()
 
 PCT = st.column_config.NumberColumn(format="%.1f %%")   # valeurs déjà × 100
+# L'espérance n'est PAS un pourcentage : c'est un nombre de semaines survécues.
+# Sans unité, à côté de colonnes en %, 2.34 se lit de travers.
+SEM = "%.2f sem."
+SEM_SIGNE = "%+.2f sem."
 
 
 # ── Données ────────────────────────────────────────────────────────────────
@@ -588,11 +592,13 @@ def page_pick():
         exp_montree = mien if mien is not None else exp_weeks
         vedette = choisi or best
         ui.tiles([
-            ("Espérance", f"{exp_montree:.2f}",
-             f"semaines survécues sur {len(plan)}"
+            ("Espérance", f"{exp_montree:.2f} sem.",
+             f"survécues sur {len(plan)}"
              + ("" if mien is None else " avec ce pick")),
-            ("Coût du choix", "—" if mien is None else f"{top_e - mien:+.2f}",
-             "vs le meilleur choix" if mien is not None else "aucun pick choisi"),
+            ("Coût du choix",
+             "—" if mien is None else f"{top_e - mien:+.2f} sem.",
+             "d'espérance vs le meilleur choix" if mien is not None
+             else "aucun pick choisi"),
             ("Match", "Domicile" if vedette.home else "Visiteur",
              f"contre {vedette.opponent} · {fr_day(vedette.game_date)}"),
             ("Série en cours", team_form[vedette.team].streak_label or "aucune",
@@ -681,8 +687,14 @@ def page_pick():
                                       "on ne peut pas se démarquer en la "
                                       "prenant."),
                              "Probabilité": PCT,
-                             "Espérance": st.column_config.NumberColumn(format="%.2f"),
-                             "Coût": st.column_config.NumberColumn(format="%.2f"),
+                             "Espérance": st.column_config.NumberColumn(
+                                 format=SEM,
+                                 help="Semaines survécues attendues en prenant "
+                                      "cette équipe, puis le meilleur plan"),
+                             "Coût": st.column_config.NumberColumn(
+                                 format=SEM,
+                                 help="Semaines d'espérance perdues par rapport "
+                                      "au meilleur choix"),
                          })
 
 
@@ -707,7 +719,8 @@ def page_plan():
         st.info("Semaine(s) sautée(s), aucun match la fin de semaine : "
                 + ", ".join(f"fin de semaine du {fr_weekend(m)}" for m in skipped))
     ui.tiles([
-        ("Espérance", f"{exp_weeks:.2f}", f"semaines survécues sur {len(plan)}"),
+        ("Espérance", f"{exp_weeks:.2f} sem.",
+         f"survécues sur {len(plan)}"),
         ("Semaines planifiées", str(len(plan)), "jusqu'à la fin de la saison"),
         # Le maillon faible plutôt que la survie cumulée : le produit de 27
         # probabilités tend vers zéro et n'apprend rien ; la semaine la plus
@@ -1013,7 +1026,7 @@ def page_precision():
                              "Probabilité de gagner": PCT,
                              "Encore en vie après": PCT,
                              "Espérance cumulée": st.column_config.NumberColumn(
-                                 format="%.2f"),
+                                 format=SEM),
                          })
             # Trois décimales : avec deux, le produit affiché ne retombait pas sur
             # le pourcentage du tableau, ce qui avait l'air d'une erreur de calcul.
@@ -1056,7 +1069,8 @@ def page_depuis_hier():
         old_pick = prev_plan[0][1].team if prev_plan and prev_plan[0][1] else "—"
         c1.metric("Pick de la semaine", now_pick)
         c1.caption("Inchangé" if now_pick == old_pick else f"Avant : {old_pick}")
-        c2.metric("Espérance", f"{exp_weeks:.2f}", f"{exp_weeks - prev_exp:+.2f}")
+        c2.metric("Espérance", f"{exp_weeks:.2f} sem.",
+                  f"{exp_weeks - prev_exp:+.2f} sem.")
 
         old = {m: o.team for m, o in prev_plan if o}
         changes = [{"Semaine du": str(m), "Avant": old.get(m, "—"), "Maintenant": o.team}
@@ -1238,18 +1252,18 @@ def page_pool():
                      column_config={
                          "Gagne cette semaine": PCT,
                          "Potentiel après": st.column_config.NumberColumn(
-                             format="%.2f",
+                             format=SEM,
                              help="Meilleur plan atteignable À PARTIR DE LA "
                                   "SEMAINE PROCHAINE, avec ses équipes "
                                   "restantes. Garder un gros club le fait "
                                   "monter."),
                          "Survie totale": st.column_config.NumberColumn(
-                             format="%.2f",
+                             format=SEM,
                              help="p(gagner cette semaine) × (1 + potentiel "
                                   "après). Il faut passer la semaine avant de "
                                   "profiter de ce qu'on a gardé."),
                          "Écart vs moi": st.column_config.NumberColumn(
-                             format="%+.2f",
+                             format=SEM_SIGNE,
                              help="Positif = mieux placé que moi"),
                      })
         st.markdown(
