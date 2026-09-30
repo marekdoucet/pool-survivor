@@ -5,4 +5,5 @@ scipy
 pandas
 altair
 streamlit
+Authlib>=1.3.2      # requis par st.login ; pas installe par defaut
 pytest
