@@ -23,6 +23,7 @@ import collect_odds as co
 import collect_dimers as cd
 import collect_puckcast as cp
 import collect_players as cpl
+import page
 import schedule as sch
 import store
 
@@ -89,6 +90,16 @@ def main():
     poids = ", ".join(f"{s} {w:.0%}" for s, w in co.WEIGHTS.items())
     print(f"{n_mk} matchs avec cotes des casinos, {n_other} sans (poids : {poids})")
     print(f"\n── Export : {len(changed)} fichier(s) modifié(s) dans {store.DATA_DIR}/")
+
+    print("\n── Page publique")
+    try:
+        modifies = page.ecrire()
+        print(f"{len(modifies)} fichier(s) dans docs/"
+              + (" (rien n'a change)" if not modifies else ""))
+    except Exception as e:
+        # La vitrine ne doit JAMAIS faire echouer la collecte : les
+        # donnees comptent, la page est secondaire.
+        print(f"⚠ page non generee : {e}")
 
     sys.exit(1 if failed else 0)
 

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://marekdoucet.github.io/pool-survivor/sitemap.xml
