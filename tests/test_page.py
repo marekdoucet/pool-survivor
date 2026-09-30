@@ -15,6 +15,10 @@ CTX = {
                "e": 2.300}],
     "disettes": [{"semaine": {"fr": "19 octobre", "en": "October 19"},
                   "p": 0.624}],
+    "joueurs": {"COL": {"first_name": "Nathan", "last_name": "MacKinnon",
+                        "position": "C", "points": "127", "color": "#236192",
+                        "headshot": "https://exemple/portrait.png",
+                        "action": "https://exemple/action.jpg"}},
 }
 
 
@@ -48,7 +52,7 @@ def test_les_deux_pages_se_declarent_alternatives():
         h = page.rendu(CTX, lang)
         assert 'hreflang="fr"' in h and 'hreflang="en"' in h
         assert 'hreflang="x-default"' in h
-        assert f'<html lang="{lang}">' in h
+        assert f'<html lang="{lang}"' in h
 
 
 def test_chaque_page_declare_sa_propre_adresse_canonique():
@@ -104,3 +108,49 @@ def test_les_dates_suivent_lusage_de_chaque_langue():
 def test_le_pourcentage_suit_lusage_de_chaque_langue():
     assert page.pourcent(0.709, "fr") == "70.9 %"    # espace insécable d'usage
     assert page.pourcent(0.709, "en") == "70.9%"
+
+
+# ── L'apparence de l'app, reprise sur la vitrine ──────────────────────────
+
+def test_la_carte_de_hockey_est_sur_la_page():
+    h = page.rendu(CTX, "fr")
+    assert 'class="carte-fond"' in h and "https://exemple/action.jpg" in h
+    assert 'class="carte-vis"' in h and "https://exemple/portrait.png" in h
+    assert "Nathan MacKinnon" in h and "127 pts" in h
+
+
+def test_le_poste_est_traduit():
+    assert "Centre" in page.rendu(CTX, "fr")
+    assert "Center" in page.rendu(CTX, "en")
+
+
+def test_la_lueur_prend_la_couleur_de_lequipe():
+    h = page.rendu(CTX, "fr")
+    assert "--lueur:rgba(35,97,146" in h          # #236192
+    assert "--photo:url('https://exemple/action.jpg')" in h
+
+
+def test_lencre_des_jetons_est_calculee():
+    assert page.encre("#ffb81c") == "#11110f"    # or des Bruins
+    assert page.encre("#00205b") == "#fff"       # marine des Leafs
+
+
+def test_sans_joueur_la_carte_se_reduit_au_logo():
+    # On cherche l'attribut, pas le mot : le nom des classes apparaît aussi
+    # dans la feuille de style, qui est toujours présente.
+    ctx = {**CTX, "joueurs": {}}
+    h = page.rendu(ctx, "fr")
+    assert 'class="carte-logo"' in h
+    assert 'class="carte-fond"' not in h
+
+
+def test_les_logos_sont_dans_le_tableau():
+    h = page.rendu(CTX, "fr")
+    assert "logos/nhl/svg/COL_dark.svg" in h
+    assert "logos/nhl/svg/EDM_dark.svg" in h
+
+
+def test_les_images_sont_en_chargement_differe():
+    """Le texte doit s'afficher avant les images : c'est lui qu'on indexe."""
+    h = page.rendu(CTX, "fr")
+    assert h.count('loading="lazy"') >= 4

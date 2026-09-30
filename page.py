@@ -10,13 +10,23 @@ collecte et servies gratuitement par GitHub Pages depuis docs/.
     python page.py        # écrit docs/index.html, docs/en/index.html,
                           # docs/sitemap.xml et docs/robots.txt
 
-Aucun appel d'API : tout vient de la base déjà construite depuis data/. Le
-nombre de visiteurs n'a donc aucun effet sur les crédits The Odds API.
+Aucun appel d'API : tout vient de la base déjà construite depuis data/, et les
+images sont servies par le CDN public de la LNH. Le nombre de visiteurs n'a
+donc aucun effet sur les crédits The Odds API.
 
-L'app reste l'outil privé où l'on décide ; ces pages sont la vitrine.
+Le style reprend celui de l'app — carte de hockey, photo fondue, lueur aux
+couleurs de l'équipe. Le CSS est recopié ici plutôt qu'importé de ui.py : ce
+module-là dépend de Streamlit, qui n'a rien à faire dans la collecte
+quotidienne. Les deux peuvent diverger sans dommage, ce sont deux publics
+différents.
+
+L'app reste l'outil privé où l'on décide ; ces pages sont la vitrine, et elles
+ne montrent aucune donnée personnelle — ni picks, ni registre du pool.
 """
 
+import csv
 import html as _html
+import io
 import sqlite3
 import datetime as dt
 from pathlib import Path
@@ -32,6 +42,8 @@ DOCS = Path("docs")
 BASE = "https://marekdoucet.github.io/pool-survivor"
 SAISON = "2026-27"
 SEUIL_DISETTE = 0.65     # en dessous, aucune équipe ne vaut vraiment le coup
+LOGO = "https://assets.nhle.com/logos/nhl/svg/{tri}_{mode}.svg"
+JOUEURS = Path("data") / "players.csv"
 
 MOIS = {
     "fr": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
@@ -43,6 +55,12 @@ JOURS = {
     "fr": ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
     "en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
            "Sunday"],
+}
+POSTES = {
+    "fr": {"C": "Centre", "L": "Ailier gauche", "R": "Ailier droit",
+           "D": "Défenseur", "G": "Gardien"},
+    "en": {"C": "Center", "L": "Left wing", "R": "Right wing",
+           "D": "Defense", "G": "Goalie"},
 }
 
 TEAMS = {
@@ -96,7 +114,8 @@ T = {
                  "jour à partir des cotes des casinos et de trois modèles "
                  "statistiques."),
         "maj": "Mis à jour le {date}. Saison {saison}.",
-        "contre": "contre", "a": "à",
+        "contre": "contre", "a": "à", "chances": "de chances de gagner",
+        "pts": "pts",
         "h_choix": "Tous les choix de la semaine du {semaine}",
         "th": ["Équipe", "Match", "Chances de gagner", "Espérance (sem.)"],
         "note": ("« Espérance » = nombre de semaines que le plan devrait "
@@ -135,7 +154,8 @@ T = {
                  "an NHL survivor pool, recalculated twice a day from "
                  "sportsbook odds and three statistical models."),
         "maj": "Updated {date}. {saison} season.",
-        "contre": "vs", "a": "at",
+        "contre": "vs", "a": "at", "chances": "win probability",
+        "pts": "pts",
         "h_choix": "Every option for the week of {semaine}",
         "th": ["Team", "Game", "Win probability", "Expected weeks"],
         "note": ("\"Expected weeks\" = how many weeks the plan should survive "
@@ -167,33 +187,92 @@ T = {
     },
 }
 
+POLICE = ("https://fonts.googleapis.com/css2?"
+          "family=Barlow+Condensed:wght@600;700&display=swap")
+
 CSS = """
-:root{color-scheme:dark;--bg:#17171b;--carte:#232329;--bord:#34343d;
---encre:#fff;--encre2:#c3c2b7;--accent:#3987e5}
+:root{color-scheme:dark;--carte:#232329;--bord:#34343d;--encre:#fff;
+--encre2:#c3c2b7;--accent:#3987e5}
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(176deg,#1d1d23,#131316);color:var(--encre);
+body{margin:0;color:var(--encre);
+background:radial-gradient(1100px 620px at 74% -12%,var(--lueur),transparent 62%),
+linear-gradient(176deg,#1d1d23,#131316) fixed;
 font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
-.page{max-width:820px;margin:0 auto;padding:2.5rem 1.2rem 4rem}
+.page{max-width:860px;margin:0 auto;padding:2.5rem 1.2rem 4rem}
 h1{font-size:2rem;line-height:1.15;margin:0 0 .3rem}
 h2{font-size:1.15rem;margin:2.4rem 0 .6rem}
 .maj{color:var(--encre2);font-size:.9rem;margin:0 0 2rem}
 .lang{float:right;font-size:.9rem}
-.top{background:var(--carte);border:1px solid var(--bord);border-left:4px solid var(--accent);
-border-radius:.9rem;padding:1.3rem 1.5rem;margin:0 0 1.5rem;overflow:hidden}
-.top .eq{font-size:1.9rem;font-weight:700;line-height:1.1}
-.top .pc{font-size:2.6rem;font-weight:700;float:right;margin-left:1rem}
-.top .de{color:var(--encre2);margin-top:.3rem}
-table{width:100%;border-collapse:collapse;margin:.6rem 0 0;font-size:.95rem}
-th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--bord)}
+
+/* Bandeau : photo d'action fondue à droite, lueur aux couleurs de l'équipe.
+   Le texte reste à gauche, sur la partie restée sombre : aucune valeur ne
+   se lit par-dessus une image. */
+.hero{position:relative;overflow:hidden;isolation:isolate;display:flex;
+align-items:center;gap:1.8rem;flex-wrap:wrap;border:1px solid var(--bord);
+border-radius:1.1rem;padding:1.5rem 1.8rem;margin:0 0 1.6rem;
+background:linear-gradient(135deg,#26262e,#17171c);
+box-shadow:0 18px 46px rgba(0,0,0,.45)}
+.hero::before{content:"";position:absolute;inset:-14% -4% -14% 30%;z-index:-2;
+background:var(--photo) center/cover;filter:blur(2px) saturate(.85);opacity:.6;
+-webkit-mask-image:linear-gradient(to right,transparent 4%,#000 58%);
+mask-image:linear-gradient(to right,transparent 4%,#000 58%)}
+.hero-txt{flex:1 1 240px;min-width:0;position:relative}
+.hero-eq{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:3rem;
+font-weight:700;line-height:1.02;margin:0}
+.hero-de{color:var(--encre2);margin-top:.3rem}
+.hero-pc{flex:none;text-align:right;min-width:150px;position:relative;
+background:rgba(16,16,20,.62);backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.1);border-radius:.9rem;padding:.8rem 1.1rem}
+.hero-pc b{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:3.4rem;
+font-weight:700;line-height:.95;display:block}
+.hero-pc span{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+color:var(--encre2)}
+
+/* Carte de hockey : proportions 5:7, cadre argenté, photo d'action en décor
+   et portrait détouré par-dessus — les photos d'action ne sont pas cadrées
+   sur le joueur, le portrait garantit qu'on voit le bon. */
+.carte{flex:none;width:186px;aspect-ratio:5/7;padding:7px;border-radius:.55rem;
+background:linear-gradient(150deg,#fff,#d6d9dd 26%,#f6f7f8 48%,#bfc3c8 74%,#eef0f2);
+box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.carte-in{position:relative;height:100%;border-radius:.28rem;overflow:hidden;
+background:#0e0e0d}
+.carte-fond{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+object-position:50% 30%;filter:blur(3px) brightness(.55)}
+.carte-vis{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+width:124%;max-width:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+.carte-logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+width:66%}
+.plaque{position:absolute;left:0;right:0;bottom:0;padding:5px 6px 6px;
+background:linear-gradient(#fdfdfd,#e4e6e9)}
+.plaque-nom{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:.92rem;
+font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#15151a;
+text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plaque-l{display:flex;align-items:center;gap:4px;margin-top:3px}
+.jeton{flex:1 1 0;min-width:0;border-radius:2px;padding:2px;
+font-family:"Barlow Condensed",system-ui,sans-serif;font-size:.58rem;
+font-weight:600;letter-spacing:.07em;text-transform:uppercase;text-align:center;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ecusson{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.ecusson img{width:20px;height:20px}
+
+table{width:100%;border-collapse:collapse;margin:.6rem 0 0;font-size:.95rem;
+background:rgba(35,35,42,.62);border:1px solid var(--bord);border-radius:1rem;
+overflow:hidden}
+th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--bord)}
 th{color:var(--encre2);font-weight:600;font-size:.82rem;text-transform:uppercase;
 letter-spacing:.06em}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td.eq{display:flex;align-items:center;gap:.5rem}
+td.eq img{width:22px;height:22px;flex:none}
 p{color:#ddd}
 .note{color:var(--encre2);font-size:.9rem}
 a{color:var(--accent)}
 footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--bord);
 color:var(--encre2);font-size:.85rem}
-@media(max-width:560px){.top .pc{float:none;display:block;margin:0 0 .4rem}}
+@media(max-width:620px){.hero{gap:1.1rem;padding:1.2rem}.carte{width:140px}
+.hero-eq{font-size:2rem}.hero-pc{text-align:left}.hero-pc b{font-size:2.6rem}}
 """
 
 # Où vit chaque langue. Le français est la racine ; l'anglais un sous-dossier.
@@ -203,6 +282,41 @@ CHEMINS = {"fr": ("index.html", f"{BASE}/"),
 
 def nom(tri, lang):
     return TEAMS[lang].get(tri, tri)
+
+
+def logo(tri, mode="dark"):
+    return LOGO.format(tri=tri, mode=mode)
+
+
+def rgba(hexa, alpha):
+    """'#236192' + 0.3 → 'rgba(35,97,146,0.3)'."""
+    h = hexa.lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def encre(bg):
+    """Noir ou blanc sur `bg`, selon le meilleur contraste (luminance WCAG)."""
+    h = bg.lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    ch = []
+    for i in (0, 2, 4):
+        c = int(h[i:i + 2], 16) / 255
+        ch.append(c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4)
+    lum = 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+    return "#11110f" if (lum + 0.05) / 0.05 > 1.05 / (lum + 0.05) else "#fff"
+
+
+def joueurs(chemin=JOUEURS):
+    """tricode → meneur de l'équipe. Absent = carte réduite au logo."""
+    chemin = Path(chemin)
+    if not chemin.exists():
+        return {}
+    with io.open(chemin, encoding="utf-8") as f:
+        return {r["team"]: r for r in csv.DictReader(f)}
 
 
 def fr_date(d, lang):
@@ -219,6 +333,31 @@ def pourcent(p, lang):
     return f"{p * 100:.1f} %" if lang == "fr" else f"{p * 100:.1f}%"
 
 
+def carte(tri, joueur, lang):
+    """La carte de hockey. Sans joueur connu, le logo prend toute la place."""
+    e = _html.escape
+    if not joueur or not joueur.get("action"):
+        return (f'<div class="carte"><div class="carte-in">'
+                f'<img class="carte-logo" src="{logo(tri)}" alt="" loading="lazy">'
+                f'</div></div>')
+    coul = joueur.get("color") or "#3a3a35"
+    poste = POSTES[lang].get(joueur.get("position", ""), joueur.get("position", ""))
+    qui = f"{joueur['first_name']} {joueur['last_name']}"
+    jeton = f'class="jeton" style="background:{e(coul)};color:{encre(coul)}"'
+    visage = (f'<img class="carte-vis" src="{e(joueur["headshot"])}" '
+              f'alt="{e(qui)}" loading="lazy">' if joueur.get("headshot") else "")
+    return (
+        f'<div class="carte"><div class="carte-in">'
+        f'<img class="carte-fond" src="{e(joueur["action"])}" alt="" loading="lazy">'
+        f'{visage}'
+        f'<div class="plaque"><div class="plaque-nom">{e(qui)}</div>'
+        f'<div class="plaque-l"><span {jeton}>{e(poste)}</span>'
+        f'<span class="ecusson"><img src="{logo(tri, "light")}" alt="" '
+        f'loading="lazy"></span>'
+        f'<span {jeton}>{joueur["points"]} {T[lang]["pts"]}</span>'
+        f'</div></div></div></div>')
+
+
 def rendu(ctx, lang):
     """Le HTML complet d'une langue, à partir d'un dictionnaire simple.
 
@@ -226,14 +365,22 @@ def rendu(ctx, lang):
     """
     e, t = _html.escape, T[lang]
     best = ctx["meilleur"]
+    vedette = ctx["joueurs"].get(best["team"])
     eq = nom(best["team"], lang)
     titre = t["titre"].format(equipe=eq)
     desc = t["desc"].format(equipe=eq, p=pourcent(best["p"], lang),
                             adv=nom(best["opponent"], lang))
     autre = "en" if lang == "fr" else "fr"
 
+    coul = (vedette or {}).get("color") or "#3987e5"
+    photo = (f"url('{e((vedette or {}).get('action', ''))}')"
+             if vedette and vedette.get("action") else "none")
+    style_page = f"--lueur:{rgba(coul, 0.26)}"
+    style_hero = f"--photo:{photo}"
+
     lignes = "\n".join(
-        f"<tr><td>{e(nom(o['team'], lang))}</td>"
+        f'<tr><td class=eq><img src="{logo(o["team"])}" alt="" loading="lazy">'
+        f'{e(nom(o["team"], lang))}</td>'
         f"<td>{t['contre'] if o['home'] else t['a']} "
         f"{e(nom(o['opponent'], lang))}</td>"
         f"<td class=n>{pourcent(o['p'], lang)}</td>"
@@ -251,7 +398,7 @@ def rendu(ctx, lang):
                  for i, h in enumerate(t["th"]))
 
     return f"""<!doctype html>
-<html lang="{lang}">
+<html lang="{lang}" style="{style_page}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -265,7 +412,10 @@ def rendu(ctx, lang):
 <meta property="og:title" content="{e(titre)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{CHEMINS[lang][1]}">
+<meta property="og:image" content="{e((vedette or {}).get('action', ''))}">
 <meta property="og:locale" content="{'fr_CA' if lang == 'fr' else 'en_CA'}">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="{POLICE}">
 <style>{CSS}</style>
 </head>
 <body>
@@ -274,11 +424,15 @@ def rendu(ctx, lang):
 <h1>{t['h1']}</h1>
 <p class="maj">{t['maj'].format(date=e(ctx['maj'][lang]), saison=SAISON)}</p>
 
-<div class="top">
-  <span class="pc">{pourcent(best['p'], lang)}</span>
-  <div class="eq">{e(eq)}</div>
-  <div class="de">{t['contre'] if best['home'] else t['a']}
+<div class="hero" style="{style_hero}">
+{carte(best['team'], vedette, lang)}
+<div class="hero-txt">
+  <h2 class="hero-eq">{e(eq)}</h2>
+  <div class="hero-de">{t['contre'] if best['home'] else t['a']}
   {e(nom(best['opponent'], lang))}, {e(ctx['jour_match'][lang])}</div>
+</div>
+<div class="hero-pc"><b>{pourcent(best['p'], lang)}</b>
+<span>{t['chances']}</span></div>
 </div>
 
 <h2>{t['h_choix'].format(semaine=e(ctx['semaine'][lang]))}</h2>
@@ -341,6 +495,7 @@ def contexte(conn, today=None):
         "choix": [{"team": o.team, "opponent": o.opponent, "home": o.home,
                    "p": o.p, "e": e} for o, e in alts],
         "disettes": disettes[:5],
+        "joueurs": joueurs(),
     }
 
 

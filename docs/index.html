@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" style="--lueur:rgba(35,97,146,0.26)">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -13,34 +13,93 @@
 <meta property="og:title" content="Pool survivor LNH : Avalanche du Colorado est le pick de la semaine">
 <meta property="og:description" content="Avalanche du Colorado à 70.9 % contre Blues de St. Louis. Le meilleur pick de la semaine pour un pool survivor de hockey, recalculé deux fois par jour à partir des cotes des casinos et de trois modèles statistiques.">
 <meta property="og:url" content="https://marekdoucet.github.io/pool-survivor/">
+<meta property="og:image" content="https://assets.nhle.com/mugs/actionshots/1296x729/8477492.jpg">
 <meta property="og:locale" content="fr_CA">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&display=swap">
 <style>
-:root{color-scheme:dark;--bg:#17171b;--carte:#232329;--bord:#34343d;
---encre:#fff;--encre2:#c3c2b7;--accent:#3987e5}
+:root{color-scheme:dark;--carte:#232329;--bord:#34343d;--encre:#fff;
+--encre2:#c3c2b7;--accent:#3987e5}
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(176deg,#1d1d23,#131316);color:var(--encre);
+body{margin:0;color:var(--encre);
+background:radial-gradient(1100px 620px at 74% -12%,var(--lueur),transparent 62%),
+linear-gradient(176deg,#1d1d23,#131316) fixed;
 font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
-.page{max-width:820px;margin:0 auto;padding:2.5rem 1.2rem 4rem}
+.page{max-width:860px;margin:0 auto;padding:2.5rem 1.2rem 4rem}
 h1{font-size:2rem;line-height:1.15;margin:0 0 .3rem}
 h2{font-size:1.15rem;margin:2.4rem 0 .6rem}
 .maj{color:var(--encre2);font-size:.9rem;margin:0 0 2rem}
 .lang{float:right;font-size:.9rem}
-.top{background:var(--carte);border:1px solid var(--bord);border-left:4px solid var(--accent);
-border-radius:.9rem;padding:1.3rem 1.5rem;margin:0 0 1.5rem;overflow:hidden}
-.top .eq{font-size:1.9rem;font-weight:700;line-height:1.1}
-.top .pc{font-size:2.6rem;font-weight:700;float:right;margin-left:1rem}
-.top .de{color:var(--encre2);margin-top:.3rem}
-table{width:100%;border-collapse:collapse;margin:.6rem 0 0;font-size:.95rem}
-th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--bord)}
+
+/* Bandeau : photo d'action fondue à droite, lueur aux couleurs de l'équipe.
+   Le texte reste à gauche, sur la partie restée sombre : aucune valeur ne
+   se lit par-dessus une image. */
+.hero{position:relative;overflow:hidden;isolation:isolate;display:flex;
+align-items:center;gap:1.8rem;flex-wrap:wrap;border:1px solid var(--bord);
+border-radius:1.1rem;padding:1.5rem 1.8rem;margin:0 0 1.6rem;
+background:linear-gradient(135deg,#26262e,#17171c);
+box-shadow:0 18px 46px rgba(0,0,0,.45)}
+.hero::before{content:"";position:absolute;inset:-14% -4% -14% 30%;z-index:-2;
+background:var(--photo) center/cover;filter:blur(2px) saturate(.85);opacity:.6;
+-webkit-mask-image:linear-gradient(to right,transparent 4%,#000 58%);
+mask-image:linear-gradient(to right,transparent 4%,#000 58%)}
+.hero-txt{flex:1 1 240px;min-width:0;position:relative}
+.hero-eq{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:3rem;
+font-weight:700;line-height:1.02;margin:0}
+.hero-de{color:var(--encre2);margin-top:.3rem}
+.hero-pc{flex:none;text-align:right;min-width:150px;position:relative;
+background:rgba(16,16,20,.62);backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.1);border-radius:.9rem;padding:.8rem 1.1rem}
+.hero-pc b{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:3.4rem;
+font-weight:700;line-height:.95;display:block}
+.hero-pc span{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+color:var(--encre2)}
+
+/* Carte de hockey : proportions 5:7, cadre argenté, photo d'action en décor
+   et portrait détouré par-dessus — les photos d'action ne sont pas cadrées
+   sur le joueur, le portrait garantit qu'on voit le bon. */
+.carte{flex:none;width:186px;aspect-ratio:5/7;padding:7px;border-radius:.55rem;
+background:linear-gradient(150deg,#fff,#d6d9dd 26%,#f6f7f8 48%,#bfc3c8 74%,#eef0f2);
+box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.carte-in{position:relative;height:100%;border-radius:.28rem;overflow:hidden;
+background:#0e0e0d}
+.carte-fond{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+object-position:50% 30%;filter:blur(3px) brightness(.55)}
+.carte-vis{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+width:124%;max-width:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+.carte-logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+width:66%}
+.plaque{position:absolute;left:0;right:0;bottom:0;padding:5px 6px 6px;
+background:linear-gradient(#fdfdfd,#e4e6e9)}
+.plaque-nom{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:.92rem;
+font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#15151a;
+text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plaque-l{display:flex;align-items:center;gap:4px;margin-top:3px}
+.jeton{flex:1 1 0;min-width:0;border-radius:2px;padding:2px;
+font-family:"Barlow Condensed",system-ui,sans-serif;font-size:.58rem;
+font-weight:600;letter-spacing:.07em;text-transform:uppercase;text-align:center;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ecusson{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.ecusson img{width:20px;height:20px}
+
+table{width:100%;border-collapse:collapse;margin:.6rem 0 0;font-size:.95rem;
+background:rgba(35,35,42,.62);border:1px solid var(--bord);border-radius:1rem;
+overflow:hidden}
+th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--bord)}
 th{color:var(--encre2);font-weight:600;font-size:.82rem;text-transform:uppercase;
 letter-spacing:.06em}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td.eq{display:flex;align-items:center;gap:.5rem}
+td.eq img{width:22px;height:22px;flex:none}
 p{color:#ddd}
 .note{color:var(--encre2);font-size:.9rem}
 a{color:var(--accent)}
 footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--bord);
 color:var(--encre2);font-size:.85rem}
-@media(max-width:560px){.top .pc{float:none;display:block;margin:0 0 .4rem}}
+@media(max-width:620px){.hero{gap:1.1rem;padding:1.2rem}.carte{width:140px}
+.hero-eq{font-size:2rem}.hero-pc{text-align:left}.hero-pc b{font-size:2.6rem}}
 </style>
 </head>
 <body>
@@ -49,25 +108,29 @@ color:var(--encre2);font-size:.85rem}
 <h1>Pool survivor hockey — le pick de la semaine</h1>
 <p class="maj">Mis à jour le mercredi 30 septembre. Saison 2026-27.</p>
 
-<div class="top">
-  <span class="pc">70.9 %</span>
-  <div class="eq">Avalanche du Colorado</div>
-  <div class="de">contre
+<div class="hero" style="--photo:url('https://assets.nhle.com/mugs/actionshots/1296x729/8477492.jpg')">
+<div class="carte"><div class="carte-in"><img class="carte-fond" src="https://assets.nhle.com/mugs/actionshots/1296x729/8477492.jpg" alt="" loading="lazy"><img class="carte-vis" src="https://assets.nhle.com/mugs/nhl/20252026/COL/8477492.png" alt="Nathan MacKinnon" loading="lazy"><div class="plaque"><div class="plaque-nom">Nathan MacKinnon</div><div class="plaque-l"><span class="jeton" style="background:#236192;color:#fff">Centre</span><span class="ecusson"><img src="https://assets.nhle.com/logos/nhl/svg/COL_light.svg" alt="" loading="lazy"></span><span class="jeton" style="background:#236192;color:#fff">127 pts</span></div></div></div></div>
+<div class="hero-txt">
+  <h2 class="hero-eq">Avalanche du Colorado</h2>
+  <div class="hero-de">contre
   Blues de St. Louis, samedi 3 octobre</div>
+</div>
+<div class="hero-pc"><b>70.9 %</b>
+<span>de chances de gagner</span></div>
 </div>
 
 <h2>Tous les choix de la semaine du 28 septembre</h2>
 <table>
 <thead><tr><th>Équipe</th><th>Match</th><th class=n>Chances de gagner</th><th class=n>Espérance (sem.)</th></tr></thead>
 <tbody>
-<tr><td>Avalanche du Colorado</td><td>contre Blues de St. Louis</td><td class=n>70.9 %</td><td class=n>2.34</td></tr>
-<tr><td>Oilers d&#x27;Edmonton</td><td>contre Kraken de Seattle</td><td class=n>67.8 %</td><td class=n>2.30</td></tr>
-<tr><td>Sabres de Buffalo</td><td>contre Blackhawks de Chicago</td><td class=n>66.7 %</td><td class=n>2.28</td></tr>
-<tr><td>Wild du Minnesota</td><td>contre Bruins de Boston</td><td class=n>61.1 %</td><td class=n>2.09</td></tr>
-<tr><td>Stars de Dallas</td><td>à Predators de Nashville</td><td class=n>57.7 %</td><td class=n>1.97</td></tr>
-<tr><td>Hurricanes de la Caroline</td><td>à Flyers de Philadelphie</td><td class=n>55.8 %</td><td class=n>1.89</td></tr>
-<tr><td>Sénateurs d&#x27;Ottawa</td><td>à Maple Leafs de Toronto</td><td class=n>54.4 %</td><td class=n>1.85</td></tr>
-<tr><td>Lightning de Tampa Bay</td><td>contre Capitals de Washington</td><td class=n>57.9 %</td><td class=n>1.84</td></tr>
+<tr><td class=eq><img src="https://assets.nhle.com/logos/nhl/svg/COL_dark.svg" alt="" loading="lazy">Avalanche du Colorado</td><td>contre Blues de St. Louis</td><td class=n>70.9 %</td><td class=n>2.34</td></tr>
+<tr><td class=eq><img src="https://assets.nhle.com/logos/nhl/svg/EDM_dark.svg" alt="" loading="lazy">Oilers d&#x27;Edmonton</td><td>contre Kraken de Seattle</td><td class=n>67.8 %</td><td class=n>2.30</td></tr>
+<tr><td class=eq><img src="https://assets.nhle.com/logos/nhl/svg/BUF_dark.svg" alt="" loading="lazy">Sabres de Buffalo</td><td>contre Blackhawks de Chicago</td><td class=n>66.7 %</td><td class=n>2.28</td></tr>
+<tr><td class=eq><img src="https://assets.nhle.com/logos/nhl/svg/MIN_dark.svg" alt="" loading="lazy">Wild du Minnesota</td><td>contre Bruins de Boston</td><td class=n>61.1 %</td><td class=n>2.09</td></tr>
+<tr><td class=eq><img src="https://assets.nhle.com/logos/nhl/svg/DAL_dark.svg" alt="" loading="lazy">Stars de Dallas</td><td>à Predators de Nashville</td><td class=n>57.7 %</td><td class=n>1.97</td></tr>
+<tr><td class=eq><img src="https://assets.nhle.com/logos/nhl/svg/CAR_dark.svg" alt="" loading="lazy">Hurricanes de la Caroline</td><td>à Flyers de Philadelphie</td><td class=n>55.8 %</td><td class=n>1.89</td></tr>
+<tr><td class=eq><img src="https://assets.nhle.com/logos/nhl/svg/OTT_dark.svg" alt="" loading="lazy">Sénateurs d&#x27;Ottawa</td><td>à Maple Leafs de Toronto</td><td class=n>54.4 %</td><td class=n>1.85</td></tr>
+<tr><td class=eq><img src="https://assets.nhle.com/logos/nhl/svg/TBL_dark.svg" alt="" loading="lazy">Lightning de Tampa Bay</td><td>contre Capitals de Washington</td><td class=n>57.9 %</td><td class=n>1.84</td></tr>
 </tbody>
 </table>
 <p class="note">« Espérance » = nombre de semaines que le plan devrait survivre en moyenne si l'on prend cette équipe maintenant, puis le meilleur choix ensuite. Ce n'est pas un pourcentage.</p>
