@@ -164,3 +164,12 @@ def test_le_bouton_mene_a_lapp_et_previent_du_delai():
         assert page.APP in h
         assert mot in h
         assert ("panne" if lang == "fr" else "not broken") in h
+
+
+def test_le_jeton_google_est_sur_les_deux_pages():
+    """Google revalide periodiquement : si la balise disparait d'une des deux
+    pages, la propriete est retiree."""
+    for lang in ("fr", "en"):
+        h = page.rendu(CTX, lang)
+        assert f'content="{page.VERIF_GOOGLE}"' in h
+        assert 'name="google-site-verification"' in h

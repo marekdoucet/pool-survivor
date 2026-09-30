@@ -41,6 +41,11 @@ DOCS = Path("docs")
 # l'indexation ne dépend pas du domaine, seulement d'une adresse publique.
 BASE = "https://marekdoucet.github.io/pool-survivor"
 APP = "https://pool-survivor-cheat-sheet.streamlit.app/"
+
+# Jeton de validation Google Search Console (propriete « prefixe d'URL »).
+# Il doit rester sur les DEUX pages : Google revalide periodiquement et
+# retire la propriete si la balise disparait.
+VERIF_GOOGLE = "Q1ZDOb5gaK_3URkxFVTvbZvTi-0Wf54jt3Wkxhm8cOE"
 SAISON = "2026-27"
 SEUIL_DISETTE = 0.65     # en dessous, aucune équipe ne vaut vraiment le coup
 LOGO = "https://assets.nhle.com/logos/nhl/svg/{tri}_{mode}.svg"
@@ -422,6 +427,7 @@ def rendu(ctx, lang):
 <title>{e(titre)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{CHEMINS[lang][1]}">
+<meta name="google-site-verification" content="{VERIF_GOOGLE}">
 <link rel="alternate" hreflang="fr" href="{CHEMINS['fr'][1]}">
 <link rel="alternate" hreflang="en" href="{CHEMINS['en'][1]}">
 <link rel="alternate" hreflang="x-default" href="{CHEMINS['fr'][1]}">
