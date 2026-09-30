@@ -5,5 +5,13 @@ scipy
 pandas
 altair
 streamlit
-Authlib>=1.3.2      # requis par st.login ; pas installe par defaut
+# Connexion Google (st.login). Aucune des deux lignes n'est tiree
+# automatiquement, et « streamlit[auth] » ne suffit pas non plus : il declare
+# Authlib mais pas httpx. Or authlib.integrations.starlette_client importe
+# httpx sans condition, donc sans lui st.login meurt sur
+# « ModuleNotFoundError: No module named 'httpx' » — une page blanche et un
+# « Internal server error », l'erreur reelle n'etant visible que dans le
+# journal de Manage app.
+Authlib>=1.3.2
+httpx
 pytest
