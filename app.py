@@ -23,6 +23,7 @@ import streamlit as st
 import auth
 import collect_moneypuck as cm
 import collect_odds as co
+import depot
 import form
 import optimize as op
 import picks as pk
@@ -42,7 +43,7 @@ import ui
 # Le repère est posé SUR le module, qui survit d'un affichage à l'autre — une
 # variable de app.py serait réinitialisée à chaque fois. Sans changement :
 # huit appels à stat(), soit quelques microsecondes.
-_MODULES = ("auth", "collect_moneypuck", "schedule", "collect_odds", "form",
+_MODULES = ("auth", "depot", "collect_moneypuck", "schedule", "collect_odds", "form",
             "optimize", "store", "picks", "ui")
 
 
@@ -288,18 +289,39 @@ def win_prob(df, team):
 
 # ── Barre latérale : mes picks ─────────────────────────────────────────────
 
-def picks_backend():
+def depot_github():
+    """L'ancien dépôt : un seul pool, rangé dans le fichier picks.json du
+    dépôt GitHub. Sert encore de source pour l'import vers Neon."""
     try:
         gh = st.secrets.get("github")
     except FileNotFoundError:
         gh = None
-    if gh:
-        author = {"name": gh.get("author_name", "marekdoucet"),
-                  "email": gh.get("author_email",
-                                  "183759644+marekdoucet@users.noreply.github.com")}
-        return pk.GitHubPicks(gh["repo"], gh["token"], gh.get("branch", "main"),
-                              author=author)
-    return None
+    if not gh:
+        return None
+    author = {"name": gh.get("author_name", "marekdoucet"),
+              "email": gh.get("author_email",
+                              "183759644+marekdoucet@users.noreply.github.com")}
+    return pk.GitHubPicks(gh["repo"], gh["token"], gh.get("branch", "main"),
+                          author=author)
+
+
+def picks_backend(courriel):
+    """Où vit le pool de la personne devant l'écran.
+
+    Neon et connectée : son pool à elle, une ligne par courriel.
+    Neon et anonyme  : rien du tout. Les pages d'analyse fonctionnent, les
+                       pages personnelles invitent à se connecter — on ne
+                       montre le pool de personne.
+    Sans Neon        : l'ancien dépôt partagé, ou picks.json en local.
+    """
+    try:
+        neon = st.secrets.get("neon")
+    except FileNotFoundError:
+        neon = None
+    if neon:
+        return (depot.PoolNeon(neon["url"], courriel) if courriel
+                else depot.PoolAnonyme(pk.empty_state))
+    return depot_github()
 
 
 def connexion():
@@ -349,7 +371,7 @@ PEUT_ECRIRE = auth.peut_ecrire(st.secrets, st.user)
 MOI = auth.qui(st.user)
 
 today = dt.datetime.now(cm.TZ).date()
-remote = picks_backend()
+remote = picks_backend(MOI)
 state = remote.load() if remote else pk.load(PICKS_PATH)
 picks, day_overrides = state["picks"], state["days"]
 # Tour en cours : quand il ne reste qu'une personne en vie, le pool repart de
@@ -388,6 +410,29 @@ with st.sidebar:
                 st.error(st.session_state["_err_connexion"])
             st.caption("Tu peux tout consulter sans compte. "
                        "La connexion sert à enregistrer.")
+
+        # Où va ce qu'on enregistre. Affiché parce qu'une erreur de stockage
+        # est invisible autrement : on croit avoir sauvegardé, et non.
+        if isinstance(remote, depot.PoolNeon):
+            st.caption("Ton pool est enregistré dans la base Neon.")
+        elif isinstance(remote, depot.PoolAnonyme):
+            st.caption("Connecte-toi pour avoir ton propre pool.")
+        elif remote:
+            st.caption(f"Pool partagé, dans GitHub ({remote.repo})")
+
+        # Migration : ton pool d'avant Neon vit encore dans picks.json sur
+        # GitHub. Un bouton explicite plutôt qu'un import automatique — c'est
+        # toi qui décides quand tes données bougent.
+        if isinstance(remote, depot.PoolNeon) and not state["picks"]:
+            ancien = depot_github()
+            if ancien:
+                with st.popover("Importer mon pool existant", width="stretch"):
+                    st.write("Ton pool d'avant la connexion est encore dans "
+                             "GitHub. Cet import le recopie dans ton compte. "
+                             "L'original n'est pas touché.")
+                    if st.button("Importer maintenant", type="primary"):
+                        save_state(ancien.load(), "Import depuis GitHub")
+
         st.divider()
 
     st.header("Mes picks")
