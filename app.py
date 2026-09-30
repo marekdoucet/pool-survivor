@@ -81,6 +81,15 @@ COLORS = TEAM_COLORS[:len(SOURCES)]
 st.set_page_config(page_title="Pool survivor NHL", page_icon="🏒", layout="wide")
 ui.inject_css()
 
+# Le titre est dessiné ici, avant toute préparation de données. Sans ça,
+# l'écran reste vide pendant que la base se reconstruit, que picks.json est
+# lu sur GitHub et que le plan s'optimise — sur Streamlit Cloud, un réveil
+# après inactivité prend des minutes, et un écran blanc ne se distingue pas
+# d'une panne. Mieux vaut montrer quelque chose qui vit.
+st.title("🏒 Pool survivor NHL 2026-27")
+STATUT = st.empty()
+STATUT.caption("Chargement des données…")
+
 PCT = st.column_config.NumberColumn(format="%.1f %%")   # valeurs déjà × 100
 # L'espérance n'est PAS un pourcentage : c'est un nombre de semaines survécues.
 # Sans unité, à côté de colonnes en %, 2.34 se lit de travers.
@@ -125,8 +134,9 @@ if "SURVIVOR_DB" in os.environ:      # base imposée (tests, démo)
     DB_PATH = os.environ["SURVIVOR_DB"]
     VERSION = Path(DB_PATH).stat().st_mtime if Path(DB_PATH).exists() else 0
 else:
-    VERSION = data_version()
-    DB_PATH = build_db(VERSION) if VERSION else cm.DB_PATH
+    with st.spinner("Reconstruction de la base depuis data/…"):
+        VERSION = data_version()
+        DB_PATH = build_db(VERSION) if VERSION else cm.DB_PATH
 
 
 def connect():
@@ -422,8 +432,6 @@ with st.sidebar:
 
 # ── En-tête ───────────────────────────────────────────────────────────────
 
-st.title("🏒 Pool survivor NHL 2026-27")
-
 v = VERSION
 snaps = snapshots(v) if v else []
 if not snaps:
@@ -452,7 +460,7 @@ plan, exp_weeks, snapshot = plan_for(v, from_date, used, overrides, horizon)
 hist = history(v)
 latest = hist[hist.snapshot == snapshot]
 counts = latest.groupby("source").size()
-st.caption(
+STATUT.caption(
     f"Données du {snapshot} · "
     + " · ".join(f"{SOURCES[s]} : {counts.get(s, 0)} matchs" for s in SOURCES if s != "consensus")
     + f" · {len(used)} équipe(s) utilisée(s)"
