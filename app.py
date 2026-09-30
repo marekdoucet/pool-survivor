@@ -20,6 +20,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+import auth
 import collect_moneypuck as cm
 import collect_odds as co
 import form
@@ -41,7 +42,7 @@ import ui
 # Le repère est posé SUR le module, qui survit d'un affichage à l'autre — une
 # variable de app.py serait réinitialisée à chaque fois. Sans changement :
 # huit appels à stat(), soit quelques microsecondes.
-_MODULES = ("collect_moneypuck", "schedule", "collect_odds", "form",
+_MODULES = ("auth", "collect_moneypuck", "schedule", "collect_odds", "form",
             "optimize", "store", "picks", "ui")
 
 
@@ -302,6 +303,12 @@ def picks_backend():
 
 
 def save_state(new_state, message):
+    # Point de passage unique de toutes les écritures : c'est ici qu'on refuse
+    # un anonyme, plutôt que devant chaque bouton. Les boutons sont désactivés
+    # en plus, pour le dire avant le clic — mais c'est cette ligne qui protège.
+    if not PEUT_ECRIRE:
+        st.sidebar.error("Connecte-toi pour enregistrer.")
+        return
     try:
         if remote:
             remote.save(new_state, message)
@@ -316,6 +323,9 @@ def save_state(new_state, message):
 def save_picks(new_picks, message):
     save_state({**state, "picks": new_picks}, message)
 
+
+PEUT_ECRIRE = auth.peut_ecrire(st.secrets, st.user)
+MOI = auth.qui(st.user)
 
 today = dt.datetime.now(cm.TZ).date()
 remote = picks_backend()
@@ -346,6 +356,17 @@ out = (dt.date.fromisoformat(_sem_out) if _out and _sem_out
        else (this_monday if _out else None))
 
 with st.sidebar:
+    if auth.configuree(st.secrets):
+        if PEUT_ECRIRE:
+            st.caption(f"Connecté : {auth.nom(st.user)}")
+            st.button("Se déconnecter", width="stretch", on_click=st.logout)
+        else:
+            st.button("Se connecter avec Google", type="primary",
+                      width="stretch", on_click=st.login)
+            st.caption("Tu peux tout consulter sans compte. "
+                       "La connexion sert à enregistrer.")
+        st.divider()
+
     st.header("Mes picks")
     if not tour:
         st.caption("Aucun pick dans ce tour.")
@@ -354,7 +375,8 @@ with st.sidebar:
     for p in tour:
         col1, col2 = st.columns([4, 1])
         col1.markdown(f"**{p['team']}** — semaine du {p['week']}")
-        if col2.button("✕", key=f"del-{p['week']}", help="Retirer ce pick"):
+        if col2.button("✕", key=f"del-{p['week']}", help="Retirer ce pick",
+                       disabled=not PEUT_ECRIRE):
             save_picks(pk.remove(picks, dt.date.fromisoformat(p["week"])),
                        f"Pick retiré : {p['team']} (semaine du {p['week']})")
 
@@ -377,11 +399,13 @@ with st.sidebar:
         lundi = op.week_start(depart)
         if lundi != depart:
             st.caption(f"Ramené au lundi de cette semaine : {lundi}.")
-        if st.button("Confirmer le redépart", type="primary", width="stretch"):
+        if st.button("Confirmer le redépart", type="primary", width="stretch",
+                     disabled=not PEUT_ECRIRE):
             save_state(pk.reset(state, lundi),
                        f"Pool reparti à la semaine du {lundi}")
     if since:
-        if st.button(f"Annuler le redépart du {since}", width="stretch"):
+        if st.button(f"Annuler le redépart du {since}", width="stretch",
+                     disabled=not PEUT_ECRIRE):
             save_state(pk.undo_reset(state, since),
                        f"Redépart du {since} annulé")
     # Plus de bouton « Je suis éliminé » : le site le déduit du résultat de
@@ -391,7 +415,8 @@ with st.sidebar:
                    + (" (déduit du résultat)" if _origine_out == "auto" else "")
                    + ".")
         if st.button("Je suis encore en vie", width="stretch",
-                     help="Passe outre : règle maison, erreur, litige"):
+                     help="Passe outre : règle maison, erreur, litige",
+                     disabled=not PEUT_ECRIRE):
             save_state(pk.back_in(state), "Élimination annulée")
 
     st.subheader("Journée de pick")
@@ -417,7 +442,8 @@ with st.sidebar:
                        f"{fr_day(sat)} ({pd_.sat_games} matchs)": sat,
                        f"{fr_day(sun)} ({pd_.sun_games} matchs)": sun}
             choice = st.radio("Journée", list(choices))
-            if st.form_submit_button("Enregistrer la journée"):
+            if st.form_submit_button("Enregistrer la journée",
+                                     disabled=not PEUT_ECRIRE):
                 day = choices[choice]
                 new_days = pk.set_day(day_overrides, wk,
                                       dt.date.fromisoformat(day) if day else None)
@@ -518,7 +544,8 @@ def page_pick():
                              "Rien d'enregistré pour cette semaine."))
             if st.button("Remplacer mon pick" if provisional
                          else "Enregistrer mon pick",
-                         type="primary", disabled=bool(deja), width="stretch"):
+                         type="primary", width="stretch",
+                         disabled=bool(deja) or not PEUT_ECRIRE):
                 save_picks(pk.add(picks, this_monday, choisi.team, choisi.game_date,
                                   since=since),
                            f"Pick {'modifié' if provisional else 'enregistré'} : "
@@ -1177,7 +1204,8 @@ def page_pool():
                     help="Calculée, pas modifiable"),
                 "Équipes déjà prises": st.column_config.TextColumn(disabled=True),
             })
-        if st.button("Enregistrer le registre", type="primary", width="stretch"):
+        if st.button("Enregistrer le registre", type="primary", width="stretch",
+                     disabled=not PEUT_ECRIRE):
             nouveau = pk.merge_pool_week(joueurs, edite.to_dict("records"),
                                          semaine)
             save_state(pk.set_pool(state, nouveau),
