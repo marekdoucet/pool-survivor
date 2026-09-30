@@ -154,3 +154,13 @@ def test_les_images_sont_en_chargement_differe():
     """Le texte doit s'afficher avant les images : c'est lui qu'on indexe."""
     h = page.rendu(CTX, "fr")
     assert h.count('loading="lazy"') >= 4
+
+
+def test_le_bouton_mene_a_lapp_et_previent_du_delai():
+    """Sans l'avertissement, un visiteur qui attend deux minutes croit a une
+    panne — c'est exactement ce qui nous est arrive."""
+    for lang, mot in (("fr", "Ouvrir l'application"), ("en", "Open the app")):
+        h = page.rendu(CTX, lang)
+        assert page.APP in h
+        assert mot in h
+        assert ("panne" if lang == "fr" else "not broken") in h

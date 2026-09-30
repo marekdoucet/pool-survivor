@@ -40,6 +40,7 @@ DOCS = Path("docs")
 # personnalisé pourra s'y substituer plus tard sans rien changer d'autre :
 # l'indexation ne dépend pas du domaine, seulement d'une adresse publique.
 BASE = "https://marekdoucet.github.io/pool-survivor"
+APP = "https://pool-survivor-cheat-sheet.streamlit.app/"
 SAISON = "2026-27"
 SEUIL_DISETTE = 0.65     # en dessous, aucune équipe ne vaut vraiment le coup
 LOGO = "https://assets.nhle.com/logos/nhl/svg/{tri}_{mode}.svg"
@@ -142,6 +143,11 @@ T = {
             "Les données sont recollectées deux fois par jour, avant et après "
             "les matchs.",
         ],
+        "cta": "Ouvrir l'application",
+        "cta_note": ("Le plan complet, la carte des matchups, la précision des "
+                     "sources. Si l'application dort, le premier chargement "
+                     "peut prendre une minute ou deux — ce n'est pas une "
+                     "panne."),
         "autre_langue": "English version",
         "pied": ("Sources : The Odds API, MoneyPuck, Dimers, Puckcast, API "
                  "publique de la LNH. Projet personnel, sans lien avec la LNH. "
@@ -180,6 +186,10 @@ T = {
             "that an early elimination cancels every week after it.",
             "Data is collected twice a day, before and after the games.",
         ],
+        "cta": "Open the app",
+        "cta_note": ("The full plan, the matchup map, source accuracy. If the "
+                     "app is asleep, the first load can take a minute or two — "
+                     "it is not broken."),
         "autre_langue": "Version française",
         "pied": ("Sources: The Odds API, MoneyPuck, Dimers, Puckcast, the "
                  "public NHL API. Personal project, not affiliated with the "
@@ -267,6 +277,13 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 td.eq{display:flex;align-items:center;gap:.5rem}
 td.eq img{width:22px;height:22px;flex:none}
 p{color:#ddd}
+.cta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+background:rgba(35,35,42,.62);border:1px solid var(--bord);border-radius:1rem;
+padding:1rem 1.2rem;margin:0 0 1.6rem}
+.cta a{flex:none;background:var(--accent);color:#fff;text-decoration:none;
+font-weight:600;padding:.6rem 1.3rem;border-radius:.6rem}
+.cta a:hover{filter:brightness(1.1)}
+.cta span{flex:1 1 220px;color:var(--encre2);font-size:.88rem}
 .note{color:var(--encre2);font-size:.9rem}
 a{color:var(--accent)}
 footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--bord);
@@ -433,6 +450,11 @@ def rendu(ctx, lang):
 </div>
 <div class="hero-pc"><b>{pourcent(best['p'], lang)}</b>
 <span>{t['chances']}</span></div>
+</div>
+
+<div class="cta">
+<a href="{APP}" rel="noopener">{t['cta']}</a>
+<span>{t['cta_note']}</span>
 </div>
 
 <h2>{t['h_choix'].format(semaine=e(ctx['semaine'][lang]))}</h2>
