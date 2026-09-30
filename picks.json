@@ -9,68 +9,89 @@
   "days": {},
   "resets": [],
   "out": null,
+  "force": null,
   "pool": {
     "Adam Bergeron": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Alexandre Deschênes": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Antoine Lague": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Antoine Proulx": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Duval": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Gagy": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Le coach": {
       "picks": {
         "2026-09-28": "MTL"
       },
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Louis": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Ludo": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Marc Proulx": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Noah": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Robert Deschênes": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Stéphane Chartier": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
+    },
+    "Stéphane Lacasse": {
+      "picks": {},
+      "out": null,
+      "force": "auto"
     },
     "Tony Bouch": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     },
     "Yohan Chuet": {
       "picks": {},
-      "out": null
+      "out": null,
+      "force": "auto"
     }
   }
 }
