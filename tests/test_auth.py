@@ -61,3 +61,29 @@ def test_le_nom_prend_le_prenom_puis_retombe_sur_le_courriel():
 def test_un_courriel_vide_vaut_absent():
     """Google peut renvoyer une chaîne vide plutôt que rien du tout."""
     assert auth.qui(Utilisateur(connecte=True, email="")) is None
+
+
+# ── Diagnostic de la connexion ────────────────────────────────────────────
+# Le premier clic a donne une page blanche et « Internal server error » :
+# Streamlit masque l'erreur de st.login. Sans diagnostic, il faut aller fouiller
+# le journal de Manage app, auquel je n'ai pas acces.
+
+def test_authlib_est_detecte():
+    """Ici il est installe ; en production il a manque, d'ou la page blanche."""
+    assert auth.authlib_present() is True
+
+
+def test_les_exceptions_de_controle_de_streamlit_sont_reconnues():
+    """Les attraper casserait la page au lieu de la rafraichir."""
+    class RerunException(Exception):
+        pass
+
+    class StopException(Exception):
+        pass
+
+    class VraieErreur(Exception):
+        pass
+
+    assert auth.est_controle_streamlit(RerunException()) is True
+    assert auth.est_controle_streamlit(StopException()) is True
+    assert auth.est_controle_streamlit(VraieErreur()) is False

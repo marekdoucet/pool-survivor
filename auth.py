@@ -54,3 +54,27 @@ def nom(user):
         if valeur:
             return valeur
     return None
+
+
+def authlib_present():
+    """La connexion native de Streamlit est une dépendance optionnelle.
+
+    Sans le paquet Authlib, st.login lève StreamlitMissingAuthlibError — et
+    Streamlit masque le message à l'écran (« redacted to prevent data leaks »),
+    ce qui donne une page blanche et « Internal server error ». On vérifie donc
+    avant de cliquer, pour pouvoir le dire en clair.
+    """
+    try:
+        import authlib          # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+# Exceptions par lesquelles Streamlit pilote son propre flot : les attraper
+# casserait la page au lieu de la rafraîchir.
+_CONTROLE = ("RerunException", "StopException", "RerunData")
+
+
+def est_controle_streamlit(exc):
+    return type(exc).__name__ in _CONTROLE

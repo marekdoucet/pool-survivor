@@ -302,6 +302,27 @@ def picks_backend():
     return None
 
 
+def connexion():
+    """Appelée par le bouton. Streamlit masque l'erreur de st.login à l'écran
+    (« redacted to prevent data leaks ») : le visiteur voit une page blanche et
+    « Internal server error », et il faut aller fouiller le journal de Manage
+    app. On l'attrape pour l'afficher en clair.
+    """
+    if not auth.authlib_present():
+        st.session_state["_err_connexion"] = (
+            "Le paquet Authlib est absent de l'environnement. Il est dans "
+            "requirements.txt : fais « Reboot app » pour que Streamlit Cloud "
+            "reconstruise l'environnement."
+        )
+        return
+    try:
+        st.login()
+    except Exception as e:
+        if auth.est_controle_streamlit(e):
+            raise                       # c'est Streamlit qui pilote, pas un bogue
+        st.session_state["_err_connexion"] = f"{type(e).__name__} : {e}"
+
+
 def save_state(new_state, message):
     # Point de passage unique de toutes les écritures : c'est ici qu'on refuse
     # un anonyme, plutôt que devant chaque bouton. Les boutons sont désactivés
@@ -362,7 +383,9 @@ with st.sidebar:
             st.button("Se déconnecter", width="stretch", on_click=st.logout)
         else:
             st.button("Se connecter avec Google", type="primary",
-                      width="stretch", on_click=st.login)
+                      width="stretch", on_click=connexion)
+            if st.session_state.get("_err_connexion"):
+                st.error(st.session_state["_err_connexion"])
             st.caption("Tu peux tout consulter sans compte. "
                        "La connexion sert à enregistrer.")
         st.divider()
