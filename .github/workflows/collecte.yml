@@ -4,15 +4,27 @@ name: Collecte quotidienne
 
 on:
   schedule:
-    # Heures en UTC. 11 h UTC = 7 h HE (6 h l'hiver) ; 21 h UTC = 17 h HE,
-    # avant les matchs du soir (cotes à jour, gardiens confirmés).
+    # Heures en UTC ; GitHub ne connaît pas ton fuseau, donc l'heure locale
+    # dérive d'une heure au changement d'heure. Chaque paire est faite pour que
+    # les deux positions restent bonnes.
+    #
+    #   8 h 23 UTC → 3 h 23 l'hiver, 4 h 23 l'été. APRÈS les matchs : le départ
+    #   le plus tardif de la saison est à 23 h (mardi), donc une fin vers
+    #   1 h 40. Résultats, éliminations et modèles MoneyPuck à jour.
+    #
+    #   22 h 23 UTC → 17 h 23 l'hiver, 18 h 23 l'été. AVANT la mise au jeu :
+    #   le premier match commence à 19 h sur 92 % des journées. C'est là que
+    #   les cotes valent le plus, gardiens confirmés.
     #
     # Minute 23 plutôt que 0 : GitHub retarde — et finit par abandonner — les
     # runs planifiés au sommet de l'heure, quand sa file est saturée.
-    # Le second cron de chaque paire rattrape le premier s'il a été sauté ; si
-    # les données n'ont pas bougé, l'étape de commit ne fait rien.
-    - cron: "23 11 * * *"
-    - cron: "23 12 * * *"
+    #
+    # Le second cron de chaque paire rattrape le premier s'il a été sauté. Il
+    # ne coûte rien : DELAI_MINI, dans collect_odds.py, saute l'appel payant
+    # quand les cotes ont moins de 4 heures. Deux vraies requêtes par jour,
+    # ~124 des 500 crédits gratuits par mois.
+    - cron: "23 8 * * *"
+    - cron: "23 9 * * *"
     - cron: "23 21 * * *"
     - cron: "23 22 * * *"
   workflow_dispatch:        # bouton « Run workflow » pour lancer à la main

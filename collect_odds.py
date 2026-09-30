@@ -10,8 +10,10 @@ Tables écrites :
              source='consensus' moyenne pondérée (WEIGHTS) des sources disponibles
                                 (marché, MoneyPuck, Dimers, Puckcast) pour chaque match
 
-Coût : 1 requête par exécution = 1 crédit par région (REGIONS) → 2 crédits/jour,
-soit ~60 des 500 crédits gratuits par mois.
+Coût : 1 requête = 1 crédit par région (REGIONS), donc 2 crédits par appel.
+Le workflow déclenche quatre exécutions par jour, mais DELAI_MINI n'en laisse
+passer que deux : ~124 des 500 crédits gratuits par mois. Les deux autres sont
+des rattrapages, qui ne coûtent rien tant que l'exécution principale a réussi.
 
 Utilisation :
     set ODDS_API_KEY=ta_cle        (ou setx pour la garder)
@@ -31,6 +33,14 @@ import collect_moneypuck as cm
 
 API_URL = "https://api.the-odds-api.com/v4/sports/icehockey_nhl/odds"
 REGIONS = "us,eu"   # « eu » inclut Pinnacle, le casino de référence du marché
+
+# Les crons vont par paires : une exécution principale, puis un rattrapage une
+# heure plus tard au cas où GitHub aurait sauté la première — ce qui arrive
+# quand sa file est saturée. Le rattrapage refait tout le reste du travail,
+# gratuit, mais ne doit pas racheter les cotes que la principale vient de
+# collecter. Quatre heures séparent largement le rattrapage (1 h) des deux
+# vraies collectes quotidiennes (13 h).
+DELAI_MINI = dt.timedelta(hours=4)
 # Poids de chaque source dans le consensus (renormalisés selon les sources
 # disponibles pour un match). Le marché des casinos est en général le plus précis.
 WEIGHTS = {"market": 0.55, "moneypuck": 0.2, "dimers": 0.15, "puckcast": 0.1}
@@ -191,20 +201,44 @@ def build_consensus(conn, snapshot, weights=None):
     return n_market, len(consensus) - n_market
 
 
-def collect_odds(api_key, db_path=cm.DB_PATH, today=None, session=None, now=None):
+def derniere_collecte(conn):
+    """Quand l'API a-t-elle été appelée pour la dernière fois ? None si jamais."""
+    ligne = conn.execute("SELECT MAX(collected_at) FROM odds").fetchone()
+    if not ligne or not ligne[0]:
+        return None
+    try:
+        return dt.datetime.fromisoformat(ligne[0])
+    except ValueError:      # horodatage illisible : on préfère collecter
+        return None
+
+
+def collect_odds(api_key, db_path=cm.DB_PATH, today=None, session=None, now=None,
+                 delai_mini=DELAI_MINI, maintenant=None):
     snapshot = (today or dt.datetime.now(cm.TZ).date()).isoformat()
-    collected_at = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
-    events, remaining = fetch_events(api_key, session)
-    rows, unknown = parse_events(events, now)
-    if unknown:
-        print(f"⚠ équipes inconnues (ajoute-les à TEAM_CODES) : {', '.join(unknown)}")
-    if events and not rows:
-        raise OddsError("aucune cote exploitable dans la réponse")
+    maintenant = maintenant or dt.datetime.now(dt.timezone.utc)
+    collected_at = maintenant.isoformat(timespec="seconds")
 
     conn = sqlite3.connect(db_path)
     init_db(conn)
-    market = save_odds(conn, snapshot, collected_at, rows)
-    conn.close()
+    precedente = derniere_collecte(conn)
+    if precedente is not None and maintenant - precedente < delai_mini:
+        conn.close()
+        heures = (maintenant - precedente).total_seconds() / 3600
+        print(f"Cotes déjà collectées il y a {heures:.1f} h "
+              f"(seuil {delai_mini.total_seconds() / 3600:.0f} h) : appel API évité.")
+        return None
+
+    try:
+        events, remaining = fetch_events(api_key, session)
+        rows, unknown = parse_events(events, now)
+        if unknown:
+            print(f"⚠ équipes inconnues (ajoute-les à TEAM_CODES) : "
+                  f"{', '.join(unknown)}")
+        if events and not rows:
+            raise OddsError("aucune cote exploitable dans la réponse")
+        market = save_odds(conn, snapshot, collected_at, rows)
+    finally:
+        conn.close()            # réseau coupé ou réponse inexploitable : on ferme
 
     books = sorted({r[3] for r in rows})
     print(f"{len(market)} matchs cotés par {len(books)} casinos ({', '.join(books)})")

@@ -123,8 +123,11 @@ def test_collect_and_consensus(tmp_path):
     assert cons[("PIT", "WSH")] == pytest.approx(0.7 * expected + 0.3 * 0.41, abs=1e-4)
     assert cons[("COL", "WPG")] == 0.638  # MoneyPuck seul
 
-    # Relance le même jour : remplace au lieu de dupliquer.
-    co.collect_odds("cle", db, today=today, session=session, now=NOW)
+    # Relance le même jour : remplace au lieu de dupliquer. delai_mini=0 pour
+    # neutraliser le garde-fou, qui sauterait sinon l'appel et ferait passer ce
+    # test sans qu'il teste plus rien.
+    co.collect_odds("cle", db, today=today, session=session, now=NOW,
+                    delai_mini=dt.timedelta(0))
     co.build_consensus(conn, today.isoformat())
     n_odds, n_cons = conn.execute(
         "SELECT (SELECT COUNT(*) FROM odds), "
@@ -136,3 +139,60 @@ def test_bad_key_gives_clear_error(tmp_path):
     resp = FakeResponse({"message": "API key is not valid."}, status=401)
     with pytest.raises(co.OddsError, match="401.*not valid"):
         co.collect_odds("mauvaise", tmp_path / "t.db", session=FakeSession(resp))
+
+
+# ── Le filet de rattrapage ────────────────────────────────────────────────
+# Les crons vont par paires : une exécution principale, un rattrapage une heure
+# plus tard si GitHub a sauté la première. Le rattrapage ne doit pas racheter
+# les cotes, sinon il double la facture (248 crédits/mois au lieu de 124).
+
+class SessionComptee(FakeSession):
+    def __init__(self, response):
+        super().__init__(response)
+        self.appels = 0
+
+    def get(self, url, **kw):
+        self.appels += 1
+        return super().get(url, **kw)
+
+
+def collecte(db, session, heures_apres_minuit, delai=None):
+    """Une collecte à une heure précise du 7 octobre, en UTC."""
+    t = dt.datetime(2026, 10, 7, tzinfo=dt.timezone.utc) + dt.timedelta(hours=heures_apres_minuit)
+    kw = {"delai_mini": delai} if delai is not None else {}
+    return co.collect_odds("cle", db, today=dt.date(2026, 10, 7), session=session,
+                           now=NOW, maintenant=t, **kw)
+
+
+def test_le_rattrapage_une_heure_apres_evite_lappel_api(tmp_path):
+    db = tmp_path / "t.db"
+    session = SessionComptee(FakeResponse(EVENTS))
+
+    assert collecte(db, session, 8) is not None       # principale : 8 h UTC
+    assert collecte(db, session, 9) is None           # rattrapage : 9 h UTC
+    assert session.appels == 1                        # un seul crédit dépensé
+
+    conn = sqlite3.connect(db)
+    assert conn.execute("SELECT COUNT(*) FROM odds").fetchone()[0] == 3
+    conn.close()
+
+
+def test_le_rattrapage_collecte_si_la_principale_a_ete_sautee(tmp_path):
+    """GitHub saute la collecte du soir : celle de 23 h doit prendre le relais."""
+    db = tmp_path / "t.db"
+    session = SessionComptee(FakeResponse(EVENTS))
+
+    collecte(db, session, 8)                          # matin
+    assert collecte(db, session, 23) is not None      # soir, 15 h plus tard
+    assert session.appels == 2
+
+
+def test_une_base_vide_collecte_toujours(tmp_path):
+    session = SessionComptee(FakeResponse(EVENTS))
+    assert collecte(tmp_path / "vide.db", session, 8) is not None
+    assert session.appels == 1
+
+
+def test_le_seuil_couvre_les_deux_collectes_quotidiennes():
+    """13 h séparent les deux vraies collectes, 1 h sépare un rattrapage."""
+    assert dt.timedelta(hours=1) < co.DELAI_MINI < dt.timedelta(hours=13)
