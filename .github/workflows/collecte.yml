@@ -69,8 +69,47 @@ jobs:
             exit 0
           fi
           git commit -m "Collecte du $(TZ=America/Toronto date +%F)"
-          git pull --rebase    # au cas où un pick a été enregistré entre-temps
-          git push
+
+          # Le rebase sert à ne pas écraser un pick enregistré depuis l'app
+          # entre le checkout et le push. Trois tentatives, parce qu'origin
+          # peut bouger de nouveau pendant qu'on pousse.
+          for essai in 1 2 3; do
+            git fetch origin main
+
+            if ! git rebase origin/main; then
+              # Un conflit ici ne peut venir que des instantanés régénérés du
+              # jour : deux collectes rapprochées produisent le même .csv.gz
+              # avec des octets différents, et git ne sait pas fusionner du
+              # binaire. C'est ce qui a fait échouer la collecte le 30
+              # septembre. La version du run en cours est la plus récente.
+              #
+              # Pendant un rebase, --theirs désigne le commit qu'on rejoue,
+              # donc le nôtre. L'inverse de l'intuition.
+              conflits=$(git diff --name-only --diff-filter=U)
+              hors_data=$(echo "$conflits" | grep -v '^data/' || true)
+              if [ -n "$hors_data" ]; then
+                # picks.json ou du code : jamais de résolution automatique, ce
+                # serait écraser du travail humain. On échoue bruyamment.
+                git rebase --abort || true
+                echo "::error::Conflit hors data/, résolution manuelle requise : $hors_data"
+                exit 1
+              fi
+              echo "Conflit sur les instantanés régénérés, on garde ceux de ce run :"
+              echo "$conflits" | sed 's/^/  /'
+              git checkout --theirs -- data/
+              git add data/
+              GIT_EDITOR=true git rebase --continue
+            fi
+
+            if git push origin HEAD:main; then
+              echo "Poussé (tentative $essai)."
+              exit 0
+            fi
+            echo "Push refusé, origin a bougé — nouvelle tentative."
+          done
+
+          echo "::error::Trois tentatives de push échouées."
+          exit 1
 
       # Streamlit Cloud eteint l'application apres une periode sans visiteur.
       # J'ai mesure le reveil a 182 secondes : un visiteur venu de Google voit
