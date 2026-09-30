@@ -59,3 +59,22 @@ jobs:
           git commit -m "Collecte du $(TZ=America/Toronto date +%F)"
           git pull --rebase    # au cas où un pick a été enregistré entre-temps
           git push
+
+      # Streamlit Cloud eteint l'application apres une periode sans visiteur.
+      # Le reveil prend environ trois minutes, pendant lesquelles un visiteur
+      # venu de Google ne voit qu'une page blanche et repart. Quatre visites
+      # par jour suffisent pour qu'elle ne s'endorme jamais.
+      #
+      # --max-time 300 : il FAUT attendre la fin du reveil. Abandonner apres
+      # dix secondes laisserait l'application endormie, ce qui annulerait tout
+      # l'interet de l'etape.
+      #
+      # L'URL est lue dans page.py pour ne pas l'ecrire une deuxieme fois.
+      - name: Garder l'application eveillee
+        if: always()
+        continue-on-error: true      # ne doit jamais faire echouer la collecte
+        run: |
+          url=$(python -c "import page; print(page.APP)")
+          echo "Reveil de $url"
+          code=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 300 "$url")
+          echo "Reponse : $code"
