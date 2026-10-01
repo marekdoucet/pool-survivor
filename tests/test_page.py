@@ -173,3 +173,61 @@ def test_le_jeton_google_est_sur_les_deux_pages():
         h = page.rendu(CTX, lang)
         assert f'content="{page.VERIF_GOOGLE}"' in h
         assert 'name="google-site-verification"' in h
+
+
+# ── Politique de confidentialité ──────────────────────────────────────────
+# Google l'exige pour publier l'écran de consentement OAuth en production.
+# Sans elle, seuls les comptes inscrits comme « utilisateurs de test »
+# peuvent se connecter — donc deux personnes, pas seize.
+
+def test_la_page_existe_dans_les_deux_langues():
+    for lang, mot in (("fr", "Politique de confidentialité"),
+                      ("en", "Privacy policy")):
+        h = page.confidentialite(lang)
+        assert mot in h
+        assert f'<html lang="{lang}"' in h
+
+
+def test_elle_dit_ce_qui_est_recueilli():
+    """Le contenu doit rester vrai : c'est un engagement public."""
+    fr = page.confidentialite("fr")
+    assert "courriel" in fr and "prénom" in fr
+    assert "Neon" in fr
+    assert "mot de passe" in fr          # on explique qu'on ne le voit jamais
+
+
+def test_elle_dit_ce_qui_nest_pas_fait():
+    fr, en = page.confidentialite("fr"), page.confidentialite("en")
+    assert "Aucune publicité" in fr and "vendu" in fr
+    assert "No advertising" in en and "sold" in en
+
+
+def test_on_peut_demander_la_suppression():
+    """Une politique qui ne dit pas comment effacer ne vaut rien."""
+    for lang in ("fr", "en"):
+        assert page.DEPOT in page.confidentialite(lang)
+
+
+def test_elle_porte_la_balise_google_et_ses_alternatives():
+    for lang in ("fr", "en"):
+        h = page.confidentialite(lang)
+        assert f'content="{page.VERIF_GOOGLE}"' in h
+        assert 'hreflang="fr"' in h and 'hreflang="en"' in h
+        assert f'rel="canonical" href="{page.CONFID[lang][1]}"' in h
+
+
+def test_le_fond_sombre_ne_casse_pas():
+    """La feuille de style utilise --lueur dans le fond du body. La page
+    d'accueil la pose sur <html> aux couleurs de l'équipe ; ici il n'y a pas
+    d'équipe. Sans valeur, le dégradé est invalide et la page vire au blanc."""
+    for lang in ("fr", "en"):
+        h = page.confidentialite(lang)
+        assert "--lueur:" in h[:h.index("<head>")]
+        assert '<main class="page">' in h
+
+
+def test_le_sitemap_liste_les_quatre_pages():
+    s = page.sitemap("2026-10-01")
+    for _chemin, url in list(page.CHEMINS.values()) + list(page.CONFID.values()):
+        assert f"<loc>{url}</loc>" in s
+    assert s.count("<url>") == 4

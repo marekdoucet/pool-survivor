@@ -301,6 +301,109 @@ color:var(--encre2);font-size:.85rem}
 CHEMINS = {"fr": ("index.html", f"{BASE}/"),
            "en": ("en/index.html", f"{BASE}/en/")}
 
+# La politique de confidentialité. Google l'exige pour publier l'écran de
+# consentement OAuth en production : sans elle, seuls les comptes inscrits
+# comme « utilisateurs de test » peuvent se connecter.
+CONFID = {"fr": ("confidentialite.html", f"{BASE}/confidentialite.html"),
+          "en": ("en/privacy.html", f"{BASE}/en/privacy.html")}
+
+DEPOT = "https://github.com/marekdoucet/pool-survivor"
+
+VIE_PRIVEE = {
+    "fr": {
+        "titre": "Politique de confidentialité",
+        "desc": "Ce que Pool Survivor LNH recueille, pourquoi, et ce qu'il n'en fait pas.",
+        "retour": "Retour au pick de la semaine",
+        "intro": ("Pool Survivor LNH est un outil personnel, gratuit, sans "
+                  "publicité et sans mouchard. Cette page dit exactement ce "
+                  "qu'il recueille et ce qu'il en fait."),
+        "sections": [
+            ("Ce qui est recueilli", [
+                "Quand tu te connectes avec Google, l'application reçoit ton "
+                "<b>adresse courriel</b> et ton <b>prénom</b>. Rien d'autre : "
+                "ni tes contacts, ni ton agenda, ni tes fichiers.",
+                "Ce que tu saisis toi-même : les <b>noms des membres de ton "
+                "pool</b>, leurs <b>choix d'équipe</b> et les corrections "
+                "manuelles d'élimination.",
+            ]),
+            ("Ton mot de passe", [
+                "L'application ne le voit jamais. C'est Google qui vérifie ton "
+                "identité et qui ne renvoie qu'une confirmation signée. Il n'y "
+                "a aucun mot de passe à stocker ici, donc aucun à perdre.",
+            ]),
+            ("Pourquoi ton courriel", [
+                "Il sert uniquement de clé : c'est ce qui permet de te montrer "
+                "ton pool et pas celui de quelqu'un d'autre. Il n'est jamais "
+                "affiché aux autres personnes, jamais envoyé à qui que ce soit, "
+                "et ne sert à aucun envoi de courriel.",
+            ]),
+            ("Où c'est rangé", [
+                "Dans une base de données PostgreSQL hébergée par "
+                "<a href='https://neon.com'>Neon</a>, accessible seulement par "
+                "l'application. Les données publiques de hockey — calendrier, "
+                "cotes, modèles — sont stockées séparément et ne contiennent "
+                "rien de personnel.",
+            ]),
+            ("Ce qui n'est pas fait", [
+                "Aucune publicité. Aucun outil de mesure d'audience. Aucun "
+                "cookie de pistage. Rien n'est vendu, loué ni partagé avec un "
+                "tiers. Les données ne servent à rien d'autre qu'à faire "
+                "fonctionner ton pool.",
+            ]),
+            ("Effacer tes données", [
+                "Demande-le et ta ligne est supprimée, avec tout ce qu'elle "
+                "contient. La demande se fait par le "
+                "<a href='" + DEPOT + "/issues'>dépôt du projet</a>.",
+            ]),
+        ],
+    },
+    "en": {
+        "titre": "Privacy policy",
+        "desc": "What NHL Pool Survivor collects, why, and what it never does with it.",
+        "retour": "Back to this week's pick",
+        "intro": ("NHL Pool Survivor is a personal, free tool with no ads and "
+                  "no trackers. This page states exactly what it collects and "
+                  "what it does with it."),
+        "sections": [
+            ("What is collected", [
+                "When you sign in with Google, the app receives your "
+                "<b>email address</b> and <b>first name</b>. Nothing else: not "
+                "your contacts, not your calendar, not your files.",
+                "What you type in yourself: the <b>names of your pool "
+                "members</b>, their <b>team picks</b>, and any manual "
+                "elimination overrides.",
+            ]),
+            ("Your password", [
+                "The app never sees it. Google verifies your identity and "
+                "returns only a signed confirmation. There is no password "
+                "stored here, so there is none to lose.",
+            ]),
+            ("Why your email", [
+                "It is used only as a key: it is what lets the app show you "
+                "your pool rather than someone else's. It is never shown to "
+                "other people, never sent to anyone, and never used to email "
+                "you.",
+            ]),
+            ("Where it is kept", [
+                "In a PostgreSQL database hosted by "
+                "<a href='https://neon.com'>Neon</a>, reachable only by the "
+                "app. Public hockey data — schedule, odds, models — is stored "
+                "separately and holds nothing personal.",
+            ]),
+            ("What is never done", [
+                "No advertising. No analytics. No tracking cookies. Nothing is "
+                "sold, rented or shared with a third party. The data serves no "
+                "purpose beyond running your pool.",
+            ]),
+            ("Deleting your data", [
+                "Ask, and your row is deleted along with everything in it. "
+                "Requests go through the "
+                "<a href='" + DEPOT + "/issues'>project repository</a>.",
+            ]),
+        ],
+    },
+}
+
 
 def nom(tri, lang):
     return TEAMS[lang].get(tri, tri)
@@ -484,12 +587,67 @@ def rendu(ctx, lang):
 """
 
 
+def confidentialite(lang, maj=None):
+    """La page de politique de confidentialité, dans une langue.
+
+    Fonction pure, comme rendu() : testable sans base ni réseau. Elle reprend
+    la même feuille de style pour que la vitrine reste d'un seul tenant.
+    """
+    t = VIE_PRIVEE[lang]
+    autre = "en" if lang == "fr" else "fr"
+    corps = []
+    for titre, paragraphes in t["sections"]:
+        corps.append(f"<h2>{_html.escape(titre)}</h2>")
+        # Les paragraphes contiennent du balisage voulu (<b>, <a>) : ils sont
+        # écrits ici, pas saisis par un visiteur, donc pas échappés.
+        corps += [f"<p>{p}</p>" for p in paragraphes]
+
+    maj = maj or dt.date.today().isoformat()
+    # --lueur est posee sur <html> par la page d'accueil, aux couleurs de
+    # l'equipe du jour. Ici il n'y a pas d'equipe, mais le fond du body
+    # l'utilise : sans valeur, le degrade devient invalide et la page
+    # s'affiche en blanc. On met donc la couleur d'accent, en sourdine.
+    return f"""<!doctype html>
+<html lang="{lang}" style="--lueur:rgba(57,135,229,.16)">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{_html.escape(t["titre"])} — Pool Survivor</title>
+<meta name="description" content="{_html.escape(t["desc"])}">
+<link rel="canonical" href="{CONFID[lang][1]}">
+<link rel="alternate" hreflang="fr" href="{CONFID['fr'][1]}">
+<link rel="alternate" hreflang="en" href="{CONFID['en'][1]}">
+<link rel="alternate" hreflang="x-default" href="{CONFID['fr'][1]}">
+<meta name="google-site-verification" content="{VERIF_GOOGLE}">
+<style>{CSS}</style>
+</head>
+<body>
+<main class="page">
+<a class="lang" href="{CONFID[autre][1]}">{"English" if lang == "fr" else "Français"}</a>
+<h1>{_html.escape(t["titre"])}</h1>
+<p class="maj">{"Mise à jour" if lang == "fr" else "Last updated"} : {maj}</p>
+<p>{t["intro"]}</p>
+{chr(10).join(corps)}
+<footer><a href="{CHEMINS[lang][1]}">{_html.escape(t["retour"])}</a></footer>
+</main>
+</body>
+</html>
+"""
+
+
 def sitemap(maj):
-    """Les deux pages, pour que les robots les trouvent d'un coup."""
+    """Les quatre pages, pour que les robots les trouvent d'un coup.
+
+    Les deux vitrines changent tous les jours ; les deux pages de
+    confidentialité presque jamais. Le dire evite de faire repasser un robot
+    pour rien.
+    """
+    quotidien = [(u, "daily") for _c, u in CHEMINS.values()]
+    rare = [(u, "yearly") for _c, u in CONFID.values()]
     urls = "".join(
         f"<url><loc>{u}</loc><lastmod>{maj}</lastmod>"
-        f"<changefreq>daily</changefreq></url>"
-        for _chemin, u in CHEMINS.values())
+        f"<changefreq>{freq}</changefreq></url>"
+        for u, freq in quotidien + rare)
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
             f"{urls}</urlset>\n")
@@ -543,6 +701,8 @@ def ecrire(docs=DOCS, db_path=None, today=None):
 
     fichiers = {chemin: rendu(ctx, lang)
                 for lang, (chemin, _u) in CHEMINS.items()}
+    fichiers.update({chemin: confidentialite(lang, maj)
+                     for lang, (chemin, _u) in CONFID.items()})
     fichiers["sitemap.xml"] = sitemap(maj)
     fichiers["robots.txt"] = robots()
 

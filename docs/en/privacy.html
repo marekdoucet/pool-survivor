@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en" style="--lueur:rgba(57,135,229,.16)">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy policy — Pool Survivor</title>
+<meta name="description" content="What NHL Pool Survivor collects, why, and what it never does with it.">
+<link rel="canonical" href="https://marekdoucet.github.io/pool-survivor/en/privacy.html">
+<link rel="alternate" hreflang="fr" href="https://marekdoucet.github.io/pool-survivor/confidentialite.html">
+<link rel="alternate" hreflang="en" href="https://marekdoucet.github.io/pool-survivor/en/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://marekdoucet.github.io/pool-survivor/confidentialite.html">
+<meta name="google-site-verification" content="Q1ZDOb5gaK_3URkxFVTvbZvTi-0Wf54jt3Wkxhm8cOE">
+<style>
+:root{color-scheme:dark;--carte:#232329;--bord:#34343d;--encre:#fff;
+--encre2:#c3c2b7;--accent:#3987e5}
+*{box-sizing:border-box}
+body{margin:0;color:var(--encre);
+background:radial-gradient(1100px 620px at 74% -12%,var(--lueur),transparent 62%),
+linear-gradient(176deg,#1d1d23,#131316) fixed;
+font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+.page{max-width:860px;margin:0 auto;padding:2.5rem 1.2rem 4rem}
+h1{font-size:2rem;line-height:1.15;margin:0 0 .3rem}
+h2{font-size:1.15rem;margin:2.4rem 0 .6rem}
+.maj{color:var(--encre2);font-size:.9rem;margin:0 0 2rem}
+.lang{float:right;font-size:.9rem}
+
+/* Bandeau : photo d'action fondue à droite, lueur aux couleurs de l'équipe.
+   Le texte reste à gauche, sur la partie restée sombre : aucune valeur ne
+   se lit par-dessus une image. */
+.hero{position:relative;overflow:hidden;isolation:isolate;display:flex;
+align-items:center;gap:1.8rem;flex-wrap:wrap;border:1px solid var(--bord);
+border-radius:1.1rem;padding:1.5rem 1.8rem;margin:0 0 1.6rem;
+background:linear-gradient(135deg,#26262e,#17171c);
+box-shadow:0 18px 46px rgba(0,0,0,.45)}
+.hero::before{content:"";position:absolute;inset:-14% -4% -14% 30%;z-index:-2;
+background:var(--photo) center/cover;filter:blur(2px) saturate(.85);opacity:.6;
+-webkit-mask-image:linear-gradient(to right,transparent 4%,#000 58%);
+mask-image:linear-gradient(to right,transparent 4%,#000 58%)}
+.hero-txt{flex:1 1 240px;min-width:0;position:relative}
+.hero-eq{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:3rem;
+font-weight:700;line-height:1.02;margin:0}
+.hero-de{color:var(--encre2);margin-top:.3rem}
+.hero-pc{flex:none;text-align:right;min-width:150px;position:relative;
+background:rgba(16,16,20,.62);backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.1);border-radius:.9rem;padding:.8rem 1.1rem}
+.hero-pc b{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:3.4rem;
+font-weight:700;line-height:.95;display:block}
+.hero-pc span{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+color:var(--encre2)}
+
+/* Carte de hockey : proportions 5:7, cadre argenté, photo d'action en décor
+   et portrait détouré par-dessus — les photos d'action ne sont pas cadrées
+   sur le joueur, le portrait garantit qu'on voit le bon. */
+.carte{flex:none;width:186px;aspect-ratio:5/7;padding:7px;border-radius:.55rem;
+background:linear-gradient(150deg,#fff,#d6d9dd 26%,#f6f7f8 48%,#bfc3c8 74%,#eef0f2);
+box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.carte-in{position:relative;height:100%;border-radius:.28rem;overflow:hidden;
+background:#0e0e0d}
+.carte-fond{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+object-position:50% 30%;filter:blur(3px) brightness(.55)}
+.carte-vis{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+width:124%;max-width:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+.carte-logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+width:66%}
+.plaque{position:absolute;left:0;right:0;bottom:0;padding:5px 6px 6px;
+background:linear-gradient(#fdfdfd,#e4e6e9)}
+.plaque-nom{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:.92rem;
+font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#15151a;
+text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plaque-l{display:flex;align-items:center;gap:4px;margin-top:3px}
+.jeton{flex:1 1 0;min-width:0;border-radius:2px;padding:2px;
+font-family:"Barlow Condensed",system-ui,sans-serif;font-size:.58rem;
+font-weight:600;letter-spacing:.07em;text-transform:uppercase;text-align:center;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ecusson{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.ecusson img{width:20px;height:20px}
+
+table{width:100%;border-collapse:collapse;margin:.6rem 0 0;font-size:.95rem;
+background:rgba(35,35,42,.62);border:1px solid var(--bord);border-radius:1rem;
+overflow:hidden}
+th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--bord)}
+th{color:var(--encre2);font-weight:600;font-size:.82rem;text-transform:uppercase;
+letter-spacing:.06em}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td.eq{display:flex;align-items:center;gap:.5rem}
+td.eq img{width:22px;height:22px;flex:none}
+p{color:#ddd}
+.cta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+background:rgba(35,35,42,.62);border:1px solid var(--bord);border-radius:1rem;
+padding:1rem 1.2rem;margin:0 0 1.6rem}
+.cta a{flex:none;background:var(--accent);color:#fff;text-decoration:none;
+font-weight:600;padding:.6rem 1.3rem;border-radius:.6rem}
+.cta a:hover{filter:brightness(1.1)}
+.cta span{flex:1 1 220px;color:var(--encre2);font-size:.88rem}
+.note{color:var(--encre2);font-size:.9rem}
+a{color:var(--accent)}
+footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--bord);
+color:var(--encre2);font-size:.85rem}
+@media(max-width:620px){.hero{gap:1.1rem;padding:1.2rem}.carte{width:140px}
+.hero-eq{font-size:2rem}.hero-pc{text-align:left}.hero-pc b{font-size:2.6rem}}
+</style>
+</head>
+<body>
+<main class="page">
+<a class="lang" href="https://marekdoucet.github.io/pool-survivor/confidentialite.html">Français</a>
+<h1>Privacy policy</h1>
+<p class="maj">Last updated : 2026-10-01</p>
+<p>NHL Pool Survivor is a personal, free tool with no ads and no trackers. This page states exactly what it collects and what it does with it.</p>
+<h2>What is collected</h2>
+<p>When you sign in with Google, the app receives your <b>email address</b> and <b>first name</b>. Nothing else: not your contacts, not your calendar, not your files.</p>
+<p>What you type in yourself: the <b>names of your pool members</b>, their <b>team picks</b>, and any manual elimination overrides.</p>
+<h2>Your password</h2>
+<p>The app never sees it. Google verifies your identity and returns only a signed confirmation. There is no password stored here, so there is none to lose.</p>
+<h2>Why your email</h2>
+<p>It is used only as a key: it is what lets the app show you your pool rather than someone else's. It is never shown to other people, never sent to anyone, and never used to email you.</p>
+<h2>Where it is kept</h2>
+<p>In a PostgreSQL database hosted by <a href='https://neon.com'>Neon</a>, reachable only by the app. Public hockey data — schedule, odds, models — is stored separately and holds nothing personal.</p>
+<h2>What is never done</h2>
+<p>No advertising. No analytics. No tracking cookies. Nothing is sold, rented or shared with a third party. The data serves no purpose beyond running your pool.</p>
+<h2>Deleting your data</h2>
+<p>Ask, and your row is deleted along with everything in it. Requests go through the <a href='https://github.com/marekdoucet/pool-survivor/issues'>project repository</a>.</p>
+<footer><a href="https://marekdoucet.github.io/pool-survivor/en/">Back to this week&#x27;s pick</a></footer>
+</main>
+</body>
+</html>
