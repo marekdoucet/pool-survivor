@@ -61,3 +61,22 @@ def test_le_garde_fou_attrape_vraiment_ce_bogue():
     casse = casse.replace("def page_pick():\n",
                           "def page_pick():\n    " + ligne + "\n", 1)
     assert ("page_pool", "current") in noms_non_definis(casse)
+
+
+def test_lapp_demarre_sans_exception():
+    """Le seul test qui execute vraiment app.py.
+
+    AppTest fait tourner le script comme Streamlit le ferait, et collecte les
+    exceptions. Mes essais precedents lancaient le serveur et faisaient un curl
+    sur la racine — ce qui ne cree aucune session, donc n'execute pas le
+    script : ils ne prouvaient rien.
+
+    Ne couvre que la page par defaut. switch_page attend un chemin de fichier
+    et ne sait pas naviguer entre des pages-fonctions de st.navigation, d'ou le
+    garde-fou statique ci-dessus pour les autres.
+    """
+    from streamlit.testing.v1 import AppTest
+
+    app = AppTest.from_file(str(APP), default_timeout=300)
+    app.run()
+    assert not app.exception, "\n".join(str(e.value) for e in app.exception)

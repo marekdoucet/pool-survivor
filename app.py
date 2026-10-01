@@ -1238,35 +1238,46 @@ def page_pool():
                            if j["picks"].get(semaine) in proba else None,
             "Équipes déjà prises": ", ".join(sorted(pk.pool_used(state, nom, since))),
         } for nom, j in sorted(joueurs.items())]
-        edite = st.data_editor(
-            chiffres(pd.DataFrame(lignes,
-                                  columns=["Joueur", "Pick", "Statut", "Réel",
-                                           "Probabilité", "Équipes déjà prises"]),
-                     ["Probabilité"]),
-            num_rows="dynamic", hide_index=True, width="stretch",
-            column_config={
-                "Pick": st.column_config.SelectboxColumn(
-                    f"Pick du {fr_weekend(this_monday)}",
-                    options=sorted(cm.TEAMS), required=False),
-                "Statut": st.column_config.SelectboxColumn(
-                    "Statut", options=[pk.AUTO, pk.DEHORS, pk.DEDANS],
-                    required=False,
-                    help="auto = déduit des résultats ; out = éliminé quoi "
-                         "qu'en disent les matchs ; in = maintenu en vie"),
-                "Réel": st.column_config.TextColumn(
-                    "Réel", disabled=True,
-                    help="Ce que le site retient, une fois le manuel appliqué"),
-                "Probabilité": st.column_config.NumberColumn(
-                    format="%.1f %%", disabled=True,
-                    help="Calculée, pas modifiable"),
-                "Équipes déjà prises": st.column_config.TextColumn(disabled=True),
-            })
-        if st.button("Enregistrer le registre", type="primary", width="stretch",
-                     disabled=not PEUT_ECRIRE):
-            nouveau = pk.merge_pool_week(joueurs, edite.to_dict("records"),
-                                         semaine)
-            save_state(pk.set_pool(state, nouveau),
-                       f"Registre du pool ({len(nouveau)} joueur(s))")
+        # Dans un formulaire, modifier une case ne reexecute pas le script.
+        # Sans lui, chaque frappe relancait tout — relecture de Neon, calcul
+        # des probabilites, reconstruction de la grille — et le curseur
+        # sautait hors de la case en cours de saisie.
+        #
+        # Contrepartie assumee : « Reel » et « Probabilite » se calculent,
+        # donc elles ne se mettent a jour qu'a l'enregistrement. On saisit
+        # seize noms bien plus souvent qu'on ne regarde une probabilite
+        # bouger en direct.
+        with st.form("registre_pool", border=False):
+            edite = st.data_editor(
+                chiffres(pd.DataFrame(lignes,
+                                      columns=["Joueur", "Pick", "Statut", "Réel",
+                                               "Probabilité", "Équipes déjà prises"]),
+                         ["Probabilité"]),
+                key="registre", num_rows="dynamic", hide_index=True, width="stretch",
+                column_config={
+                    "Pick": st.column_config.SelectboxColumn(
+                        f"Pick du {fr_weekend(this_monday)}",
+                        options=sorted(cm.TEAMS), required=False),
+                    "Statut": st.column_config.SelectboxColumn(
+                        "Statut", options=[pk.AUTO, pk.DEHORS, pk.DEDANS],
+                        required=False,
+                        help="auto = déduit des résultats ; out = éliminé quoi "
+                             "qu'en disent les matchs ; in = maintenu en vie"),
+                    "Réel": st.column_config.TextColumn(
+                        "Réel", disabled=True,
+                        help="Ce que le site retient, une fois le manuel appliqué"),
+                    "Probabilité": st.column_config.NumberColumn(
+                        format="%.1f %%", disabled=True,
+                        help="Calculée, pas modifiable"),
+                    "Équipes déjà prises": st.column_config.TextColumn(disabled=True),
+                })
+            if st.form_submit_button("Enregistrer le registre",
+                                     type="primary", width="stretch",
+                                     disabled=not PEUT_ECRIRE):
+                nouveau = pk.merge_pool_week(joueurs, edite.to_dict("records"),
+                                             semaine)
+                save_state(pk.set_pool(state, nouveau),
+                           f"Registre du pool ({len(nouveau)} joueur(s))")
 
     if pris:
         with ui.panel("popularite", "Popularité des équipes cette semaine",
