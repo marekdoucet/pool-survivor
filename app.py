@@ -387,6 +387,11 @@ overrides = tuple(sorted(day_overrides.items()))   # clé de cache
 all_days = pick_days_for(VERSION, overrides) if VERSION else {}
 this_monday = op.week_start(today)
 from_date, used_set, provisional = pk.planning(picks, today, since)
+# Le pick de la semaine en cours. Defini ici plutot que dans page_pick :
+# page_pool le lit aussi, et st.navigation n'execute QUE la page ouverte.
+# Quand il etait local a page_pick, ouvrir « Le pool » levait
+# « NameError: name 'current' is not defined ».
+current = next((p for p in picks if p["week"] == this_monday.isoformat()), None)
 used = tuple(sorted(used_set))
 
 RES = resultats(VERSION, overrides) if VERSION else {}
@@ -562,7 +567,6 @@ def page_pick():
     # Un seul endroit pour choisir, ici. Le formulaire qui doublonnait dans la
     # barre latérale a été retiré : il y avait deux façons d'enregistrer le
     # même pick, avec le risque de ne plus savoir laquelle faisait foi.
-    current = next((p for p in picks if p["week"] == this_monday.isoformat()), None)
     choisi = None            # l'équipe montrée dans « Enregistrer mon pick »
     if current and not provisional:
         st.success(f"Pick verrouillé pour cette semaine : **{current['team']}**. "
