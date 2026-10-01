@@ -23,10 +23,27 @@ on:
     # ne coûte rien : DELAI_MINI, dans collect_odds.py, saute l'appel payant
     # quand les cotes ont moins de 4 heures. Deux vraies requêtes par jour,
     # ~124 des 500 crédits gratuits par mois.
-    - cron: "23 8 * * *"
-    - cron: "23 9 * * *"
-    - cron: "23 21 * * *"
-    - cron: "23 22 * * *"
+    #
+    # Trois creneaux par fenetre plutot que deux. Mesure du 1er octobre : les
+    # collectes du soir sont parties avec plus de TROIS HEURES de retard, et
+    # celle du matin n'est jamais partie. GitHub met les taches planifiees en
+    # file et, quand ses runners gratuits saturent, il les retarde lourdement
+    # ou les abandonne.
+    #
+    # Le vrai risque est l'abandon, pas le retard : une collecte decalee reste
+    # utilisable, une collecte absente laisse un trou dans la saison. On
+    # multiplie donc les chances qu'une parte.
+    #
+    # Et ca ne coute rien : DELAI_MINI (collect_odds.py) ne laisse payer que la
+    # premiere qui demarre reellement dans chaque fenetre. Les autres font tout
+    # le reste du travail — MoneyPuck, calendrier, page publique, reveil de
+    # l'app — gratuitement. Toujours deux requetes payantes par jour.
+    - cron: "23 8 * * *"      # 3 h 23 l'hiver, 4 h 23 l'ete
+    - cron: "23 10 * * *"     # 5 h 23 / 6 h 23
+    - cron: "23 12 * * *"     # 7 h 23 / 8 h 23
+    - cron: "23 20 * * *"     # 15 h 23 / 16 h 23
+    - cron: "23 22 * * *"     # 17 h 23 / 18 h 23
+    - cron: "23 23 * * *"     # 18 h 23 / 19 h 23, dernier recours
   workflow_dispatch:        # bouton « Run workflow » pour lancer à la main
 
 permissions:
