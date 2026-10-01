@@ -420,26 +420,11 @@ with st.sidebar:
         elif remote:
             st.caption(f"Pool partagé, dans GitHub ({remote.repo})")
 
-        # Migration : ton pool d'avant Neon vit encore dans picks.json sur
-        # GitHub. Un bouton explicite plutôt qu'un import automatique — c'est
-        # toi qui décides quand tes données bougent.
-        if isinstance(remote, depot.PoolNeon) and not state["picks"]:
-            ancien = depot_github()
-            if ancien:
-                with st.popover("Importer mon pool existant", width="stretch"):
-                    st.write("Ton pool d'avant la connexion est encore dans "
-                             "GitHub. Cet import le recopie dans ton compte. "
-                             "L'original n'est pas touché.")
-                    if st.button("Importer maintenant", type="primary"):
-                        save_state(ancien.load(), "Import depuis GitHub")
-
         st.divider()
 
     st.header("Mes picks")
     if not tour:
         st.caption("Aucun pick dans ce tour.")
-    if remote:
-        st.caption(f"Sauvegardés dans GitHub ({remote.repo})")
     for p in tour:
         col1, col2 = st.columns([4, 1])
         col1.markdown(f"**{p['team']}** — semaine du {p['week']}")

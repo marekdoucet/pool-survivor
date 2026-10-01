@@ -117,3 +117,34 @@ def test_le_pool_lit_et_ecrit_pour_le_bon_courriel():
     assert pool.load() == ETAT
     pool.save({"picks": {}}, "message ignoré")
     assert any(p and p[0] == "moi@exemple.ca" for _sql, p in conn.journal)
+
+
+# ── Le chemin de toute nouvelle personne ──────────────────────────────────
+# Bogue du 1er octobre : PoolNeon.load() rendait None pour quelqu'un sans
+# ligne, et app.py faisait aussitot state["picks"] :
+#     TypeError: 'NoneType' object is not subscriptable
+# C'est le chemin qu'emprunte CHAQUE nouvelle personne, donc celui qui doit le
+# moins casser.
+
+def test_une_personne_qui_arrive_recoit_un_etat_utilisable():
+    pool = depot.PoolNeon("postgresql://faux", "nouveau@exemple.ca",
+                          connecter=lambda url: Connexion(reponse=None))
+    etat = pool.load()
+    assert etat is not None
+    assert etat["picks"] == []          # app.py fait state["picks"] sans detour
+    assert "days" in etat and "pool" in etat
+
+
+def test_un_etat_existant_nest_pas_remplace_par_du_vide():
+    pool = depot.PoolNeon("postgresql://faux", "moi@exemple.ca",
+                          connecter=lambda url: Connexion(reponse=(ETAT,)))
+    assert pool.load()["picks"] == ETAT["picks"]
+
+
+def test_les_deux_depots_repondent_pareil_a_un_pool_absent():
+    """GitHubPicks rend empty_state() sur un 404 ; Neon doit faire de meme,
+    sinon les deux ne sont plus interchangeables."""
+    import picks as pk
+    pool = depot.PoolNeon("postgresql://faux", "neuf@exemple.ca",
+                          connecter=lambda url: Connexion(reponse=None))
+    assert pool.load() == pk.empty_state()

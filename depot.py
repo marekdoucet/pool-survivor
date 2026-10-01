@@ -69,6 +69,12 @@ def courriels(conn):
         return [l[0] for l in cur.fetchall()]
 
 
+def _etat_vide():
+    # Import tardif : depot.py doit rester importable sans picks.py.
+    import picks
+    return picks.empty_state()
+
+
 def _connecter(url):
     # Import tardif : le module doit rester importable (et testable) sur une
     # machine sans psycopg, par exemple pour la collecte quotidienne.
@@ -89,15 +95,24 @@ class PoolNeon:
     exécutions donnerait une connexion morte plutôt qu'une économie.
     """
 
-    def __init__(self, url, courriel, connecter=None):
+    def __init__(self, url, courriel, connecter=None, etat_vide=None):
         self.url = url
         self.courriel = courriel
         self._connecter = connecter or _connecter
+        self._etat_vide = etat_vide or _etat_vide
 
     def load(self):
+        """L'état de cette personne, ou un état vide si elle arrive.
+
+        charger() rend None quand la ligne n'existe pas, mais l'app attend
+        toujours un dictionnaire : elle fait state["picks"] sans détour. C'est
+        le chemin de TOUTE nouvelle personne, donc celui qui doit le moins
+        casser — GitHubPicks.load() fait déjà pareil sur un 404.
+        """
         with self._connecter(self.url) as conn:
             init(conn)
-            return charger(conn, self.courriel)
+            etat = charger(conn, self.courriel)
+        return self._etat_vide() if etat is None else etat
 
     def save(self, etat, message=None):
         with self._connecter(self.url) as conn:
