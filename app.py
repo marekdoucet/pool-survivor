@@ -70,8 +70,8 @@ _recharge_les_modules_modifies()
 PICKS_PATH = Path(os.environ.get("SURVIVOR_PICKS", pk.PICKS_PATH))
 CACHE_DB = Path(".cache") / "survivor.db"
 
-SOURCES = {"consensus": "Consensus", "market": "Casinos", "moneypuck": "MoneyPuck",
-           "dimers": "Dimers", "puckcast": "Puckcast"}
+SOURCES = {"consensus": "Consensus", "market": "Casinos", "kalshi": "Kalshi",
+           "moneypuck": "MoneyPuck", "dimers": "Dimers", "puckcast": "Puckcast"}
 # Palette catégorielle de référence (8 couleurs), dans un ordre fixe :
 # la couleur suit la source, ou l'équipe (au plus 8 équipes comparées à la fois).
 # Pas calibrés pour fond sombre — mêmes teintes et même ordre que la version

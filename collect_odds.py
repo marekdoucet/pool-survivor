@@ -43,7 +43,13 @@ REGIONS = "us,eu"   # « eu » inclut Pinnacle, le casino de référence du marc
 DELAI_MINI = dt.timedelta(hours=4)
 # Poids de chaque source dans le consensus (renormalisés selon les sources
 # disponibles pour un match). Le marché des casinos est en général le plus précis.
-WEIGHTS = {"market": 0.55, "moneypuck": 0.2, "dimers": 0.15, "puckcast": 0.1}
+WEIGHTS = {"market": 0.45, "kalshi": 0.2, "moneypuck": 0.2,
+           "dimers": 0.1, "puckcast": 0.05}
+# Kalshi est une bourse reglementee, pas un casino a marge : son prix est
+# deja une probabilite de marche. On lui donne un poids proche de celui des
+# casinos, et on baisse dimers/puckcast plutot que market, pour ne pas
+# affaiblir la source la plus liquide au profit d'une nouvelle encore peu
+# testee.
 
 TEAM_CODES = {
     "anaheim ducks": "ANA", "boston bruins": "BOS", "buffalo sabres": "BUF",

@@ -1,6 +1,6 @@
 """
 Collecte quotidienne complète :
-MoneyPuck → cotes des casinos → Dimers → calendrier → Puckcast → consensus.
+MoneyPuck → cotes des casinos → Dimers → Kalshi → calendrier → Puckcast → consensus.
 
     python daily.py
 
@@ -21,6 +21,7 @@ import requests
 import collect_moneypuck as cm
 import collect_odds as co
 import collect_dimers as cd
+import collect_kalshi as kl
 import collect_puckcast as cp
 import collect_players as cpl
 import page
@@ -55,6 +56,13 @@ def main():
     try:
         print(f"{len(cd.collect_dimers(today=today))} matchs prédits")
     except (requests.RequestException, cd.DimersError, ValueError) as e:
+        print(f"⚠ {e}")
+        failed = True
+
+    print("\n── Kalshi")
+    try:
+        print(f"{len(kl.collect_kalshi(today=today))} matchs avec prix des deux côtés")
+    except (requests.RequestException, kl.KalshiError) as e:
         print(f"⚠ {e}")
         failed = True
 
