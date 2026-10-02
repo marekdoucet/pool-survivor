@@ -62,3 +62,106 @@ def test_collect_replaces_snapshot(tmp_path, db):
     rows = sqlite3.connect(path).execute(
         "SELECT away, home, p_away FROM probs WHERE source='puckcast' ORDER BY away").fetchall()
     assert rows == [("FLA", "CAR", 0.361), ("MTL", "TOR", 0.57)]
+
+
+# ── Affinage par la page de match (gardiens confirmés) ──────────────────────
+# Trouvé le 2 octobre : la page de saison restait figée à 64,3 % pour COL,
+# alors que la page de match individuelle affichait 58,7 %, gardiens
+# confirmés. La page de saison est générée une fois et ne bouge plus ; la
+# page de match se met à jour à l'approche de la mise au jeu.
+
+ARIA_COL_STL = (
+    '<div aria-label="Win probability: Blues 41.3%, Avalanche 58.7%">x</div>')
+ARIA_SANS_WIDGET = "<html><body>match déjà joué, pas de pronostic</body></html>"
+
+
+def test_nom_vers_code_reconnait_le_surnom_seul():
+    assert cp.nom_vers_code("Avalanche") == "COL"
+    assert cp.nom_vers_code("Maple Leafs") == "TOR"   # surnom à deux mots
+
+
+def test_parse_matchup_lit_les_deux_equipes():
+    assert cp.parse_matchup(ARIA_COL_STL) == {"STL": 0.413, "COL": 0.587}
+
+
+def test_parse_matchup_sans_widget_rend_vide():
+    """Les matchs déjà joués perdent le widget : pas d'erreur, juste rien à
+    affiner — la page de saison reste la seule source pour eux."""
+    assert cp.parse_matchup(ARIA_SANS_WIDGET) == {}
+
+
+class FakeSessionMatchup:
+    """Sert la page de saison à l'URL de saison, et un contenu par match aux
+    URL de match — contrairement au FakeSession plus haut, qui sert la même
+    page partout et ne peut donc pas tester l'affinage."""
+
+    def __init__(self, par_id):
+        self.par_id = par_id
+        self.demandes = []
+
+    def get(self, url, **kw):
+        self.demandes.append(url)
+        if url == cp.URL:
+            html = HTML
+        else:
+            gid = int(url.rsplit("/", 1)[-1])
+            html = self.par_id.get(gid, ARIA_SANS_WIDGET)
+        return type("R", (), {"text": html, "raise_for_status": lambda self: None})()
+
+
+def test_affiner_horizon_proche_remplace_le_chiffre_de_la_saison(db):
+    """Le cœur du correctif : le chiffre affiné doit l'emporter sur celui de
+    la page de saison pour un match dans l'horizon."""
+    probs = {("2026-09-29", "FLA", "CAR"): (0.361, 0.639)}
+    session = FakeSessionMatchup({
+        2026020001: '<div aria-label="Win probability: Panthers 20.0%, Hurricanes 80.0%">x</div>',
+    })
+    affine = cp.affiner_horizon_proche(dict(probs), db, TODAY, session)
+    assert affine[("2026-09-29", "FLA", "CAR")] == (0.2, 0.8)
+
+
+def test_affiner_horizon_proche_ignore_les_matchs_hors_du_dictionnaire():
+    """matchs_proches peut lister un match que to_probs n'a pas retenu (pas
+    couvert par Puckcast, par ex.) : pas de KeyError."""
+    conn = sqlite3.connect(":memory:")
+    store.init_db(conn)
+    conn.execute("INSERT INTO schedule VALUES (?,?,?,?,?,?,?,?)",
+                (2026020009, "2026-10-01", "x", "BOS", "NYR", None, None, None))
+    conn.commit()
+    affine = cp.affiner_horizon_proche({}, conn, dt.date(2026, 9, 30),
+                                       FakeSessionMatchup({}))
+    assert affine == {}
+
+
+def test_une_erreur_reseau_sur_un_match_ne_fait_rien_perdre(db):
+    """Le chiffre de la page de saison, moins précis mais présent, vaut mieux
+    qu'une exception qui ferait échouer toute la collecte."""
+    class SessionCassee:
+        def get(self, url, **kw):
+            raise __import__("requests").ConnectionError("réseau coupé")
+
+    probs = {("2026-09-29", "FLA", "CAR"): (0.361, 0.639)}
+    affine = cp.affiner_horizon_proche(dict(probs), db, TODAY, SessionCassee())
+    assert affine == probs   # inchangé, pas d'exception propagée
+
+
+def test_collecte_de_bout_en_bout_integre_laffinage(tmp_path):
+    """Vérifie que collect_puckcast() appelle bien l'affinage, pas seulement
+    que les fonctions marchent isolément."""
+    path = tmp_path / "t.db"
+    conn = sqlite3.connect(path)
+    store.init_db(conn)
+    conn.executemany("INSERT INTO schedule VALUES (?,?,?,?,?,?,?,?)", [
+        (2026020001, "2026-09-29", "x", "FLA", "CAR", None, None, None),
+    ])
+    conn.commit()
+    conn.close()
+
+    session = FakeSessionMatchup({
+        2026020001: '<div aria-label="Win probability: Panthers 10.0%, Hurricanes 90.0%">x</div>',
+    })
+    cp.collect_puckcast(path, today=TODAY, session=session)
+    row = sqlite3.connect(path).execute(
+        "SELECT p_away, p_home FROM probs WHERE source='puckcast' "
+        "AND away='FLA' AND home='CAR'").fetchone()
+    assert row == (0.1, 0.9)   # le chiffre affiné, pas le 36,1/63,9 de la saison

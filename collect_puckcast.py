@@ -10,6 +10,10 @@ l'équipe favorite et sa probabilité de victoire :
     <a class="season-game" href="/matchup/2026020004"> … <span>EDM</span>
       <span class="stat-num">66.9%</span></a>
 Le numéro LNH permet de retrouver visiteur/local dans le calendrier officiel.
+
+Pour les matchs dans les HORIZON_JOURS prochains jours, on relit en plus la
+page /matchup/<id> elle-même : la page de saison est générée une fois et reste
+figée, donc elle ignore les gardiens confirmés. Voir affiner_horizon_proche.
 """
 
 import re
@@ -19,6 +23,7 @@ import datetime as dt
 import requests
 
 import collect_moneypuck as cm
+import collect_odds as co
 import schedule as sch
 
 URL = "https://puckcast.ai/2026-27/games"
@@ -26,6 +31,75 @@ SOURCE = "puckcast"
 RE_GAME = re.compile(r'<a\b[^>]*\bhref="/matchup/(\d+)"[^>]*>(.*?)</a>', re.S)
 RE_TEAM = re.compile(r">([A-Z]{2,3})</span>")
 RE_PROB = re.compile(r'class="stat-num"[^>]*>\s*([\d.]+)\s*%')
+
+# Affinage par match : la page de saison est générée une fois et ne bouge
+# plus, donc elle ignore les gardiens confirmés — trouvé en comparant son
+# 64,3 % à la page de match individuelle, qui affichait 58,7 % le même jour,
+# avec « with goalies, edges and the total ». La page de match n'a ce widget
+# que pour les matchs pas encore joués ; les gardiens se confirment en
+# général dans les 24-48 h, d'où un horizon court plutôt que les ~1300
+# matchs de la saison (ce qui serait abusif envers leur serveur).
+URL_MATCHUP = "https://puckcast.ai/matchup/{id}"
+HORIZON_JOURS = 2
+RE_WIN_PROB = re.compile(
+    r'aria-label="Win probability: ([^,"]+?) ([\d.]+)%, ([^,"]+?) ([\d.]+)%"')
+
+
+def nom_vers_code(nom):
+    """« Avalanche » → COL. Les noms de la page de match sont des surnoms
+    seuls, jamais « Ville Surnom » : même repli que collect_dimers.team_code,
+    sur le suffixe de TEAM_CODES."""
+    nick = co.team_code(nom) or " " + nom.lower()
+    matches = {c for full, c in co.TEAM_CODES.items() if full.endswith(nick)}
+    return matches.pop() if len(matches) == 1 else None
+
+
+def parse_matchup(html):
+    """→ {code_équipe: probabilité_de_victoire}, ou {} si le widget est
+    absent (match déjà joué, ou format de page différent)."""
+    m = RE_WIN_PROB.search(html)
+    if not m:
+        return {}
+    nom_a, p_a, nom_b, p_b = m.groups()
+    code_a, code_b = nom_vers_code(nom_a), nom_vers_code(nom_b)
+    if not code_a or not code_b:
+        return {}
+    return {code_a: round(float(p_a) / 100, 4), code_b: round(float(p_b) / 100, 4)}
+
+
+def matchs_proches(conn, today):
+    """Les (game_id, game_date, away, home) dont la mise au jeu est dans
+    HORIZON_JOURS."""
+    fin = (today + dt.timedelta(days=HORIZON_JOURS)).isoformat()
+    return conn.execute(
+        "SELECT game_id, game_date, away, home FROM schedule "
+        "WHERE game_date >= ? AND game_date < ? AND away_score IS NULL",
+        (today.isoformat(), fin)).fetchall()
+
+
+def affiner_horizon_proche(probs, conn, today, session):
+    """Remplace, pour les matchs proches, la probabilité de la page de
+    saison par celle — mise à jour, gardiens confirmés — de la page de match.
+
+    `probs` est le dictionnaire final {(game_date, away, home): (p_away,
+    p_home)} rendu par to_probs ; modifié en place et retourné.
+
+    Ne touche que les matchs où la page de match répond ET donne les deux
+    équipes : une erreur réseau ou un format inattendu sur un match laisse
+    simplement le chiffre de la page de saison, moins précis mais pas absent.
+    """
+    for gid, g, away, home in matchs_proches(conn, today):
+        if (g, away, home) not in probs:
+            continue
+        try:
+            r = session.get(URL_MATCHUP.format(id=gid), headers=cm.HEADERS, timeout=30)
+            r.raise_for_status()
+        except requests.RequestException:
+            continue
+        cote = parse_matchup(r.text)
+        if away in cote and home in cote:
+            probs[(g, away, home)] = (cote[away], cote[home])
+    return probs
 
 
 class PuckcastError(Exception):
@@ -80,6 +154,7 @@ def collect_puckcast(db_path=cm.DB_PATH, today=None, session=None):
     cm.init_db(conn)
     sch.init_db(conn)
     probs = to_probs(games, conn, today)
+    probs = affiner_horizon_proche(probs, conn, today, session)
     with conn:
         conn.execute("DELETE FROM probs WHERE snapshot=? AND source=?",
                      (today.isoformat(), SOURCE))
