@@ -10,10 +10,11 @@ Tables écrites :
              source='consensus' moyenne pondérée (WEIGHTS) des sources disponibles
                                 (marché, MoneyPuck, Dimers, Puckcast) pour chaque match
 
-Coût : 1 requête = 1 crédit par région (REGIONS), donc 2 crédits par appel.
-Le workflow déclenche quatre exécutions par jour, mais DELAI_MINI n'en laisse
-passer que deux : ~124 des 500 crédits gratuits par mois. Les deux autres sont
-des rattrapages, qui ne coûtent rien tant que l'exécution principale a réussi.
+Coût : 1 requête = 1 crédit par région (REGIONS), donc 3 crédits par appel
+(us, eu, uk). Le workflow déclenche six exécutions par jour, mais DELAI_MINI
+n'en laisse passer que deux par vraie fenêtre : ~186 des 500 crédits gratuits
+par mois. Les autres sont des rattrapages, gratuits tant qu'une exécution de
+la fenêtre a déjà réussi.
 
 Utilisation :
     set ODDS_API_KEY=ta_cle        (ou setx pour la garder)
@@ -32,7 +33,11 @@ import requests
 import collect_moneypuck as cm
 
 API_URL = "https://api.the-odds-api.com/v4/sports/icehockey_nhl/odds"
-REGIONS = "us,eu"   # « eu » inclut Pinnacle, le casino de référence du marché
+REGIONS = "us,eu,uk"   # eu : Pinnacle, le casino de référence du marché.
+# uk : Betfair, Ladbrokes, Paddy Power, William Hill (UK)… aucun chevauchement
+# avec les 16 casinos déjà couverts par us+eu. Bet365 n'est PAS disponible ici :
+# The Odds API ne l'offre que sous "au", en payant, et seulement pour
+# l'AFL/NRL — jamais pour le hockey, gratuit ou non.
 
 # Les crons vont par paires : une exécution principale, puis un rattrapage une
 # heure plus tard au cas où GitHub aurait sauté la première — ce qui arrive

@@ -22,7 +22,7 @@ on:
     # Le second cron de chaque paire rattrape le premier s'il a été sauté. Il
     # ne coûte rien : DELAI_MINI, dans collect_odds.py, saute l'appel payant
     # quand les cotes ont moins de 4 heures. Deux vraies requêtes par jour,
-    # ~124 des 500 crédits gratuits par mois.
+    # ~186 des 500 crédits gratuits par mois (trois régions : us, eu, uk).
     #
     # Trois creneaux par fenetre plutot que deux. Mesure du 1er octobre : les
     # collectes du soir sont parties avec plus de TROIS HEURES de retard, et

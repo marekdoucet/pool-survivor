@@ -109,7 +109,7 @@ def test_collect_and_consensus(tmp_path):
 
     session = FakeSession(FakeResponse(EVENTS))
     market = co.collect_odds("cle", db, today=today, session=session, now=NOW)
-    assert session.params["regions"] == "us,eu" and session.params["markets"] == "h2h"
+    assert session.params["regions"] == "us,eu,uk" and session.params["markets"] == "h2h"
 
     pit = market[("2026-10-07", "PIT", "WSH")][0]
     expected = (co.devig(2.40, 1.62)[0] + co.devig(2.35, 1.60)[0]) / 2
@@ -144,7 +144,7 @@ def test_bad_key_gives_clear_error(tmp_path):
 # ── Le filet de rattrapage ────────────────────────────────────────────────
 # Les crons vont par paires : une exécution principale, un rattrapage une heure
 # plus tard si GitHub a sauté la première. Le rattrapage ne doit pas racheter
-# les cotes, sinon il double la facture (248 crédits/mois au lieu de 124).
+# les cotes, sinon il double la facture (372 crédits/mois au lieu de 186).
 
 class SessionComptee(FakeSession):
     def __init__(self, response):
