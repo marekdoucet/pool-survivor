@@ -45,6 +45,11 @@ on:
     - cron: "23 22 * * *"     # 17 h 23 / 18 h 23
     - cron: "23 23 * * *"     # 18 h 23 / 19 h 23, dernier recours
   workflow_dispatch:        # bouton « Run workflow » pour lancer à la main
+    inputs:
+      forcer_casinos:
+        description: "Forcer l'appel aux casinos (contourne DELAI_MINI, coûte un crédit) — pour vérifier un changement, pas pour l'usage courant"
+        type: boolean
+        default: false
 
 permissions:
   contents: write           # pour pousser les données collectées
@@ -70,6 +75,7 @@ jobs:
       - name: Collecte
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          FORCER_CASINOS: ${{ github.event.inputs.forcer_casinos }}
         run: python daily.py
 
       # always() : même si une source a échoué, on garde ce qui a été collecté.

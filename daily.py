@@ -46,8 +46,18 @@ def main():
     if not api_key:
         print("ODDS_API_KEY absente : consensus sans les casinos")
     else:
+        # FORCER_CASINOS : contourne DELAI_MINI pour une vérification manuelle
+        # ponctuelle (ex. après un changement de REGIONS), jamais utilisé par
+        # les exécutions planifiées — sinon la paire de rattrapage perdrait
+        # sa gratuité.
+        #
+        # GitHub Actions transmet un booléen d'entrée comme la CHAÎNE "true"
+        # ou "false" — et "false" est vrai en Python, car non vide. D'où le
+        # test explicite contre "true" plutôt qu'un simple if sur la valeur.
+        force = os.environ.get("FORCER_CASINOS", "").lower() == "true"
+        kw = {"delai_mini": dt.timedelta(0)} if force else {}
         try:
-            co.collect_odds(api_key, today=today)
+            co.collect_odds(api_key, today=today, **kw)
         except (requests.RequestException, co.OddsError) as e:
             print(f"⚠ {e}")
             failed = True
