@@ -64,6 +64,17 @@ def name(tri):
     return TEAMS.get(tri, tri)
 
 
+def barre(texte):
+    """Texte barré, pour un nom dans un st.dataframe ordinaire.
+
+    st.dataframe ne permet pas de styler une cellule au cas par cas (pas de
+    Styler + column_config ensemble) : on barre donc le texte lui-même, avec
+    un caractère combinant après chaque lettre. Rendu correct dans les
+    navigateurs courants pour du texte latin.
+    """
+    return "̶".join(texte) + "̶" if texte else texte
+
+
 def rgba(bg, alpha):
     """'#236192' + 0.4 → 'rgba(35,97,146,0.4)'.
 

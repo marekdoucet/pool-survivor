@@ -14,6 +14,20 @@ def contraste(a, b):
     return (l1 + 0.05) / (l2 + 0.05)
 
 
+# ── Texte barré (personnes éliminées dans un tableau) ──────────────────────
+
+def test_barre_insere_un_combinant_apres_chaque_lettre():
+    """st.dataframe ne permet pas de styler une cellule au cas par cas : le
+    texte lui-même porte la marque, lettre par lettre, dernière comprise."""
+    b = ui.barre("abc")
+    assert b == "a̶b̶c̶"
+    assert len(b) == 6
+
+
+def test_barre_dune_chaine_vide_reste_vide():
+    assert ui.barre("") == ""
+
+
 def test_encre_noire_sur_les_couleurs_claires():
     assert ui.ink("#ffb81c") == "#11110f"      # or des Bruins
     assert ui.ink("#fedd00") == "#11110f"      # jaune des Blackhawks

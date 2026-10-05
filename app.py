@@ -1359,7 +1359,10 @@ def page_pool():
     for nom, brulees, vivant, equipe in gens:
         apres, total = evalue(brulees, equipe)
         lignes.append({
-            "Joueur": nom, "En vie": "oui" if vivant else "non",
+            # Barré pour une personne éliminée : sinon son nom se mélange
+            # visuellement à ceux encore en vie dans la même colonne.
+            "Joueur": nom if vivant else ui.barre(nom),
+            "En vie": "oui" if vivant else "non",
             "Pick": equipe or "—",
             "Gagne cette semaine": 100 * proba[equipe] if equipe in proba else None,
             "Potentiel après": apres,
@@ -1368,7 +1371,11 @@ def page_pool():
                              else total - ma_survie),
             "Brûlées": ", ".join(sorted(brulees)) or "—",
         })
-    lignes.sort(key=lambda r: (-(r["Survie totale"] if r["Survie totale"]
+    # Les éliminés tout en bas, quel que soit leur potentiel restant : un
+    # grand « Survie totale » théorique n'y change rien, ils ne sont plus en
+    # course. Chaque groupe reste trié par survie totale, comme avant.
+    lignes.sort(key=lambda r: (r["En vie"] == "non",
+                               -(r["Survie totale"] if r["Survie totale"]
                                  is not None else -1), r["Joueur"]))
 
     with ui.panel("potentiel", "Chances de survie de chacun",
