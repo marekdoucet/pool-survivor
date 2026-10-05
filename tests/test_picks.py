@@ -122,6 +122,30 @@ def test_sans_reset_rien_ne_change():
     assert pk.this_round([{"week": "2026-09-28"}], None) == [{"week": "2026-09-28"}]
 
 
+# ── Les semaines du registre, pour rattraper un pick oublié ────────────────
+
+def test_sans_reset_on_remonte_au_moins_huit_semaines():
+    """Au tout début de saison, sans reset, il peut déjà y avoir plusieurs
+    semaines à corriger — même repère que horizon() : 8 semaines de base."""
+    lundi = dt.date(2026, 10, 12)
+    semaines = pk.semaines_tour(None, lundi)
+    assert len(semaines) == 8
+    assert semaines[0] == lundi                           # la plus récente en premier
+    assert semaines[-1] == lundi - dt.timedelta(weeks=7)
+
+
+def test_avec_reset_la_liste_sarrete_au_redepart():
+    lundi = dt.date(2026, 10, 12)
+    depart = lundi - dt.timedelta(weeks=2)
+    assert pk.semaines_tour(depart, lundi) == [
+        lundi, lundi - dt.timedelta(weeks=1), depart]
+
+
+def test_un_redepart_cette_semaine_meme_ne_donne_quune_semaine():
+    lundi = dt.date(2026, 10, 12)
+    assert pk.semaines_tour(lundi, lundi) == [lundi]
+
+
 def test_reset_libere_les_equipes_deja_prises():
     picks = pk.add(pk.add([], W1, "VGK"), W2, "COL")
     # sans redépart, VGK reste bloquée

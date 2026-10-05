@@ -137,6 +137,24 @@ def this_round(picks, since):
     return [p for p in picks if since is None or p["week"] >= since.isoformat()]
 
 
+def semaines_tour(since, this_monday, plancher_semaines=8):
+    """Les lundis du tour en cours, du plus récent au plus ancien.
+
+    Sert à choisir quelle semaine remplir dans le registre du pool — en
+    particulier pour rattraper un pick oublié la semaine d'avant. Sans reset
+    (`since=None`), on remonte quand même d'au moins `plancher_semaines` : au
+    tout début d'une saison il n'y a pas encore de reset, mais il peut déjà y
+    avoir plusieurs semaines à corriger. Même repère que `horizon()` : 8
+    semaines de base.
+    """
+    debut = since or (this_monday - dt.timedelta(weeks=plancher_semaines - 1))
+    semaines, d = [], this_monday
+    while d >= debut:
+        semaines.append(d)
+        d -= dt.timedelta(days=7)
+    return semaines
+
+
 # ── Les autres joueurs du pool ────────────────────────────────────────────
 # {nom: {"picks": {lundi: équipe}, "out": date d'élimination ou None}}
 # Mes picks à moi restent au premier niveau ("picks") : ce sont eux qui

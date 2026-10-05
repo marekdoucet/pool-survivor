@@ -1229,13 +1229,28 @@ def page_pool():
                 return "en vie" if origine == "manuel" else "en vie"
             return f"éliminé sem. du {sem}" if sem else "éliminé"
 
+        # Choix de la semaine à remplir, en dehors du formulaire pour que le
+        # tableau se reconstruise tout de suite quand on change — sinon il
+        # faudrait cliquer « Enregistrer » juste pour voir une autre semaine.
+        # Séparé de `semaine` (toujours la semaine en cours, this_monday) :
+        # le potentiel restant plus bas dépend de `semaine` pour planifier à
+        # partir de la semaine SUIVANTE, et doit rester sur la vraie semaine
+        # courante même quand on vient corriger un pick oublié.
+        semaines_dispo = pk.semaines_tour(since, this_monday)
+        semaine_edit = st.selectbox(
+            "Semaine à remplir", semaines_dispo, format_func=fr_weekend,
+            help="Pour rattraper un pick oublié la semaine d'avant.")
+        semaine_edit_iso = semaine_edit.isoformat()
+        proba_edit = ({t: o.p for t, o in options.get(semaine_edit, {}).items()}
+                      if semaine_edit == this_monday else {})
+
         lignes = [{
             "Joueur": nom,
-            "Pick": j["picks"].get(semaine, ""),
+            "Pick": j["picks"].get(semaine_edit_iso, ""),
             "Statut": j.get("force") or pk.AUTO,
             "Réel": verdict(j),
-            "Probabilité": 100 * proba[j["picks"][semaine]]
-                           if j["picks"].get(semaine) in proba else None,
+            "Probabilité": 100 * proba_edit[j["picks"][semaine_edit_iso]]
+                           if j["picks"].get(semaine_edit_iso) in proba_edit else None,
             "Équipes déjà prises": ", ".join(sorted(pk.pool_used(state, nom, since))),
         } for nom, j in sorted(joueurs.items())]
         # Dans un formulaire, modifier une case ne reexecute pas le script.
@@ -1247,16 +1262,26 @@ def page_pool():
         # donc elles ne se mettent a jour qu'a l'enregistrement. On saisit
         # seize noms bien plus souvent qu'on ne regarde une probabilite
         # bouger en direct.
-        with st.form("registre_pool", border=False):
+        #
+        # Probabilite n'est calculable que pour la semaine en cours : les
+        # options passees ne couvrent que l'horizon futur, pas l'historique.
+        # La colonne reste donc vide pour une semaine passee, sans fausser
+        # quoi que ce soit — ce n'est pas l'objectif de ce rattrapage.
+        #
+        # La cle varie avec la semaine choisie : sinon Streamlit garde l'etat
+        # du tableau de la semaine precedemment affichee au lieu de reprendre
+        # les picks de la nouvelle semaine.
+        with st.form(f"registre_pool_{semaine_edit_iso}", border=False):
             edite = st.data_editor(
                 chiffres(pd.DataFrame(lignes,
                                       columns=["Joueur", "Pick", "Statut", "Réel",
                                                "Probabilité", "Équipes déjà prises"]),
                          ["Probabilité"]),
-                key="registre", num_rows="dynamic", hide_index=True, width="stretch",
+                key=f"registre-{semaine_edit_iso}", num_rows="dynamic",
+                hide_index=True, width="stretch",
                 column_config={
                     "Pick": st.column_config.SelectboxColumn(
-                        f"Pick du {fr_weekend(this_monday)}",
+                        f"Pick du {fr_weekend(semaine_edit)}",
                         options=sorted(cm.TEAMS), required=False),
                     "Statut": st.column_config.SelectboxColumn(
                         "Statut", options=[pk.AUTO, pk.DEHORS, pk.DEDANS],
@@ -1268,14 +1293,15 @@ def page_pool():
                         help="Ce que le site retient, une fois le manuel appliqué"),
                     "Probabilité": st.column_config.NumberColumn(
                         format="%.1f %%", disabled=True,
-                        help="Calculée, pas modifiable"),
+                        help="Calculée, pas modifiable — disponible seulement "
+                             "pour la semaine en cours"),
                     "Équipes déjà prises": st.column_config.TextColumn(disabled=True),
                 })
             if st.form_submit_button("Enregistrer le registre",
                                      type="primary", width="stretch",
                                      disabled=not PEUT_ECRIRE):
                 nouveau = pk.merge_pool_week(joueurs, edite.to_dict("records"),
-                                             semaine)
+                                             semaine_edit_iso)
                 save_state(pk.set_pool(state, nouveau),
                            f"Registre du pool ({len(nouveau)} joueur(s))")
 
