@@ -384,6 +384,39 @@ def test_les_resultats_dun_tour_precedent_ne_comptent_plus():
     assert pk.statut(j, res, since=R)[0] is False    # défaite d'avant le redépart
 
 
+# ── Le pick affiché dans le registre, une fois quelqu'un éliminé ──────────
+# Marek : « je dis bien la semaine après qu'ils soient éliminés [...] car je
+# veux voir leur choix de la semaine d'avant ou de toutes les semaines
+# d'avant qu'ils ont joué pour comparer ».
+
+def test_le_pick_reel_reste_visible_jusqua_la_semaine_delimination_comprise():
+    """SEM1 est la semaine du pick PERDANT lui-même : elle doit rester
+    comparable, pas remplacée par ÉLIMINÉ."""
+    j = {"picks": {SEM1: "COL"}}
+    res = {(SEM1, "COL"): False}
+    assert pk.pick_registre(j, SEM1, res) == "COL"
+
+
+def test_les_semaines_dapres_lelimination_affichent_elimine():
+    j = {"picks": {SEM1: "COL"}}
+    res = {(SEM1, "COL"): False}
+    assert pk.pick_registre(j, SEM2, res) == pk.ELIMINE
+
+
+def test_quelquun_de_vivant_garde_sa_vraie_valeur_meme_vide():
+    """Pas éliminé : jamais ÉLIMINÉ, même sans pick cette semaine-là."""
+    j = {"picks": {}}
+    assert pk.pick_registre(j, SEM1, {}) == ""
+
+
+def test_elimination_manuelle_suit_la_meme_regle():
+    """Même logique pour une cotisation impayée que pour une défaite : la
+    semaine où le statut a été force reste visible, les suivantes non."""
+    j = {"picks": {SEM1: "COL"}, "force": pk.DEHORS, "out": SEM1}
+    assert pk.pick_registre(j, SEM1, {}) == "COL"
+    assert pk.pick_registre(j, SEM2, {}) == pk.ELIMINE
+
+
 def test_les_vivants_tiennent_compte_des_resultats():
     etat = pool_etat(Alex={"picks": {SEM1: "COL"}, "out": None},
                      Bob={"picks": {SEM1: "TOR"}, "out": None})

@@ -1246,7 +1246,7 @@ def page_pool():
 
         lignes = [{
             "Joueur": nom,
-            "Pick": j["picks"].get(semaine_edit_iso, ""),
+            "Pick": pk.pick_registre(j, semaine_edit_iso, RES, since),
             "Statut": j.get("force") or pk.AUTO,
             "Réel": verdict(j),
             "Probabilité": 100 * proba_edit[j["picks"][semaine_edit_iso]]
@@ -1282,7 +1282,9 @@ def page_pool():
                 column_config={
                     "Pick": st.column_config.SelectboxColumn(
                         f"Pick du {fr_weekend(semaine_edit)}",
-                        options=sorted(cm.TEAMS), required=False),
+                        options=[pk.ELIMINE] + sorted(cm.TEAMS), required=False,
+                        help="« Éliminé » se met tout seul après la semaine "
+                             "où quelqu'un sort : rien à remplir."),
                     "Statut": st.column_config.SelectboxColumn(
                         "Statut", options=[pk.AUTO, pk.DEHORS, pk.DEDANS],
                         required=False,
@@ -1300,8 +1302,13 @@ def page_pool():
             if st.form_submit_button("Enregistrer le registre",
                                      type="primary", width="stretch",
                                      disabled=not PEUT_ECRIRE):
-                nouveau = pk.merge_pool_week(joueurs, edite.to_dict("records"),
-                                             semaine_edit_iso)
+                # « Éliminé » n'est qu'un affichage : jamais écrit dans
+                # picks.json comme si c'était une équipe.
+                records = edite.to_dict("records")
+                for r in records:
+                    if r.get("Pick") == pk.ELIMINE:
+                        r["Pick"] = ""
+                nouveau = pk.merge_pool_week(joueurs, records, semaine_edit_iso)
                 save_state(pk.set_pool(state, nouveau),
                            f"Registre du pool ({len(nouveau)} joueur(s))")
 

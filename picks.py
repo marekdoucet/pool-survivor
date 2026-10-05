@@ -186,6 +186,12 @@ def set_pool(state, joueurs):
 
 AUTO, DEHORS, DEDANS = "auto", "out", "in"
 
+# Valeur affichée dans la colonne « Pick » du registre, pour une semaine
+# POSTÉRIEURE à l'élimination — remplace la case vide à remplir chaque
+# semaine une fois que quelqu'un est sorti. N'est jamais écrite dans
+# picks.json : app.py la filtre avant d'appeler merge_pool_week.
+ELIMINE = "Éliminé"
+
 
 def auto_out(picks_semaine, resultats, since=None):
     """Première semaine du tour où le pick a perdu, ou None.
@@ -221,6 +227,21 @@ def statut(joueur, resultats, since=None):
         return True, manuel, "manuel"
     w = auto_out(joueur.get("picks", {}), resultats, since)
     return w is not None, w, "auto"
+
+
+def pick_registre(joueur, semaine, resultats, since=None):
+    """Ce qu'affiche la colonne « Pick » du registre pour cette semaine.
+
+    La vraie valeur — y compris pour la semaine d'élimination elle-même,
+    souvent LE pick perdant, et pour toutes les semaines d'avant : il faut
+    pouvoir comparer les choix de chacun. ELIMINE seulement pour une semaine
+    POSTÉRIEURE à l'élimination, pour ne pas avoir à remplir une case vide
+    chaque semaine une fois que quelqu'un est sorti.
+    """
+    elimine, sem, _origine = statut(joueur, resultats, since)
+    if elimine and sem and semaine > sem:
+        return ELIMINE
+    return joueur.get("picks", {}).get(semaine, "")
 
 
 def merge_pool_week(joueurs, lignes, semaine):
