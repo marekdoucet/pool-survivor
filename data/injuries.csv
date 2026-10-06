@@ -26,7 +26,7 @@ DET,Chase Stillman,RW,IR,Undisclosed
 DET,J.T. Compher,LW,Out,Undisclosed
 DET,Jacob Bernard-Docker,D,IR,Upper Body
 DET,Marco Kasper,C,IR,Upper Body
-DET,Mason Appleton,C,Out,Undisclosed
+DET,Mason Appleton,C,IR,Undisclosed
 DET,Simon Edvinsson,D,Out,Contract Dispute
 EDM,Alec Regula,D,IR,Undisclosed
 EDM,Atro Leppanen,D,IR,Undisclosed
@@ -37,15 +37,14 @@ EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
 EDM,Ryan Nugent-Hopkins,C,IR,Lower Body
 EDM,Zach Hyman,LW,Out,Undisclosed
-FLA,Aaron Ekblad,D,Day-To-Day,Personal
-FLA,Aleksander Barkov,C,IR,Knee
+FLA,Aaron Ekblad,D,Out,Personal
+FLA,Aleksander Barkov,C,IR,Lower Body
 FLA,Jonah Gadjovich,LW,IR,Upper Body
 FLA,MacKenzie Entwistle,RW,IR,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
 LAK,Kevin Fiala,LW,IR,Lower Leg
 MIN,Brock Faber,D,IR,Skull
-MIN,Danila Yurov,RW,Day-To-Day,Upper Body
 MIN,Filip Gustavsson,G,IR,Hip
 NJD,Connor Brown,RW,Out,Lower Body
 NJD,Johnathan Kovacevic,D,IR,Knee
@@ -62,7 +61,7 @@ OTT,Artem Zub,D,IR,Knee
 OTT,Blake Montgomery,LW,IR,Undisclosed
 OTT,Jake Sanderson,D,Out,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
-OTT,Linus Ullmark,G,Day-To-Day,Undisclosed
+OTT,Linus Ullmark,G,Out,Undisclosed
 PHI,Helge Grans,D,IR,Lower Body
 PHI,Nikita Grebenkin,RW,IR,Upper Body
 PHI,Rasmus Ristolainen,D,Day-To-Day,Undisclosed
