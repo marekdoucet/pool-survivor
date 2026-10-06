@@ -44,3 +44,47 @@ def test_export_is_stable(tmp_path):
     conn.execute("UPDATE probs SET p_away=0.26 WHERE snapshot='2026-09-29'")
     changed = store.export_snapshot(conn, "2026-09-29", data)
     assert [p.name for p in changed] == ["2026-09-29.csv.gz"]
+
+
+# ── Blessures : situation actuelle, réécrite à chaque collecte ─────────────
+
+def test_les_blessures_font_laller_retour_par_le_fichier(tmp_path):
+    import collect_injuries as inj
+    conn = sqlite3.connect(tmp_path / "a.db")
+    store.init_db(conn)
+    conn.executemany("INSERT INTO injuries VALUES (?,?,?,?,?)", [
+        ("COL", "Trent Miner", "G", "IR", "Undisclosed"),
+        ("NJD", "Connor Brown", "RW", "Out", "Lower Body"),
+    ])
+    conn.commit()
+    data = tmp_path / "data"
+    assert store.export_injuries(conn, data)
+    assert (data / "injuries.csv").exists()
+
+    neuve = tmp_path / "b.db"
+    store.build_db(neuve, data)
+    lignes = sqlite3.connect(neuve).execute(
+        f"SELECT {','.join(inj.COLS)} FROM injuries ORDER BY team").fetchall()
+    assert lignes == [("COL", "Trent Miner", "G", "IR", "Undisclosed"),
+                      ("NJD", "Connor Brown", "RW", "Out", "Lower Body")]
+
+
+def test_un_second_export_identique_ne_change_rien(tmp_path):
+    """Sinon chaque collecte commiterait un fichier identique."""
+    conn = sqlite3.connect(tmp_path / "a.db")
+    store.init_db(conn)
+    conn.execute("INSERT INTO injuries VALUES ('COL','X','C','IR','Genou')")
+    conn.commit()
+    assert store.export_injuries(conn, tmp_path / "data")
+    assert store.export_injuries(conn, tmp_path / "data") == []
+
+
+def test_une_table_vide_nefface_pas_le_fichier(tmp_path):
+    """Une collecte qui échoue ne doit pas effacer les blessés connus."""
+    conn = sqlite3.connect(tmp_path / "a.db")
+    store.init_db(conn)
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "injuries.csv").write_text("team,player,pos,status,injury\nCOL,X,C,IR,Genou\n")
+    assert store.export_injuries(conn, data) == []
+    assert "COL,X" in (data / "injuries.csv").read_text()

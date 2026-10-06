@@ -80,3 +80,21 @@ def test_lapp_demarre_sans_exception():
     app = AppTest.from_file(str(APP), default_timeout=300)
     app.run()
     assert not app.exception, "\n".join(str(e.value) for e in app.exception)
+
+
+def test_le_panneau_blessures_saffiche_vraiment():
+    """Le panneau est caché tant qu'il n'y a aucune blessure en base : un test
+    d'exécution sans data/injuries.csv ne passe jamais par son code et réussit
+    pour rien. Celui-ci vérifie qu'il s'affiche, avec les vraies données du
+    dépôt (le fichier est réécrit à chaque collecte)."""
+    import pytest
+    from streamlit.testing.v1 import AppTest
+
+    if not (APP.parent / "data" / "injuries.csv").exists():
+        pytest.skip("pas encore de data/injuries.csv")
+
+    app = AppTest.from_file(str(APP), default_timeout=300)
+    app.run()
+    assert not app.exception, "\n".join(str(e.value) for e in app.exception)
+    titres = [m.value for m in app.markdown if "Blessures ·" in m.value]
+    assert titres, "le panneau « Blessures » ne s'est pas affiché"

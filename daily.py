@@ -21,6 +21,7 @@ import requests
 import collect_moneypuck as cm
 import collect_odds as co
 import collect_dimers as cd
+import collect_injuries as ci
 import collect_kalshi as kl
 import collect_puckcast as cp
 import collect_players as cpl
@@ -90,6 +91,15 @@ def main():
         print(f"⚠ {e}")
         failed = True
 
+    print("\n── Blessures")
+    try:
+        lignes = ci.collect_injuries()
+        print(f"{len(lignes)} joueur(s) blessé(s), "
+              f"{len({l[0] for l in lignes})} équipe(s) touchée(s)")
+    except (requests.RequestException, ci.InjuriesError) as e:
+        print(f"⚠ {e} (on garde les blessures précédentes)")
+        failed = True
+
     print("\n── Joueurs vedettes")
     try:
         rows, ko = cpl.collect_players()
@@ -103,7 +113,8 @@ def main():
     conn = sqlite3.connect(cm.DB_PATH)
     co.init_db(conn)
     n_mk, n_other = co.build_consensus(conn, today.isoformat())
-    changed = store.export_snapshot(conn, today.isoformat()) + store.export_schedule(conn)
+    changed = (store.export_snapshot(conn, today.isoformat())
+               + store.export_schedule(conn) + store.export_injuries(conn))
     conn.close()
     poids = ", ".join(f"{s} {w:.0%}" for s, w in co.WEIGHTS.items())
     print(f"{n_mk} matchs avec cotes des casinos, {n_other} sans (poids : {poids})")

@@ -6,6 +6,7 @@ est le dossier data/ :
     data/probs/AAAA-MM-JJ.csv.gz   une collecte (toutes les sources)
     data/odds/AAAA-MM-JJ.csv.gz    cotes brutes des casinos de cette collecte
     data/schedule.csv              calendrier de la saison
+    data/injuries.csv              blessures actuelles (réécrit, sans historique)
 
 Un fichier par collecte, écrit une fois : le dépôt grossit d'environ 30 Ko par
 jour au lieu d'une copie complète de la base à chaque commit.
@@ -21,6 +22,7 @@ import sys
 import sqlite3
 from pathlib import Path
 
+import collect_injuries as inj
 import collect_moneypuck as cm
 import collect_odds as co
 import schedule as sch
@@ -37,6 +39,7 @@ TABLES = {  # table → colonnes, dans l'ordre du CREATE TABLE
 def init_db(conn):
     co.init_db(conn)    # crée aussi probs
     sch.init_db(conn)
+    inj.init_db(conn)
 
 
 def _write_if_changed(path, data):
@@ -81,10 +84,20 @@ def export_schedule(conn, data_dir=DATA_DIR):
     return [path] if rows and _write_if_changed(path, _csv_bytes(sch.COLS, rows)) else []
 
 
+def export_injuries(conn, data_dir=DATA_DIR):
+    """Les blessures actuelles. Une table vide n'écrase pas le fichier : une
+    collecte qui échoue ne doit pas effacer les blessés connus."""
+    rows = conn.execute(
+        f"SELECT {','.join(inj.COLS)} FROM injuries ORDER BY {','.join(inj.COLS)}"
+    ).fetchall()
+    path = Path(data_dir) / "injuries.csv"
+    return [path] if rows and _write_if_changed(path, _csv_bytes(inj.COLS, rows)) else []
+
+
 def export_all(conn, data_dir=DATA_DIR):
     snaps = [r[0] for r in conn.execute("SELECT DISTINCT snapshot FROM probs")]
     changed = [p for s in snaps for p in export_snapshot(conn, s, data_dir)]
-    return changed + export_schedule(conn, data_dir)
+    return changed + export_schedule(conn, data_dir) + export_injuries(conn, data_dir)
 
 
 def _read_csv(path):
@@ -113,6 +126,10 @@ def build_db(db_path=cm.DB_PATH, data_dir=DATA_DIR):
             cols, rows = _read_csv(data_dir / "schedule.csv")
             rows = [[None if v == "" else v for v in row] for row in rows]   # match non joué
             conn.executemany(f"INSERT INTO schedule ({','.join(cols)}) "
+                             f"VALUES ({','.join('?' * len(cols))})", rows)
+        if (data_dir / "injuries.csv").exists():
+            cols, rows = _read_csv(data_dir / "injuries.csv")
+            conn.executemany(f"INSERT OR REPLACE INTO injuries ({','.join(cols)}) "
                              f"VALUES ({','.join('?' * len(cols))})", rows)
     conn.close()
     tmp.replace(db_path)

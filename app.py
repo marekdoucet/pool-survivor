@@ -218,6 +218,28 @@ def history(version):
 
 
 @st.cache_data
+def blesses(version):
+    """{équipe: [(joueur, poste, statut, blessure)]}, gardiens d'abord.
+
+    Affichage seulement : jamais dans les probabilités, les modèles tiennent
+    déjà compte des blessures. Une base sans la table (démo, ancienne
+    version) donne simplement un dictionnaire vide.
+    """
+    try:
+        with connect() as c:
+            rows = c.execute("SELECT team, player, pos, status, injury "
+                             "FROM injuries").fetchall()
+    except sqlite3.OperationalError:
+        return {}
+    par_equipe = {}
+    for team, player, pos, status, injury in rows:
+        par_equipe.setdefault(team, []).append((player, pos, status, injury))
+    for lst in par_equipe.values():
+        lst.sort(key=lambda r: (r[1] != "G", r[0]))   # gardiens en tête
+    return par_equipe
+
+
+@st.cache_data
 def forms(version):
     with connect() as c:
         return form.team_forms(c)
@@ -660,6 +682,26 @@ def page_pick():
             else:
                 st.info(f"Journée de pick : **{txt}** ({n_games} matchs)"
                         + (" — choisie par toi" if pd_week.how == "choisi" else ""))
+        # Blessures du match de l'équipe MONTRÉE comme mon pick (le choix du
+        # menu s'il y en a un cette semaine, sinon la recommandation) — pas
+        # celle des pastilles ci-dessus, qui suivent toujours la recommandation.
+        cible = choisi if (choisi is not None and monday == this_monday) else best
+        bl = blesses(v)
+        if bl:
+            with ui.panel("blessures", f"Blessures · {cible.team} contre {cible.opponent}",
+                          "Information seulement : les modèles en tiennent déjà "
+                          "compte, ce n'est pas ajouté aux probabilités. Un "
+                          "gardien absent pèse plus qu'un attaquant."):
+                for equipe in (cible.team, cible.opponent):
+                    liste = bl.get(equipe, [])
+                    if not liste:
+                        st.caption(f"{ui.name(equipe)} : aucune blessure déclarée.")
+                        continue
+                    st.markdown(f"**{ui.name(equipe)}** — {len(liste)} blessé(s)")
+                    st.dataframe(pd.DataFrame(
+                        [{"Joueur": j, "Poste": p, "Statut": s, "Blessure": b}
+                         for j, p, s, b in liste]),
+                        hide_index=True, width="stretch")
         # `include` force l'évaluation de l'équipe choisie même si elle n'est
         # pas dans les meilleures : sans ça, son espérance serait introuvable.
         # Popularité chez les adversaires : une équipe que tout le monde prend
