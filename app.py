@@ -531,6 +531,28 @@ with st.sidebar:
                     save_picks(nouveaux, f"Pick corrigé : {eq} (semaine du {sem})"
                                + (f", remplace {actuel}" if actuel else ""))
 
+    # Annuler la dernière modification — pick, registre, redépart, n'importe
+    # quoi passé par save_state. Seulement avec Neon : c'est là que vit
+    # l'historique. `derniere` est lu par load(), sans requête de plus.
+    derniere = getattr(remote, "derniere", None)
+    if derniere and hasattr(remote, "annuler"):
+        message, quand = derniere
+        with st.popover("↶ Annuler la dernière modification", width="stretch",
+                        disabled=not PEUT_ECRIRE):
+            st.write(f"Revenir à l'état d'avant : « {message} »")
+            if isinstance(quand, dt.datetime):
+                q = quand.astimezone(cm.TZ)
+                st.caption(f"Modification faite le {fr_day(q.date().isoformat())} "
+                           f"à {q.hour} h {q.minute:02d}. Tu peux annuler plusieurs "
+                           f"fois de suite pour remonter plus loin.")
+            if st.button("Annuler cette modification", type="primary", key="annuler-ok"):
+                try:
+                    remote.annuler()
+                except Exception as e:   # réseau, base indisponible…
+                    st.error(f"Pas annulé : {e}")
+                else:
+                    st.rerun()
+
     st.subheader("Tour en cours")
     archive = len(picks) - len(tour)
     if since:

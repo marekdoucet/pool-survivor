@@ -33,12 +33,48 @@ SET etat = EXCLUDED.etat, modifie_le = now()
 
 LECTURE = "SELECT etat FROM pools WHERE courriel = %s"
 
+# Historique : chaque sauvegarde range l'état D'AVANT, avec le message de la
+# modification qui l'a remplacé. Annuler = remettre la dernière ligne rangée et
+# la retirer. Avant Neon, chaque sauvegarde était un commit GitHub, donc tout
+# se récupérait ; depuis, le pool était réécrit en entier sans rien garder.
+CREATION_HISTORIQUE = """
+CREATE TABLE IF NOT EXISTS historique (
+    id       BIGSERIAL   PRIMARY KEY,
+    courriel TEXT        NOT NULL,
+    etat     JSONB       NOT NULL,
+    message  TEXT        NOT NULL,
+    cree_le  TIMESTAMPTZ NOT NULL DEFAULT now()
+)
+"""
+INDEX_HISTORIQUE = ("CREATE INDEX IF NOT EXISTS historique_courriel "
+                    "ON historique (courriel, id)")
+GARDER = 50     # versions conservées par personne
+HISTORISER = ("INSERT INTO historique (courriel, etat, message) "
+              "VALUES (%s, %s::jsonb, %s)")
+# Supprime ce qui dépasse les GARDER plus récentes. Sous-requête vide (moins
+# de GARDER lignes) : « id <= NULL » n'est jamais vrai, rien n'est supprimé.
+ELAGUER = """
+DELETE FROM historique WHERE courriel = %s AND id <= (
+    SELECT id FROM historique WHERE courriel = %s
+    ORDER BY id DESC LIMIT 1 OFFSET %s)
+"""
+DERNIERE = ("SELECT id, etat, message, cree_le FROM historique "
+            "WHERE courriel = %s ORDER BY id DESC LIMIT 1")
+OUBLIER = "DELETE FROM historique WHERE id = %s"
+
 
 def init(conn):
-    """Crée la table si elle n'existe pas. Sans effet si elle est déjà là."""
+    """Crée les tables si elles n'existent pas. Sans effet sinon."""
     with conn.cursor() as cur:
         cur.execute(CREATION)
+        cur.execute(CREATION_HISTORIQUE)
+        cur.execute(INDEX_HISTORIQUE)
     conn.commit()
+
+
+def _decoder(etat):
+    # psycopg3 décode le JSONB tout seul ; un autre pilote peut rendre du texte.
+    return json.loads(etat) if isinstance(etat, str) else etat
 
 
 def charger(conn, courriel):
@@ -48,18 +84,53 @@ def charger(conn, courriel):
         ligne = cur.fetchone()
     if not ligne or ligne[0] is None:
         return None
-    etat = ligne[0]
-    # psycopg3 décode le JSONB tout seul ; un autre pilote peut rendre du texte.
-    return json.loads(etat) if isinstance(etat, str) else etat
+    return _decoder(ligne[0])
 
 
-def enregistrer(conn, courriel, etat):
-    """Remplace le pool de cette personne."""
+def enregistrer(conn, courriel, etat, message=None, historiser=True):
+    """Remplace le pool de cette personne, en rangeant l'état d'avant.
+
+    Une seule transaction : l'état d'avant rangé, le nouveau écrit, l'excédent
+    élagué, puis un seul commit — jamais un historique à moitié écrit. Une
+    sauvegarde qui ne change rien n'ajoute rien à l'historique.
+    """
     if not courriel:
         raise ValueError("pas de courriel : impossible de savoir à qui écrire")
+    avant = charger(conn, courriel) if historiser else None
     with conn.cursor() as cur:
+        if avant is not None and avant != etat:
+            cur.execute(HISTORISER, (courriel, json.dumps(avant),
+                                     message or "Modification"))
+            cur.execute(ELAGUER, (courriel, courriel, GARDER))
         cur.execute(ECRITURE, (courriel, json.dumps(etat)))
     conn.commit()
+
+
+def derniere_modification(conn, courriel):
+    """(message, quand) de la dernière modification annulable, ou None."""
+    with conn.cursor() as cur:
+        cur.execute(DERNIERE, (courriel,))
+        ligne = cur.fetchone()
+    return (ligne[2], ligne[3]) if ligne else None
+
+
+def annuler(conn, courriel):
+    """Remet l'état d'avant la dernière modification. → son message, ou None.
+
+    La ligne remise est retirée de l'historique, sans en créer une nouvelle :
+    annuler deux fois remonte deux modifications en arrière, au lieu de faire
+    l'aller-retour entre les deux mêmes états.
+    """
+    with conn.cursor() as cur:
+        cur.execute(DERNIERE, (courriel,))
+        ligne = cur.fetchone()
+        if not ligne:
+            return None
+        ident, etat, message, _quand = ligne
+        cur.execute(ECRITURE, (courriel, json.dumps(_decoder(etat))))
+        cur.execute(OUBLIER, (ident,))
+    conn.commit()
+    return message
 
 
 def courriels(conn):
@@ -86,9 +157,9 @@ class PoolNeon:
     """Le pool d'une personne, avec la même interface que pk.GitHubPicks.
 
     load() et save(etat, message) : l'app appelle exactement les mêmes méthodes
-    qu'avant, elle ne sait pas où ça va. Le message de commit n'a plus de sens
-    ici, il est ignoré — on le garde dans la signature pour que les deux dépôts
-    restent interchangeables.
+    qu'avant, elle ne sait pas où ça va. Le message sert d'étiquette dans
+    l'historique (« Pick retiré : COL… »), c'est ce qu'on lit avant d'annuler.
+    En plus : annuler() et `derniere`, renseigné par load().
 
     La connexion est ouverte puis refermée à chaque opération. Streamlit relit
     le script à chaque interaction : garder une connexion ouverte entre deux
@@ -100,6 +171,7 @@ class PoolNeon:
         self.courriel = courriel
         self._connecter = connecter or _connecter
         self._etat_vide = etat_vide or _etat_vide
+        self.derniere = None
 
     def load(self):
         """L'état de cette personne, ou un état vide si elle arrive.
@@ -112,12 +184,21 @@ class PoolNeon:
         with self._connecter(self.url) as conn:
             init(conn)
             etat = charger(conn, self.courriel)
+            # Lu dans la même connexion : afficher « annuler » ne coûte pas un
+            # aller-retour de plus vers la base à chaque interaction.
+            self.derniere = derniere_modification(conn, self.courriel)
         return self._etat_vide() if etat is None else etat
 
     def save(self, etat, message=None):
         with self._connecter(self.url) as conn:
             init(conn)
-            enregistrer(conn, self.courriel, etat)
+            enregistrer(conn, self.courriel, etat, message)
+
+    def annuler(self):
+        """Revient à l'état d'avant la dernière modification. → son message."""
+        with self._connecter(self.url) as conn:
+            init(conn)
+            return annuler(conn, self.courriel)
 
 
 class PoolAnonyme:
