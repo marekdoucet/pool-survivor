@@ -491,19 +491,32 @@ with st.sidebar:
     st.header("Mes picks")
     if not tour:
         st.caption("Aucun pick dans ce tour.")
-    for p in tour:
+    # Par date, la plus ancienne en haut, celle de cette semaine en bas. Sans
+    # tri, la liste suivait l'ordre d'enregistrement — et corriger un pick
+    # passé le retire puis le rajoute à la fin, sous celui de cette semaine.
+    for p in sorted(tour, key=lambda p: p["week"]):
         col1, col2 = st.columns([4, 1])
         col1.markdown(f"**{p['team']}** — semaine du {p['week']}")
         # Une confirmation : le ✕ supprimait d'un seul clic. Or supprimer un
         # pick passé rend l'équipe de nouveau disponible au plan, et peut même
-        # remettre en vie si ce pick avait perdu.
-        with col2.popover("✕", help="Retirer ce pick", disabled=not PEUT_ECRIRE,
-                          key=f"del-{p['week']}"):
-            st.write(f"Supprimer **{p['team']}**, semaine du {p['week']} ?")
-            st.caption("L'équipe redevient disponible dans le plan.")
-            if st.button("Supprimer", type="primary", key=f"del-ok-{p['week']}"):
+        # remettre en vie si ce pick avait perdu. Un simple bouton qui fait
+        # apparaître la question, pas un st.popover : celui-ci ajoute sa propre
+        # flèche « ouvrir » au libellé, illisible dans une colonne si étroite.
+        demande = f"del-demande-{p['week']}"
+        if col2.button("✕", key=f"del-{p['week']}", help="Retirer ce pick",
+                       disabled=not PEUT_ECRIRE):
+            st.session_state[demande] = True
+        if st.session_state.get(demande):
+            st.caption(f"Supprimer {p['team']}, semaine du {p['week']} ? "
+                       f"L'équipe redevient disponible dans le plan.")
+            oui, non = st.columns(2)
+            if oui.button("Supprimer", type="primary", key=f"del-ok-{p['week']}"):
+                st.session_state.pop(demande, None)
                 save_picks(pk.remove(picks, dt.date.fromisoformat(p["week"])),
                            f"Pick retiré : {p['team']} (semaine du {p['week']})")
+            if non.button("Garder", key=f"del-non-{p['week']}"):
+                st.session_state.pop(demande, None)
+                st.rerun()
 
     # Corriger ou remettre un pick d'une semaine passée. Un menu, pas une page :
     # « Enregistrer mon pick » ne connaît que la semaine en cours, donc un pick
