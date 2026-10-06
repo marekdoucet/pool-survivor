@@ -165,3 +165,53 @@ def test_collecte_de_bout_en_bout_integre_laffinage(tmp_path):
         "SELECT p_away, p_home FROM probs WHERE source='puckcast' "
         "AND away='FLA' AND home='CAR'").fetchone()
     assert row == (0.1, 0.9)   # le chiffre affiné, pas le 36,1/63,9 de la saison
+
+
+# ── Horizon : 2 jours pour tout, 7 jours pour la journée de pick ───────────
+# La page de Puckcast le dit : la prédiction complète (gardiens confirmés,
+# repos, forme) est publiée dans les sept jours avant la mise au jeu. Avec
+# seulement 2 jours, un match de samedi regardé le lundi restait sur le
+# chiffre figé de la page de saison.
+
+def calendrier(lignes):
+    conn = sqlite3.connect(":memory:")
+    store.init_db(conn)
+    conn.executemany("INSERT INTO schedule VALUES (?,?,?,?,?,?,?,?)",
+                     [(gid, d, "x", a, h, None, None, None) for gid, d, a, h in lignes])
+    conn.commit()
+    return conn
+
+
+LUNDI = dt.date(2026, 10, 5)
+
+
+def test_la_journee_de_pick_est_relue_a_cinq_jours():
+    conn = calendrier([
+        (1, "2026-10-10", "VAN", "NJD"),   # samedi : 2 matchs → journée de pick
+        (2, "2026-10-10", "TOR", "COL"),
+        (3, "2026-10-11", "BOS", "MTL"),   # dimanche : 1 match → pas de pick
+    ])
+    ids = {r[0] for r in cp.matchs_proches(conn, LUNDI)}
+    assert {1, 2} <= ids
+    assert 3 not in ids
+
+
+def test_tout_match_des_deux_prochains_jours_est_relu():
+    """Les gardiens se confirment la veille : même hors journée de pick."""
+    conn = calendrier([(4, "2026-10-06", "EDM", "SEA"),
+                       (1, "2026-10-10", "VAN", "NJD")])
+    assert 4 in {r[0] for r in cp.matchs_proches(conn, LUNDI)}
+
+
+def test_au_dela_de_sept_jours_rien_nest_relu():
+    conn = calendrier([(5, "2026-10-17", "VAN", "NJD"),     # samedi suivant
+                       (6, "2026-10-17", "TOR", "COL")])
+    assert cp.matchs_proches(conn, LUNDI) == []
+
+
+def test_egalite_du_week_end_les_deux_jours_sont_relus():
+    """Égalité samedi/dimanche : la journée de pick n'est pas tranchée, on
+    relit les deux plutôt que de deviner."""
+    conn = calendrier([(1, "2026-10-10", "VAN", "NJD"),
+                       (3, "2026-10-11", "BOS", "MTL")])
+    assert {1, 3} <= {r[0] for r in cp.matchs_proches(conn, LUNDI)}

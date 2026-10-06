@@ -11,9 +11,10 @@ l'équipe favorite et sa probabilité de victoire :
       <span class="stat-num">66.9%</span></a>
 Le numéro LNH permet de retrouver visiteur/local dans le calendrier officiel.
 
-Pour les matchs dans les HORIZON_JOURS prochains jours, on relit en plus la
-page /matchup/<id> elle-même : la page de saison est générée une fois et reste
-figée, donc elle ignore les gardiens confirmés. Voir affiner_horizon_proche.
+Pour les matchs des HORIZON_JOURS prochains jours, et pour la journée de pick
+jusqu'à HORIZON_PICK_JOURS, on relit en plus la page /matchup/<id> elle-même :
+la page de saison est générée une fois et reste figée, donc elle ignore les
+gardiens confirmés. Voir matchs_proches et affiner_horizon_proche.
 """
 
 import re
@@ -24,6 +25,7 @@ import requests
 
 import collect_moneypuck as cm
 import collect_odds as co
+import optimize as op
 import schedule as sch
 
 URL = "https://puckcast.ai/2026-27/games"
@@ -41,6 +43,11 @@ RE_PROB = re.compile(r'class="stat-num"[^>]*>\s*([\d.]+)\s*%')
 # matchs de la saison (ce qui serait abusif envers leur serveur).
 URL_MATCHUP = "https://puckcast.ai/matchup/{id}"
 HORIZON_JOURS = 2
+# La page de Puckcast le dit elle-même : la prédiction complète — gardiens
+# confirmés, repos, forme — « publishes inside the seven days before puck
+# drop and replaces these numbers ». Sept jours, donc, mais seulement pour la
+# journée de pick : relire tous les matchs de la semaine serait abusif.
+HORIZON_PICK_JOURS = 7
 RE_WIN_PROB = re.compile(
     r'aria-label="Win probability: ([^,"]+?) ([\d.]+)%, ([^,"]+?) ([\d.]+)%"')
 
@@ -68,13 +75,27 @@ def parse_matchup(html):
 
 
 def matchs_proches(conn, today):
-    """Les (game_id, game_date, away, home) dont la mise au jeu est dans
-    HORIZON_JOURS."""
-    fin = (today + dt.timedelta(days=HORIZON_JOURS)).isoformat()
-    return conn.execute(
+    """Les (game_id, game_date, away, home) à relire individuellement :
+
+    - tous ceux des HORIZON_JOURS prochains jours (gardiens confirmés) ;
+    - ceux de la JOURNÉE DE PICK de chaque semaine, jusqu'à
+      HORIZON_PICK_JOURS : c'est le seul match qui compte pour un pick, et
+      Puckcast publie sa vraie prédiction dans les sept jours avant la mise au
+      jeu. Sans ça, un match de samedi regardé le lundi restait sur le chiffre
+      figé de la page de saison alors que Puckcast avait déjà mieux.
+
+    La journée de pick est celle par défaut (la plus chargée du week-end, les
+    deux en cas d'égalité) : le collecteur est le même pour tout le monde, il ne
+    connaît pas le choix manuel d'une personne en particulier.
+    """
+    fin_proche = (today + dt.timedelta(days=HORIZON_JOURS)).isoformat()
+    fin_pick = (today + dt.timedelta(days=HORIZON_PICK_JOURS)).isoformat()
+    jours_pick = {d for pd in op.pick_days(conn).values() for d in pd.days}
+    lignes = conn.execute(
         "SELECT game_id, game_date, away, home FROM schedule "
         "WHERE game_date >= ? AND game_date < ? AND away_score IS NULL",
-        (today.isoformat(), fin)).fetchall()
+        (today.isoformat(), fin_pick)).fetchall()
+    return [l for l in lignes if l[1] < fin_proche or l[1] in jours_pick]
 
 
 def affiner_horizon_proche(probs, conn, today, session):
