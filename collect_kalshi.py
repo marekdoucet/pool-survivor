@@ -34,9 +34,17 @@ SOURCE = "kalshi"
 # KXNHLGAME-26OCT03STLCOL-COL : date (2 chiffres d'année, mois en lettres,
 # jour), puis les deux équipes collées (visiteur d'abord), puis l'équipe que
 # CE marché concerne (celle dont le OUI vaut « elle gagne »).
-RE_TICKER = re.compile(r"^KXNHLGAME-(\d{2})([A-Z]{3})(\d{2})([A-Z]{6})-([A-Z]{3})$")
+RE_TICKER = re.compile(
+    r"^KXNHLGAME-(\d{2})([A-Z]{3})(\d{2})([A-Z]{4,6})-([A-Z]{2,3})$")
 MOIS = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6,
         "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12}
+
+# Kalshi n'utilise pas les tricodes de la LNH pour quatre équipes. Constaté le
+# 6 octobre en comparant tous ses tickers à nos 32 codes : les 28 autres sont
+# identiques. Avec l'ancien motif, exactement trois lettres par équipe, ces
+# quatre-là étaient écartées sans un mot — 18 tickers sur 92, dont tous les
+# matchs des Devils, que Marek avait justement choisis cette semaine-là.
+CODES_KALSHI = {"LA": "LAK", "NJ": "NJD", "SJ": "SJS", "TB": "TBL"}
 
 
 class KalshiError(Exception):
@@ -45,7 +53,14 @@ class KalshiError(Exception):
 
 def parse_ticker(ticker):
     """→ (date_iso, visiteur, domicile, equipe_du_marche) ou None si le motif
-    ne correspond pas (un autre type de marché NHL, pas un match classique)."""
+    ne correspond pas (un autre type de marché NHL, pas un match classique, ou
+    une équipe que ni CODES_KALSHI ni nos 32 tricodes ne reconnaissent).
+
+    Les deux équipes sont collées sans séparateur et n'ont plus la même
+    longueur (« VANNJ » = VAN + NJ), donc on ne peut pas couper à un rang
+    fixe. Le suffixe du ticker nomme l'une des deux : on la retire de la
+    paire, ce qui laisse l'autre sans ambiguïté.
+    """
     m = RE_TICKER.match(ticker)
     if not m:
         return None
@@ -53,8 +68,14 @@ def parse_ticker(ticker):
     mois = MOIS.get(mois_txt)
     if not mois:
         return None
-    away, home = paire[:3], paire[3:]
-    if equipe not in (away, home):
+    if paire.startswith(equipe):
+        away, home = equipe, paire[len(equipe):]
+    elif paire.endswith(equipe):
+        away, home = paire[:-len(equipe)], equipe
+    else:
+        return None
+    away, home, equipe = (CODES_KALSHI.get(c, c) for c in (away, home, equipe))
+    if away not in cm.TEAMS or home not in cm.TEAMS:
         return None
     date = dt.date(2000 + int(an), mois, int(jour))
     return date.isoformat(), away, home, equipe
@@ -80,18 +101,25 @@ def prix_milieu(marche):
     return (bid + ask) / 2
 
 
-def parse_markets(payload, aujourdhui=None):
+def parse_markets(payload, aujourdhui=None, illisibles=None):
     """→ {(game_date, away, home): (p_away, p_home)} pour les matchs à venir.
 
     Les deux marchés d'un même match (un par équipe) se combinent : chacun
     donne la probabilité de SA propre équipe, donc pas besoin de les
     normaliser l'un par rapport à l'autre comme pour des cotes de casino.
+
+    `illisibles` : liste à remplir avec les tickers que parse_ticker rejette.
+    La série demandée ne contient que des matchs, donc un rejet n'est pas un
+    autre type de marché mais un format qu'on ne comprend pas — exactement ce
+    qui a fait disparaître quatre équipes sans un mot.
     """
     aujourdhui = aujourdhui or dt.datetime.now(cm.TZ).date()
     par_match = {}
     for marche in payload.get("markets", []):
         info = parse_ticker(marche["ticker"])
         if not info:
+            if illisibles is not None:
+                illisibles.append(marche["ticker"])
             continue
         date_iso, away, home, equipe = info
         if dt.date.fromisoformat(date_iso) < aujourdhui:
@@ -134,7 +162,13 @@ def collect_kalshi(db_path=cm.DB_PATH, today=None, session=None):
     snapshot = (today or dt.datetime.now(cm.TZ).date()).isoformat()
     collected_at = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     payload = fetch_markets(session)
-    games = parse_markets(payload, today)
+    illisibles = []
+    games = parse_markets(payload, today, illisibles)
+    if illisibles:
+        # Bruyant exprès : un ticker écarté en silence, c'est un match absent
+        # du site sans que personne ne sache pourquoi.
+        print(f"⚠ {len(illisibles)} ticker(s) Kalshi illisible(s), ignorés : "
+              f"{', '.join(illisibles[:6])}")
 
     conn = sqlite3.connect(db_path)
     cm.init_db(conn)

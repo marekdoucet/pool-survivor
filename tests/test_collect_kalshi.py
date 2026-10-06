@@ -154,3 +154,51 @@ def test_la_pagination_est_suivie():
     payload = k.fetch_markets(session)
     assert len(payload["markets"]) == 2
     assert session.appels == [None, "page2"]
+
+
+# ── Les quatre équipes dont Kalshi n'utilise pas le tricode de la LNH ─────
+# Bogue du 6 octobre : l'ancien motif exigeait trois lettres par équipe, donc
+# NJ, LA, SJ et TB étaient écartées sans un mot — 18 tickers sur 92, dont tous
+# les matchs des Devils, choisis par Marek cette semaine-là. Les tickers
+# ci-dessous sont réels, lus sur l'API.
+
+def test_les_devils_sont_lus_malgre_le_code_NJ():
+    assert k.parse_ticker("KXNHLGAME-26OCT10VANNJ-NJ") == (
+        "2026-10-10", "VAN", "NJD", "NJD")
+    assert k.parse_ticker("KXNHLGAME-26OCT10VANNJ-VAN") == (
+        "2026-10-10", "VAN", "NJD", "VAN")
+
+
+def test_les_quatre_codes_differents_sont_traduits():
+    assert k.parse_ticker("KXNHLGAME-26OCT10LAVGK-LA")[1] == "LAK"
+    assert k.parse_ticker("KXNHLGAME-26OCT10TBNYI-TB")[1] == "TBL"
+    assert k.parse_ticker("KXNHLGAME-26OCT10EDMSJ-SJ")[2] == "SJS"
+
+
+def test_une_paire_de_longueur_variable_se_coupe_sans_ambiguite():
+    """« VANNJ » n'a pas de séparateur et 5 lettres : le suffixe du ticker
+    nomme l'une des équipes, on la retire, il reste l'autre."""
+    assert k.parse_ticker("KXNHLGAME-26OCT12OTTNJ-OTT")[1:3] == ("OTT", "NJD")
+    assert k.parse_ticker("KXNHLGAME-26OCT12OTTNJ-NJ")[1:3] == ("OTT", "NJD")
+
+
+def test_une_equipe_inconnue_est_rejetee_pas_inventee():
+    assert k.parse_ticker("KXNHLGAME-26OCT10ZZZNJ-ZZZ") is None
+
+
+def test_les_tickers_illisibles_sont_signales_pas_avales():
+    payload = {"markets": [
+        marche("KXNHLGAME-26OCT10ZZZNJ-ZZZ", bid=0.5, ask=0.6),
+        marche("KXNHLGAME-26OCT10VANNJ-NJ", bid=0.65, ask=0.67),
+        marche("KXNHLGAME-26OCT10VANNJ-VAN", bid=0.33, ask=0.35),
+    ]}
+    illisibles = []
+    games = k.parse_markets(payload, dt.date(2026, 10, 6), illisibles)
+    assert illisibles == ["KXNHLGAME-26OCT10ZZZNJ-ZZZ"]
+    assert ("2026-10-10", "VAN", "NJD") in games
+
+
+def test_tous_les_codes_de_kalshi_sont_connus():
+    """Chaque cible de la traduction est un vrai tricode de la LNH."""
+    import collect_moneypuck as cm
+    assert set(k.CODES_KALSHI.values()) <= set(cm.TEAMS)
