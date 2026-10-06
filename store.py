@@ -7,6 +7,7 @@ est le dossier data/ :
     data/odds/AAAA-MM-JJ.csv.gz    cotes brutes des casinos de cette collecte
     data/schedule.csv              calendrier de la saison
     data/injuries.csv              blessures actuelles (réécrit, sans historique)
+    data/goalies.csv               gardiens annoncés (réécrit, sans historique)
 
 Un fichier par collecte, écrit une fois : le dépôt grossit d'environ 30 Ko par
 jour au lieu d'une copie complète de la base à chaque commit.
@@ -25,6 +26,7 @@ from pathlib import Path
 import collect_injuries as inj
 import collect_moneypuck as cm
 import collect_odds as co
+import collect_puckcast as cpk
 import schedule as sch
 
 DATA_DIR = Path("data")
@@ -40,6 +42,7 @@ def init_db(conn):
     co.init_db(conn)    # crée aussi probs
     sch.init_db(conn)
     inj.init_db(conn)
+    cpk.init_gardiens(conn)
 
 
 def _write_if_changed(path, data):
@@ -84,20 +87,35 @@ def export_schedule(conn, data_dir=DATA_DIR):
     return [path] if rows and _write_if_changed(path, _csv_bytes(sch.COLS, rows)) else []
 
 
-def export_injuries(conn, data_dir=DATA_DIR):
-    """Les blessures actuelles. Une table vide n'écrase pas le fichier : une
-    collecte qui échoue ne doit pas effacer les blessés connus."""
+# Tables « situation actuelle » : un seul fichier, réécrit à chaque collecte,
+# sans historique. Un blessé ou un gardien d'hier ne dit rien du match de ce
+# soir. → (table, colonnes, fichier)
+ACTUELLES = [("injuries", inj.COLS, "injuries.csv"),
+             ("goalies", cpk.GARDIEN_COLS, "goalies.csv")]
+
+
+def _export_actuel(conn, table, cols, nom, data_dir):
+    """Une table vide n'écrase pas le fichier : une collecte qui échoue ne
+    doit pas effacer ce qu'on savait."""
     rows = conn.execute(
-        f"SELECT {','.join(inj.COLS)} FROM injuries ORDER BY {','.join(inj.COLS)}"
-    ).fetchall()
-    path = Path(data_dir) / "injuries.csv"
-    return [path] if rows and _write_if_changed(path, _csv_bytes(inj.COLS, rows)) else []
+        f"SELECT {','.join(cols)} FROM {table} ORDER BY {','.join(cols)}").fetchall()
+    path = Path(data_dir) / nom
+    return [path] if rows and _write_if_changed(path, _csv_bytes(cols, rows)) else []
+
+
+def export_injuries(conn, data_dir=DATA_DIR):
+    return _export_actuel(conn, "injuries", inj.COLS, "injuries.csv", data_dir)
+
+
+def export_goalies(conn, data_dir=DATA_DIR):
+    return _export_actuel(conn, "goalies", cpk.GARDIEN_COLS, "goalies.csv", data_dir)
 
 
 def export_all(conn, data_dir=DATA_DIR):
     snaps = [r[0] for r in conn.execute("SELECT DISTINCT snapshot FROM probs")]
     changed = [p for s in snaps for p in export_snapshot(conn, s, data_dir)]
-    return changed + export_schedule(conn, data_dir) + export_injuries(conn, data_dir)
+    return (changed + export_schedule(conn, data_dir)
+            + export_injuries(conn, data_dir) + export_goalies(conn, data_dir))
 
 
 def _read_csv(path):
@@ -127,10 +145,11 @@ def build_db(db_path=cm.DB_PATH, data_dir=DATA_DIR):
             rows = [[None if v == "" else v for v in row] for row in rows]   # match non joué
             conn.executemany(f"INSERT INTO schedule ({','.join(cols)}) "
                              f"VALUES ({','.join('?' * len(cols))})", rows)
-        if (data_dir / "injuries.csv").exists():
-            cols, rows = _read_csv(data_dir / "injuries.csv")
-            conn.executemany(f"INSERT OR REPLACE INTO injuries ({','.join(cols)}) "
-                             f"VALUES ({','.join('?' * len(cols))})", rows)
+        for table, _cols, nom in ACTUELLES:
+            if (data_dir / nom).exists():
+                cols, rows = _read_csv(data_dir / nom)
+                conn.executemany(f"INSERT OR REPLACE INTO {table} ({','.join(cols)}) "
+                                 f"VALUES ({','.join('?' * len(cols))})", rows)
     conn.close()
     tmp.replace(db_path)
     return n

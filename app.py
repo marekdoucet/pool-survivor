@@ -240,6 +240,28 @@ def blesses(version):
 
 
 @st.cache_data
+def gardiens(version):
+    """{(game_date, away, home): {équipe: (gardien, statut, mis à jour)}}.
+
+    Lus sur la page de chaque match proche chez Puckcast, qui cite RotoWire.
+    Gardien vide = pas encore annoncé.
+    """
+    try:
+        with connect() as c:
+            rows = c.execute("SELECT game_date, away, home, team, goalie, status, "
+                             "updated FROM goalies").fetchall()
+    except sqlite3.OperationalError:
+        return {}
+    par_match = {}
+    for g, a, h, team, nom, statut, maj in rows:
+        par_match.setdefault((g, a, h), {})[team] = (nom, statut, maj)
+    return par_match
+
+
+STATUT_GARDIEN = {"Expected": "attendu", "Confirmed": "confirmé"}
+
+
+@st.cache_data
 def forms(version):
     with connect() as c:
         return form.team_forms(c)
@@ -687,12 +709,30 @@ def page_pick():
         # celle des pastilles ci-dessus, qui suivent toujours la recommandation.
         cible = choisi if (choisi is not None and monday == this_monday) else best
         bl = blesses(v)
-        if bl:
-            with ui.panel("blessures", f"Blessures · {cible.team} contre {cible.opponent}",
+        visiteur, local = ((cible.opponent, cible.team) if cible.home
+                           else (cible.team, cible.opponent))
+        gd = gardiens(v).get((cible.game_date, visiteur, local), {})
+        if bl or gd:
+            with ui.panel("avant-match", f"Avant le match · {cible.team} contre {cible.opponent}",
                           "Information seulement : les modèles en tiennent déjà "
                           "compte, ce n'est pas ajouté aux probabilités. Un "
-                          "gardien absent pèse plus qu'un attaquant."):
-                for equipe in (cible.team, cible.opponent):
+                          "gardien titulaire pèse plus que n'importe quel attaquant."):
+                if gd:
+                    st.markdown("**Gardiens**")
+                    for equipe in (cible.team, cible.opponent):
+                        nom, statut, _maj = gd.get(equipe, ("", "", ""))
+                        st.markdown(
+                            f"{ui.name(equipe)} : **{nom}** "
+                            f"({STATUT_GARDIEN.get(statut, statut.lower() or 'annoncé')})"
+                            if nom else f"{ui.name(equipe)} : pas encore annoncé")
+                    maj = next((m for _n, _s, m in gd.values() if m), "")
+                    st.caption("Source : RotoWire, via Puckcast"
+                               + (f" · mis à jour {maj}" if maj else "")
+                               + ". « Attendu » n'est pas une certitude : le "
+                                 "titulaire se confirme en général le jour du match.")
+                if bl:
+                    st.markdown("**Blessures**")
+                for equipe in (cible.team, cible.opponent) if bl else ():
                     liste = bl.get(equipe, [])
                     if not liste:
                         st.caption(f"{ui.name(equipe)} : aucune blessure déclarée.")

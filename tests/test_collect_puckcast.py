@@ -215,3 +215,49 @@ def test_egalite_du_week_end_les_deux_jours_sont_relus():
     conn = calendrier([(1, "2026-10-10", "VAN", "NJD"),
                        (3, "2026-10-11", "BOS", "MTL")])
     assert {1, 3} <= {r[0] for r in cp.matchs_proches(conn, LUNDI)}
+
+
+# ── Gardiens annoncés, lus sur la même page de match ──────────────────────
+# Extrait réel de VAN @ NJD (10 octobre), lu le 6 : Jake Allen attendu pour
+# les Devils, Vancouver pas encore annoncé (« TBD »).
+
+GARDIENS_HTML = (Path(__file__).parent / "fixtures" / "puckcast_goalies.htm").read_text(
+    encoding="utf-8")
+
+
+def test_les_gardiens_sont_lus():
+    par_equipe, maj = cp.parse_gardiens(GARDIENS_HTML)
+    assert par_equipe["NJD"] == ("Jake Allen", "Expected")
+    assert maj == "Oct 6, 4:23 AM"
+
+
+def test_un_gardien_pas_encore_annonce_reste_vide():
+    """« TBD » : la ligne existe, mais sans nom ni statut — surtout pas un nom
+    inventé."""
+    par_equipe, _ = cp.parse_gardiens(GARDIENS_HTML)
+    assert par_equipe["VAN"] == ("", "")
+
+
+def test_une_page_sans_bloc_de_gardiens_ne_donne_rien():
+    assert cp.parse_gardiens("<html>match déjà joué</html>") == ({}, "")
+
+
+def test_laffinage_recolte_les_gardiens_sans_requete_de_plus():
+    conn = calendrier([(2026020071, "2026-10-10", "VAN", "NJD")])
+    page = ('<div aria-label="Win probability: Canucks 25.0%, Devils 75.0%">x</div>'
+            + GARDIENS_HTML)
+
+    class Session:
+        appels = 0
+
+        def get(self, url, **kw):
+            Session.appels += 1
+            return type("R", (), {"text": page, "raise_for_status": lambda self: None})()
+
+    gardiens = []
+    probs = {("2026-10-10", "VAN", "NJD"): (0.347, 0.653)}
+    cp.affiner_horizon_proche(probs, conn, LUNDI, Session(), gardiens)
+    assert Session.appels == 1
+    assert probs[("2026-10-10", "VAN", "NJD")] == (0.25, 0.75)
+    assert ("2026-10-10", "VAN", "NJD", "NJD", "Jake Allen", "Expected",
+            "Oct 6, 4:23 AM") in gardiens

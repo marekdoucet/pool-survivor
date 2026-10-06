@@ -96,5 +96,5 @@ def test_le_panneau_blessures_saffiche_vraiment():
     app = AppTest.from_file(str(APP), default_timeout=300)
     app.run()
     assert not app.exception, "\n".join(str(e.value) for e in app.exception)
-    titres = [m.value for m in app.markdown if "Blessures ·" in m.value]
-    assert titres, "le panneau « Blessures » ne s'est pas affiché"
+    titres = [m.value for m in app.markdown if "Avant le match ·" in m.value]
+    assert titres, "le panneau « Avant le match » ne s'est pas affiché"

@@ -17,6 +17,7 @@ la page de saison est générée une fois et reste figée, donc elle ignore les
 gardiens confirmés. Voir matchs_proches et affiner_horizon_proche.
 """
 
+import html as html_lib
 import re
 import sqlite3
 import datetime as dt
@@ -98,12 +99,50 @@ def matchs_proches(conn, today):
     return [l for l in lignes if l[1] < fin_proche or l[1] in jours_pick]
 
 
-def affiner_horizon_proche(probs, conn, today, session):
+GARDIEN_COLS = ["game_date", "away", "home", "team", "goalie", "status", "updated"]
+RE_GARDIEN_INFO = re.compile(r'class="matchup-goalie-banner__info[^"]*"(.*?)</div></div>', re.S)
+RE_GARDIEN_EQUIPE = re.compile(r'matchup-goalie-banner__team"[^>]*>([A-Z]{2,3})<')
+RE_GARDIEN_NOM = re.compile(r'matchup-goalie-banner__name"[^>]*>([^<]+)<')
+RE_GARDIEN_STATUT = re.compile(r'matchup-goalie-banner__st"[^>]*>([^<]+)<')
+RE_GARDIEN_SOURCE = re.compile(r'matchup-goalies-banner__source"[^>]*>(.*?)</p>', re.S)
+
+
+def parse_gardiens(page_html):
+    """→ ({équipe: (gardien, statut)}, « mis à jour »), ou ({}, "").
+
+    Le bloc des gardiens de la page de match, avec des classes explicites :
+        __team  → NJD        __name → Jake Allen      __st → Expected
+        __tbd   → TBD (pas encore annoncé : gardien et statut vides)
+    Puckcast cite sa source (RotoWire) et l'heure de mise à jour, qu'on garde
+    pour l'afficher : un gardien « attendu » mardi n'est pas une certitude.
+    """
+    gardiens = {}
+    for bloc in RE_GARDIEN_INFO.findall(page_html):
+        equipe = RE_GARDIEN_EQUIPE.search(bloc)
+        if not equipe:
+            continue
+        nom, statut = RE_GARDIEN_NOM.search(bloc), RE_GARDIEN_STATUT.search(bloc)
+        gardiens[equipe.group(1)] = (
+            html_lib.unescape(nom.group(1)).strip() if nom else "",
+            html_lib.unescape(statut.group(1)).strip() if statut else "")
+    source = RE_GARDIEN_SOURCE.search(page_html)
+    maj = ""
+    if source:
+        texte = html_lib.unescape(re.sub(r"<[^>]+>", "", source.group(1)))
+        maj = texte.split("Updated:")[-1].strip() if "Updated:" in texte else ""
+    return gardiens, maj
+
+
+def affiner_horizon_proche(probs, conn, today, session, gardiens=None):
     """Remplace, pour les matchs proches, la probabilité de la page de
     saison par celle — mise à jour, gardiens confirmés — de la page de match.
 
     `probs` est le dictionnaire final {(game_date, away, home): (p_away,
     p_home)} rendu par to_probs ; modifié en place et retourné.
+
+    `gardiens` : liste à remplir avec les gardiens annoncés, une ligne par
+    équipe (colonnes GARDIEN_COLS). Ils sont sur la même page : aucune requête
+    de plus.
 
     Ne touche que les matchs où la page de match répond ET donne les deux
     équipes : une erreur réseau ou un format inattendu sur un match laisse
@@ -120,6 +159,11 @@ def affiner_horizon_proche(probs, conn, today, session):
         cote = parse_matchup(r.text)
         if away in cote and home in cote:
             probs[(g, away, home)] = (cote[away], cote[home])
+        if gardiens is not None:
+            par_equipe, maj = parse_gardiens(r.text)
+            for equipe in (away, home):
+                if equipe in par_equipe:
+                    gardiens.append((g, away, home, equipe, *par_equipe[equipe], maj))
     return probs
 
 
@@ -162,6 +206,21 @@ def to_probs(games, conn, today):
     return out
 
 
+def init_gardiens(conn):
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS goalies (
+            game_date TEXT NOT NULL,
+            away      TEXT NOT NULL,
+            home      TEXT NOT NULL,
+            team      TEXT NOT NULL,
+            goalie    TEXT NOT NULL,   -- vide : pas encore annoncé
+            status    TEXT NOT NULL,   -- Expected, Confirmed… ; vide si non annoncé
+            updated   TEXT NOT NULL,   -- heure de mise à jour citée par Puckcast
+            PRIMARY KEY (game_date, away, home, team)
+        )
+    """)
+
+
 def collect_puckcast(db_path=cm.DB_PATH, today=None, session=None):
     """Remplace les prédictions Puckcast de l'instantané du jour."""
     today = today or dt.datetime.now(cm.TZ).date()
@@ -175,8 +234,17 @@ def collect_puckcast(db_path=cm.DB_PATH, today=None, session=None):
     cm.init_db(conn)
     sch.init_db(conn)
     probs = to_probs(games, conn, today)
-    probs = affiner_horizon_proche(probs, conn, today, session)
+    gardiens = []
+    probs = affiner_horizon_proche(probs, conn, today, session, gardiens)
+    init_gardiens(conn)
     with conn:
+        # Situation actuelle seulement, comme les blessures. On ne vide la
+        # table que si au moins un gardien a été lu : une collecte où toutes
+        # les pages de match échouent ne doit pas effacer les gardiens connus.
+        if gardiens:
+            conn.execute("DELETE FROM goalies")
+            conn.executemany("INSERT OR REPLACE INTO goalies VALUES (?,?,?,?,?,?,?)",
+                             gardiens)
         conn.execute("DELETE FROM probs WHERE snapshot=? AND source=?",
                      (today.isoformat(), SOURCE))
         conn.executemany(

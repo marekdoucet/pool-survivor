@@ -88,3 +88,19 @@ def test_une_table_vide_nefface_pas_le_fichier(tmp_path):
     (data / "injuries.csv").write_text("team,player,pos,status,injury\nCOL,X,C,IR,Genou\n")
     assert store.export_injuries(conn, data) == []
     assert "COL,X" in (data / "injuries.csv").read_text()
+
+
+def test_les_gardiens_font_laller_retour_par_le_fichier(tmp_path):
+    conn = sqlite3.connect(tmp_path / "a.db")
+    store.init_db(conn)
+    ligne = ("2026-10-10", "VAN", "NJD", "NJD", "Jake Allen", "Expected", "Oct 6, 4:23 AM")
+    vide = ("2026-10-10", "VAN", "NJD", "VAN", "", "", "Oct 6, 4:23 AM")
+    conn.executemany("INSERT INTO goalies VALUES (?,?,?,?,?,?,?)", [ligne, vide])
+    conn.commit()
+    data = tmp_path / "data"
+    assert store.export_goalies(conn, data)
+
+    neuve = tmp_path / "b.db"
+    store.build_db(neuve, data)
+    lignes = sorted(sqlite3.connect(neuve).execute("SELECT * FROM goalies").fetchall())
+    assert lignes == sorted([ligne, vide])     # le « pas encore annoncé » survit aussi
