@@ -2,6 +2,7 @@ import datetime as dt
 
 import pytest
 
+import collect_moneypuck as cm
 import picks as pk
 
 W1, W2 = dt.date(2026, 9, 28), dt.date(2026, 10, 5)
@@ -55,6 +56,57 @@ def test_planning():
     assert pk.planning(picks, fri)[2]["team"] == "VGK"      # le vendredi même
     # Dès samedi : verrouillé, on passe à lundi prochain
     assert pk.planning(picks, sat) == (W2, {"EDM", "VGK"}, None)
+
+
+# ── Le verrou du pool : 30 min avant le premier match de la journée de pick ──
+# Marek : « 30 min avant le premier match du samedi, comme ça ça laisse le
+# temps de regarder puis aussi de voir les gardiens ». C'est le vrai verrou de
+# son pool, confirmé avant d'écrire ceci.
+
+ET = cm.TZ
+LUNDI_V = dt.date(2026, 10, 5)
+SAMEDI, DIMANCHE = "2026-10-10", "2026-10-11"
+PREMIERS = {SAMEDI: dt.datetime(2026, 10, 10, 13, 0, tzinfo=ET),
+            DIMANCHE: dt.datetime(2026, 10, 11, 15, 0, tzinfo=ET)}
+
+
+def test_le_verrou_tombe_30_minutes_avant_le_premier_match():
+    assert pk.verrou(LUNDI_V, (SAMEDI,), PREMIERS) == dt.datetime(
+        2026, 10, 10, 12, 30, tzinfo=ET)
+
+
+def test_le_verrou_suit_la_journee_de_pick_meme_un_dimanche():
+    """Journée choisie ou plus chargée le dimanche : le verrou suit."""
+    assert pk.verrou(LUNDI_V, (DIMANCHE,), PREMIERS) == dt.datetime(
+        2026, 10, 11, 14, 30, tzinfo=ET)
+
+
+def test_en_cas_degalite_le_premier_des_deux_jours_compte():
+    """Sinon on pourrait changer de pick après qu'un match permis a commencé."""
+    assert pk.verrou(LUNDI_V, (SAMEDI, DIMANCHE), PREMIERS).day == 10
+
+
+def test_sans_match_le_week_end_on_retombe_sur_la_fin_du_vendredi():
+    assert pk.verrou(LUNDI_V, (), PREMIERS) == dt.datetime(
+        2026, 10, 10, 0, 0, tzinfo=ET)
+
+
+def test_a_la_minute_pres():
+    """12 h 29 : encore modifiable. 12 h 30 : verrouillé."""
+    v = pk.verrou(LUNDI_V, (SAMEDI,), PREMIERS)
+    assert dt.datetime(2026, 10, 10, 12, 29, tzinfo=ET) < v
+    assert not dt.datetime(2026, 10, 10, 12, 30, tzinfo=ET) < v
+
+
+def test_planning_suit_le_verrou_et_non_plus_le_vendredi():
+    """Samedi matin, avant le verrou : le pick est encore modifiable — ce que
+    l'ancien verrou du vendredi minuit interdisait."""
+    picks = pk.add([], LUNDI_V, "NJD")
+    samedi = dt.date(2026, 10, 10)
+    _, used, prov = pk.planning(picks, samedi, ouvert=True)
+    assert prov["team"] == "NJD" and "NJD" not in used
+    depart, used, prov = pk.planning(picks, samedi, ouvert=False)
+    assert prov is None and depart == LUNDI_V + dt.timedelta(days=7)
 
 
 class FakeResponse:

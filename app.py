@@ -181,6 +181,16 @@ def pick_days_for(version, overrides):
 
 
 @st.cache_data
+def premiers_matchs(version):
+    """{date ISO: début du premier match de ce jour, en heure de l'Est}."""
+    with connect() as c:
+        rows = c.execute("SELECT game_date, MIN(start_utc) FROM schedule "
+                         "GROUP BY game_date").fetchall()
+    return {g: dt.datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(cm.TZ)
+            for g, s in rows if s}
+
+
+@st.cache_data
 def resultats(version, overrides):
     """{(lundi ISO, équipe): a gagné} pour les matchs de journée de pick joués.
 
@@ -430,7 +440,14 @@ horizon = pk.horizon(since, today)
 overrides = tuple(sorted(day_overrides.items()))   # clé de cache
 all_days = pick_days_for(VERSION, overrides) if VERSION else {}
 this_monday = op.week_start(today)
-from_date, used_set, provisional = pk.planning(picks, today, since)
+# Le verrou du pool : 30 min avant le premier match de la journée de pick de
+# CETTE semaine — elle suit le choix forcé dans la barre latérale s'il y en a
+# un. Une heure précise, comparée à l'heure actuelle, pas à la date.
+_jour_pick = all_days.get(this_monday)
+VERROU = pk.verrou(this_monday, _jour_pick.days if _jour_pick else (),
+                   premiers_matchs(VERSION))
+OUVERT = dt.datetime.now(cm.TZ) < VERROU
+from_date, used_set, provisional = pk.planning(picks, today, since, ouvert=OUVERT)
 # Le pick de la semaine en cours. Defini ici plutot que dans page_pick :
 # page_pool le lit aussi, et st.navigation n'execute QUE la page ouverte.
 # Quand il etait local a page_pick, ouvrir « Le pool » levait
@@ -619,8 +636,9 @@ def page_pick():
         week_opts = sorted(options[this_monday].values(), key=lambda o: -o.p)
         teams_ = [o.team for o in week_opts]
         # Ce que le site retient : le pick déjà enregistré s'il y en a un,
-        # sinon la recommandation. C'est CE choix qui se verrouille vendredi
-        # minuit, qu'on y retouche ou non.
+        # sinon la recommandation. C'est CE choix qui se verrouille au verrou
+        # (30 min avant le premier match de la journée de pick), qu'on y
+        # retouche ou non.
         retenu = (provisional or {}).get("team")
         if retenu is None and plan and plan[0][1] is not None:
             retenu = plan[0][1].team
@@ -628,7 +646,9 @@ def page_pick():
         labels = [f"{o.team} {match_label(o)} — {o.p:.1%}" for o in week_opts]
         with ui.panel("choisir", "Enregistrer mon pick",
                       f"Modifiable jusqu'au "
-                      f"{fr_day(pk.pick_deadline(today).isoformat())} à minuit. "
+                      f"{fr_day(VERROU.date().isoformat())} à "
+                      f"{VERROU.hour} h {VERROU.minute:02d} (heure de l'Est), "
+                      f"30 minutes avant le premier match de la journée de pick. "
                       f"Passé ce délai, c'est l'équipe affichée ici qui est "
                       f"retenue."):
             # Hors formulaire, exprès : le menu relance l'affichage à chaque

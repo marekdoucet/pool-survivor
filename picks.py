@@ -451,17 +451,48 @@ def set_day(days, week, day):
 
 
 def pick_deadline(today):
-    """Dernier jour pour changer le pick de la semaine : le vendredi (jusqu'à minuit)."""
+    """Ancien verrou, gardé comme repli : le vendredi (jusqu'à minuit).
+
+    Ne sert plus que pour une semaine sans match le week-end, où il n'y a pas
+    de « premier match » sur lequel caler le verrou (voir verrou())."""
     return op.week_start(today) + dt.timedelta(days=4)
 
 
-def planning(picks, today, since=None):
+# Le vrai verrou du pool : 30 minutes avant le premier match de la journée de
+# pick. Plus tard que l'ancien vendredi minuit, ce qui laisse le temps de voir
+# les gardiens annoncés.
+DELAI_VERROU = dt.timedelta(minutes=30)
+
+
+def verrou(monday, journees, premiers_matchs, delai=DELAI_VERROU):
+    """Heure exacte (heure de l'Est) où le pick de la semaine se verrouille.
+
+    `journees` : les dates ISO de la journée de pick (PickDay.days) — un seul
+    jour d'habitude, les deux en cas d'égalité samedi/dimanche, ou celui que
+    la personne a forcé. `premiers_matchs` : {date ISO: datetime du premier
+    match de ce jour}.
+
+    En cas d'égalité, c'est le PREMIER des deux jours qui compte : sinon on
+    pourrait encore changer de pick après qu'un match permis a commencé.
+
+    Sans match ce week-end-là, repli sur l'ancien verrou : fin du vendredi.
+    """
+    debuts = [premiers_matchs[d] for d in journees if d in premiers_matchs]
+    if debuts:
+        return min(debuts) - delai
+    return dt.datetime.combine(monday + dt.timedelta(days=5), dt.time(0), tzinfo=cm.TZ)
+
+
+def planning(picks, today, since=None, ouvert=None):
     """Point de départ du plan : (date de départ, équipes utilisées, pick provisoire).
 
-    Le pick de la semaine en cours reste modifiable jusqu'au vendredi minuit
-    (pick_deadline) : on planifie alors encore cette semaine, avec cette équipe
-    de nouveau disponible. Ensuite il est verrouillé et le plan commence lundi
-    prochain.
+    Le pick de la semaine en cours reste modifiable jusqu'au verrou : on
+    planifie alors encore cette semaine, avec cette équipe de nouveau
+    disponible. Ensuite il est verrouillé et le plan commence lundi prochain.
+
+    `ouvert` : est-on encore avant le verrou ? C'est l'appelant qui le sait,
+    parce que le verrou est une heure précise (verrou()) et pas une date. Sans
+    lui, repli sur l'ancien critère du vendredi.
 
     `since` : lundi de départ du tour en cours. Seuls les picks de ce tour
     bloquent une équipe ; ceux des tours précédents sont de l'archive.
@@ -472,6 +503,8 @@ def planning(picks, today, since=None):
     used = {p["team"] for p in picks}
     if current is None:
         return today, used, None
-    if today <= pick_deadline(today):
+    if ouvert is None:
+        ouvert = today <= pick_deadline(today)
+    if ouvert:
         return today, used - {current["team"]}, current
     return monday + dt.timedelta(days=7), used, None
