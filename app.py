@@ -496,7 +496,11 @@ with st.sidebar:
     # passé le retire puis le rajoute à la fin, sous celui de cette semaine.
     for p in sorted(tour, key=lambda p: p["week"]):
         col1, col2 = st.columns([4, 1])
-        col1.markdown(f"**{p['team']}** — semaine du {p['week']}")
+        # La fin de semaine (« 26-27 sept. ») plutôt que le lundi ISO : c'est
+        # la forme du reste du site, le jour où le pick se joue, et elle tient
+        # sur une ligne — « semaine du 2026-09-28 » coupait en deux.
+        fds = fr_weekend(dt.date.fromisoformat(p["week"]))
+        col1.markdown(f"**{p['team']}** — {fds}")
         # Une confirmation : le ✕ supprimait d'un seul clic. Or supprimer un
         # pick passé rend l'équipe de nouveau disponible au plan, et peut même
         # remettre en vie si ce pick avait perdu. Un simple bouton qui fait
@@ -507,13 +511,13 @@ with st.sidebar:
                        disabled=not PEUT_ECRIRE):
             st.session_state[demande] = True
         if st.session_state.get(demande):
-            st.caption(f"Supprimer {p['team']}, semaine du {p['week']} ? "
+            st.caption(f"Supprimer {p['team']}, fin de semaine du {fds} ? "
                        f"L'équipe redevient disponible dans le plan.")
             oui, non = st.columns(2)
             if oui.button("Supprimer", type="primary", key=f"del-ok-{p['week']}"):
                 st.session_state.pop(demande, None)
                 save_picks(pk.remove(picks, dt.date.fromisoformat(p["week"])),
-                           f"Pick retiré : {p['team']} (semaine du {p['week']})")
+                           f"Pick retiré : {p['team']} ({fds})")
             if non.button("Garder", key=f"del-non-{p['week']}"):
                 st.session_state.pop(demande, None)
                 st.rerun()
@@ -525,8 +529,8 @@ with st.sidebar:
     if passees:
         with st.popover("Ajouter ou corriger un pick passé", width="stretch",
                         disabled=not PEUT_ECRIRE):
-            sem = st.selectbox("Semaine", passees, key="corr-sem",
-                               format_func=lambda m: f"fin de semaine du {fr_weekend(m)}")
+            sem = st.selectbox("Fin de semaine", passees, key="corr-sem",
+                               format_func=fr_weekend)
             actuel = next((p["team"] for p in picks if p["week"] == sem.isoformat()), None)
             equipes = sorted(cm.TEAMS)
             eq = st.selectbox("Équipe", equipes, key=f"corr-eq-{sem}",
@@ -541,7 +545,7 @@ with st.sidebar:
                 except ValueError as e:
                     st.error(str(e))
                 else:
-                    save_picks(nouveaux, f"Pick corrigé : {eq} (semaine du {sem})"
+                    save_picks(nouveaux, f"Pick corrigé : {eq} ({fr_weekend(sem)})"
                                + (f", remplace {actuel}" if actuel else ""))
 
     # Annuler la dernière modification — pick, registre, redépart, n'importe
@@ -737,7 +741,7 @@ def page_pick():
                 save_picks(pk.add(picks, this_monday, choisi.team, choisi.game_date,
                                   since=since),
                            f"Pick {'modifié' if provisional else 'enregistré'} : "
-                           f"{choisi.team} (semaine du {this_monday})")
+                           f"{choisi.team} ({fr_weekend(this_monday)})")
         # La carte de l'équipe choisie. C'est elle qui doit donner sa couleur
         # au fond de la page, pas la recommandation : le site reflète MON
         # choix. Comme ui.hero() pose la lueur lui-même et que la

@@ -67,7 +67,13 @@ def test_garder_annule_la_demande(fichier):
 
 
 def lignes_mes_picks(app):
-    return [m.value for m in app.sidebar.markdown if "semaine du" in m.value]
+    """Les lignes « **COL** — 26-27 sept. » de la barre latérale."""
+    return [m.value for m in app.sidebar.markdown
+            if m.value.startswith("**") and " — " in m.value]
+
+
+def equipes_affichees(app):
+    return [l.split("**")[1] for l in lignes_mes_picks(app)]
 
 
 def test_la_liste_va_du_plus_ancien_au_pick_de_cette_semaine(tmp_path, monkeypatch):
@@ -83,8 +89,18 @@ def test_la_liste_va_du_plus_ancien_au_pick_de_cette_semaine(tmp_path, monkeypat
     ]}), encoding="utf-8")
     monkeypatch.setenv("SURVIVOR_PICKS", str(chemin))
     app = lancer()
-    semaines = [l.split("semaine du ")[1] for l in lignes_mes_picks(app)]
-    assert semaines == [AVANT, PASSEE, LUNDI.isoformat()]
+    assert equipes_affichees(app) == ["EDM", "COL", "NJD"]   # 2 sem., 1 sem., cette sem.
+
+
+def test_un_seul_format_de_date_la_fin_de_semaine(fichier):
+    """Avant : « semaine du 2026-09-28 » dans la liste (coupé en deux lignes)
+    et « fin de semaine du 3-4 oct. » dans le menu. Une seule forme."""
+    import re
+    app = lancer()
+    lignes = lignes_mes_picks(app)
+    assert len(lignes) == 3
+    assert not any(re.search(r"\d{4}-\d{2}-\d{2}", l) for l in lignes)
+    assert all(re.search(r"\d+-\d+ \w+\.|\d+ \w+\.-\d+ \w+\.", l) for l in lignes)
 
 
 def test_un_pick_passe_supprime_peut_etre_remis(fichier):
