@@ -494,10 +494,42 @@ with st.sidebar:
     for p in tour:
         col1, col2 = st.columns([4, 1])
         col1.markdown(f"**{p['team']}** — semaine du {p['week']}")
-        if col2.button("✕", key=f"del-{p['week']}", help="Retirer ce pick",
-                       disabled=not PEUT_ECRIRE):
-            save_picks(pk.remove(picks, dt.date.fromisoformat(p["week"])),
-                       f"Pick retiré : {p['team']} (semaine du {p['week']})")
+        # Une confirmation : le ✕ supprimait d'un seul clic. Or supprimer un
+        # pick passé rend l'équipe de nouveau disponible au plan, et peut même
+        # remettre en vie si ce pick avait perdu.
+        with col2.popover("✕", help="Retirer ce pick", disabled=not PEUT_ECRIRE,
+                          key=f"del-{p['week']}"):
+            st.write(f"Supprimer **{p['team']}**, semaine du {p['week']} ?")
+            st.caption("L'équipe redevient disponible dans le plan.")
+            if st.button("Supprimer", type="primary", key=f"del-ok-{p['week']}"):
+                save_picks(pk.remove(picks, dt.date.fromisoformat(p["week"])),
+                           f"Pick retiré : {p['team']} (semaine du {p['week']})")
+
+    # Corriger ou remettre un pick d'une semaine passée. Un menu, pas une page :
+    # « Enregistrer mon pick » ne connaît que la semaine en cours, donc un pick
+    # passé supprimé ou oublié ne pouvait plus être saisi nulle part.
+    passees = pk.semaines_tour(since, this_monday)[1:]
+    if passees:
+        with st.popover("Ajouter ou corriger un pick passé", width="stretch",
+                        disabled=not PEUT_ECRIRE):
+            sem = st.selectbox("Semaine", passees, key="corr-sem",
+                               format_func=lambda m: f"fin de semaine du {fr_weekend(m)}")
+            actuel = next((p["team"] for p in picks if p["week"] == sem.isoformat()), None)
+            equipes = sorted(cm.TEAMS)
+            eq = st.selectbox("Équipe", equipes, key=f"corr-eq-{sem}",
+                              index=equipes.index(actuel) if actuel in equipes else None,
+                              placeholder="Choisir une équipe")
+            st.caption(f"Enregistré actuellement : {actuel or 'rien'}.")
+            if st.button("Enregistrer", type="primary", key="corr-ok",
+                         disabled=eq is None or eq == actuel):
+                # Mêmes règles que partout : une équipe une seule fois par tour.
+                try:
+                    nouveaux = pk.add(picks, sem, eq, since=since)
+                except ValueError as e:
+                    st.error(str(e))
+                else:
+                    save_picks(nouveaux, f"Pick corrigé : {eq} (semaine du {sem})"
+                               + (f", remplace {actuel}" if actuel else ""))
 
     st.subheader("Tour en cours")
     archive = len(picks) - len(tour)
