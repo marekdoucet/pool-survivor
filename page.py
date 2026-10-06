@@ -117,8 +117,8 @@ T = {
         "titre": "Pool survivor LNH : {equipe} est le pick de la semaine",
         "desc": ("{equipe} à {p} contre {adv}. Le meilleur pick de la semaine "
                  "pour un pool survivor de hockey, recalculé deux fois par "
-                 "jour à partir des cotes des casinos et de trois modèles "
-                 "statistiques."),
+                 "jour à partir des cotes des casinos, du marché Kalshi et de "
+                 "trois modèles statistiques."),
         "maj": "Mis à jour le {date}. Saison {saison}.",
         "contre": "contre", "a": "à", "chances": "de chances de gagner",
         "pts": "pts",
@@ -139,8 +139,8 @@ T = {
             "ne sert qu'une fois. Prendre le plus gros favori chaque semaine "
             "n'est donc pas la bonne stratégie : il faut garder les grosses "
             "équipes pour les semaines où rien d'autre ne tient la route.",
-            "Ce site combine quatre sources — les cotes des casinos, "
-            "MoneyPuck, Dimers et Puckcast — en un consensus pondéré, puis "
+            "Ce site combine cinq sources — les cotes des casinos, "
+            "Kalshi, MoneyPuck, Dimers et Puckcast — en un consensus pondéré, puis "
             "optimise le plan sur les huit prochaines semaines d'un coup. Il "
             "maximise l'espérance du nombre de semaines survécues, ce qui "
             "tient compte du fait qu'une élimination précoce annule toutes "
@@ -154,7 +154,7 @@ T = {
                      "peut prendre une minute ou deux — ce n'est pas une "
                      "panne."),
         "autre_langue": "English version",
-        "pied": ("Sources : The Odds API, MoneyPuck, Dimers, Puckcast, API "
+        "pied": ("Sources : The Odds API, Kalshi, MoneyPuck, Dimers, Puckcast, API "
                  "publique de la LNH. Projet personnel, sans lien avec la LNH. "
                  "Ces chiffres sont des estimations, pas des certitudes."),
     },
@@ -163,7 +163,7 @@ T = {
         "titre": "NHL survivor pool cheat sheet: {equipe} is this week's pick",
         "desc": ("{equipe} at {p} against {adv}. The best pick of the week for "
                  "an NHL survivor pool, recalculated twice a day from "
-                 "sportsbook odds and three statistical models."),
+                 "sportsbook odds, the Kalshi market and three statistical models."),
         "maj": "Updated {date}. {saison} season.",
         "contre": "vs", "a": "at", "chances": "win probability",
         "pts": "pts",
@@ -184,7 +184,7 @@ T = {
             "can only be used once. Taking the biggest favourite every week "
             "is therefore not the right strategy: the strong teams have to be "
             "saved for the weeks when nothing else holds up.",
-            "This site blends four sources — sportsbook odds, MoneyPuck, "
+            "This site blends five sources — sportsbook odds, Kalshi, MoneyPuck, "
             "Dimers and Puckcast — into a weighted consensus, then optimises "
             "the plan over the next eight weeks at once. It maximises the "
             "expected number of weeks survived, which accounts for the fact "
@@ -196,7 +196,7 @@ T = {
                      "app is asleep, the first load can take a minute or two — "
                      "it is not broken."),
         "autre_langue": "Version française",
-        "pied": ("Sources: The Odds API, MoneyPuck, Dimers, Puckcast, the "
+        "pied": ("Sources: The Odds API, Kalshi, MoneyPuck, Dimers, Puckcast, the "
                  "public NHL API. Personal project, not affiliated with the "
                  "NHL. These numbers are estimates, not certainties."),
     },
