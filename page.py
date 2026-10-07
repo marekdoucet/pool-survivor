@@ -117,7 +117,7 @@ T = {
         "titre": ("Pool survivor LNH, semaine {n} : {equipe} est le pick de "
                   "la semaine"),
         "desc": ("{equipe} à {p} contre {adv}. Le meilleur pick de la semaine "
-                 "pour un pool survivor de hockey, recalculé deux fois par "
+                 "pour un pool survivor de hockey, recalculé plusieurs fois par "
                  "jour à partir des cotes des casinos, du marché Kalshi et de "
                  "trois modèles statistiques."),
         "maj": "Mis à jour le {date}. Saison {saison}.",
@@ -149,7 +149,7 @@ T = {
             "maximise l'espérance du nombre de semaines survécues, ce qui "
             "tient compte du fait qu'une élimination précoce annule toutes "
             "les semaines suivantes.",
-            "Les données sont recollectées deux fois par jour, avant et après "
+            "Les données sont recollectées plusieurs fois par jour, avant et après "
             "les matchs.",
         ],
         "cta": "Ouvrir l'application",
@@ -167,7 +167,7 @@ T = {
         "titre": ("NHL survivor pool cheat sheet, week {n}: {equipe} is this "
                   "week's pick"),
         "desc": ("{equipe} at {p} against {adv}. The best pick of the week for "
-                 "an NHL survivor pool, recalculated twice a day from "
+                 "an NHL survivor pool, recalculated several times a day from "
                  "sportsbook odds, the Kalshi market and three statistical models."),
         "maj": "Updated {date}. {saison} season.",
         "contre": "vs", "a": "at", "chances": "win probability",
@@ -196,7 +196,7 @@ T = {
             "the plan over the next eight weeks at once. It maximises the "
             "expected number of weeks survived, which accounts for the fact "
             "that an early elimination cancels every week after it.",
-            "Data is collected twice a day, before and after the games.",
+            "Data is collected several times a day, before and after the games.",
         ],
         "cta": "Open the app",
         "cta_note": ("The full plan, the matchup map, source accuracy. If the "
