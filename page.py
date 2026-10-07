@@ -114,7 +114,8 @@ TEAMS = {
 T = {
     "fr": {
         "h1": "Pool survivor hockey — le pick de la semaine",
-        "titre": "Pool survivor LNH : {equipe} est le pick de la semaine",
+        "titre": ("Pool survivor LNH, semaine {n} : {equipe} est le pick de "
+                  "la semaine"),
         "desc": ("{equipe} à {p} contre {adv}. Le meilleur pick de la semaine "
                  "pour un pool survivor de hockey, recalculé deux fois par "
                  "jour à partir des cotes des casinos, du marché Kalshi et de "
@@ -122,11 +123,14 @@ T = {
         "maj": "Mis à jour le {date}. Saison {saison}.",
         "contre": "contre", "a": "à", "chances": "de chances de gagner",
         "pts": "pts",
-        "h_choix": "Tous les choix de la semaine du {semaine}",
+        "h_choix": "Tous les choix de la semaine {n} (du {semaine})",
         "th": ["Équipe", "Match", "Chances de gagner", "Espérance (sem.)"],
         "note": ("« Espérance » = nombre de semaines que le plan devrait "
                  "survivre en moyenne si l'on prend cette équipe maintenant, "
                  "puis le meilleur choix ensuite. Ce n'est pas un pourcentage."),
+        "h_prono": "Pronostics des matchs de la semaine {n}",
+        "prono": ("<b>{eq}</b> {rel} {adv}{jour} — {p} de probabilité de "
+                  "victoire."),
         "h_disette": "Les semaines à éviter",
         "p_disette": ("Une équipe brûlée ne revient jamais. Ces semaines "
                       "n'offrent aucun favori solide : mieux vaut y arriver "
@@ -160,18 +164,21 @@ T = {
     },
     "en": {
         "h1": "NHL survivor pool — this week's pick",
-        "titre": "NHL survivor pool cheat sheet: {equipe} is this week's pick",
+        "titre": ("NHL survivor pool cheat sheet, week {n}: {equipe} is this "
+                  "week's pick"),
         "desc": ("{equipe} at {p} against {adv}. The best pick of the week for "
                  "an NHL survivor pool, recalculated twice a day from "
                  "sportsbook odds, the Kalshi market and three statistical models."),
         "maj": "Updated {date}. {saison} season.",
         "contre": "vs", "a": "at", "chances": "win probability",
         "pts": "pts",
-        "h_choix": "Every option for the week of {semaine}",
+        "h_choix": "Every option for week {n} (week of {semaine})",
         "th": ["Team", "Game", "Win probability", "Expected weeks"],
         "note": ("\"Expected weeks\" = how many weeks the plan should survive "
                  "on average if you take this team now, then the best choice "
                  "after. It is not a percentage."),
+        "h_prono": "Week {n} game predictions",
+        "prono": "<b>{eq}</b> {rel} {adv}{jour} — {p} chance of winning.",
         "h_disette": "Weeks to avoid",
         "p_disette": ("A team you burn never comes back. These weeks offer no "
                       "solid favourite: better to reach them with a strong "
@@ -202,6 +209,72 @@ T = {
     },
 }
 
+# Les questions sont formulées comme les gens les tapent dans Google : c'est
+# ce qui fait sortir la page sur des recherches rares et précises (« longue
+# traîne »), que le titre seul ne couvre pas.
+FAQ = {
+    "fr": ("Questions fréquentes sur le pool survivor LNH", [
+        ("Qu'est-ce qu'un pool survivor de hockey ?",
+         "Chaque semaine, chaque participant choisit une équipe de la LNH. "
+         "Si elle gagne, il passe à la semaine suivante ; si elle perd, il "
+         "est éliminé. Une équipe ne peut être choisie qu'une seule fois de "
+         "la saison. Le dernier participant encore en vie gagne le pool."),
+        ("Quelle équipe choisir cette semaine dans mon pool survivor ?",
+         "Le pick en haut de cette page est le choix qui maximise le nombre "
+         "de semaines survécues sur l'ensemble du plan, pas seulement la "
+         "meilleure probabilité de la semaine. Si tu as déjà utilisé cette "
+         "équipe, le tableau donne les autres options, avec leurs chances de "
+         "gagner."),
+        ("Pourquoi ne pas toujours prendre le plus gros favori ?",
+         "Parce qu'une équipe brûlée ne revient jamais. Prendre la meilleure "
+         "équipe dans une semaine facile, c'est s'en priver pour une semaine "
+         "où aucun autre favori ne tient la route. Le calcul compare donc "
+         "chaque choix avec ce qu'il laisse pour la suite."),
+        ("Peut-on reprendre une équipe déjà utilisée ?",
+         "Non : dans un pool survivor, chaque équipe ne sert qu'une fois. "
+         "C'est toute la stratégie — savoir quand dépenser ses grosses "
+         "équipes."),
+        ("D'où viennent les probabilités de victoire ?",
+         "D'un consensus pondéré de cinq sources : les cotes des casinos, le "
+         "marché de prédiction Kalshi et trois modèles statistiques "
+         "(MoneyPuck, Dimers, Puckcast). Elles sont recollectées plusieurs "
+         "fois par jour."),
+        ("Comment gagner un pool survivor de hockey ?",
+         "Survivre plus longtemps que les autres : choisir des favoris "
+         "solides, garder des équipes fortes pour les semaines creuses, et "
+         "éviter les matchs serrés. Le plan repère d'avance les semaines "
+         "creuses, où aucun favori solide ne joue."),
+    ]),
+    "en": ("NHL survivor pool FAQ", [
+        ("What is an NHL survivor pool?",
+         "Every week, each entrant picks one NHL team. If it wins, they "
+         "advance to the next week; if it loses, they are eliminated. Each "
+         "team can only be picked once per season. The last entrant standing "
+         "wins the pool."),
+        ("Who should I pick in my NHL survivor pool this week?",
+         "The pick at the top of this page is the one that maximises the "
+         "number of weeks survived across the whole plan, not just the best "
+         "win probability this week. If you have already used that team, the "
+         "table lists the other options with their chances of winning."),
+        ("Why not always take the biggest favourite?",
+         "Because a team you burn never comes back. Using the best team in an "
+         "easy week means not having it for a week when no other favourite "
+         "holds up. The calculation weighs each pick against what it leaves "
+         "for later."),
+        ("Can I pick the same team twice?",
+         "No: in a survivor pool each team can only be used once. That is the "
+         "whole strategy — knowing when to spend your strong teams."),
+        ("Where do the win probabilities come from?",
+         "From a weighted consensus of five sources: sportsbook odds, the "
+         "Kalshi prediction market and three statistical models (MoneyPuck, "
+         "Dimers, Puckcast). They are collected several times a day."),
+        ("How do you win a hockey survivor pool?",
+         "Outlast everyone else: pick solid favourites, save strong teams for "
+         "the thin weeks, and avoid coin-flip games. The plan spots the "
+         "thin weeks ahead of time, when no solid favourite plays."),
+    ]),
+}
+
 POLICE = ("https://fonts.googleapis.com/css2?"
           "family=Barlow+Condensed:wght@600;700&display=swap")
 
@@ -216,6 +289,7 @@ font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
 .page{max-width:860px;margin:0 auto;padding:2.5rem 1.2rem 4rem}
 h1{font-size:2rem;line-height:1.15;margin:0 0 .3rem}
 h2{font-size:1.15rem;margin:2.4rem 0 .6rem}
+h3{font-size:1rem;margin:1.4rem 0 .2rem}
 .maj{color:var(--encre2);font-size:.9rem;margin:0 0 2rem}
 .lang{float:right;font-size:.9rem}
 
@@ -492,7 +566,8 @@ def rendu(ctx, lang):
     best = ctx["meilleur"]
     vedette = ctx["joueurs"].get(best["team"])
     eq = nom(best["team"], lang)
-    titre = t["titre"].format(equipe=eq)
+    n = ctx["numero"]
+    titre = t["titre"].format(equipe=eq, n=n)
     desc = t["desc"].format(equipe=eq, p=pourcent(best["p"], lang),
                             adv=nom(best["opponent"], lang))
     autre = "en" if lang == "fr" else "fr"
@@ -518,6 +593,18 @@ def rendu(ctx, lang):
         for s in ctx["disettes"])
     bloc_creuses = (f"<h2>{t['h_disette']}</h2><p>{t['p_disette']}</p>"
                     f"<ul>{creuses}</ul>" if creuses else "")
+    # Les mêmes chiffres que le tableau, mais en phrases : c'est ce qui fait
+    # sortir la page sur « pronostic Devils Canucks » et compagnie.
+    pronos = "".join(
+        "<li>" + t["prono"].format(
+            eq=e(nom(o["team"], lang)),
+            rel=t["contre"] if o["home"] else t["a"],
+            adv=e(nom(o["opponent"], lang)),
+            jour=f" ({e(o['jour'][lang])})" if o.get("jour") else "",
+            p=pourcent(o["p"], lang)) + "</li>"
+        for o in ctx["choix"])
+    titre_faq, questions = FAQ[lang]
+    faq = "".join(f"<h3>{e(q)}</h3><p>{e(r)}</p>" for q, r in questions)
     methode = "".join(f"<p>{p}</p>" for p in t["methode"])
     th = "".join(f"<th{' class=n' if i >= 2 else ''}>{h}</th>"
                  for i, h in enumerate(t["th"]))
@@ -566,7 +653,7 @@ def rendu(ctx, lang):
 <span>{t['cta_note']}</span>
 </div>
 
-<h2>{t['h_choix'].format(semaine=e(ctx['semaine'][lang]))}</h2>
+<h2>{t['h_choix'].format(semaine=e(ctx['semaine'][lang]), n=n)}</h2>
 <table>
 <thead><tr>{th}</tr></thead>
 <tbody>
@@ -575,10 +662,16 @@ def rendu(ctx, lang):
 </table>
 <p class="note">{t['note']}</p>
 
+<h2>{t['h_prono'].format(n=n)}</h2>
+<ul>{pronos}</ul>
+
 {bloc_creuses}
 
 <h2>{t['h_methode']}</h2>
 {methode}
+
+<h2>{e(titre_faq)}</h2>
+{faq}
 
 <footer>{t['pied']}</footer>
 </main>
@@ -657,6 +750,15 @@ def robots():
     return f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n"
 
 
+def numero_semaine(conn, monday):
+    """Semaine 1 = celle du premier match de la saison au calendrier."""
+    debut = conn.execute("SELECT MIN(game_date) FROM schedule").fetchone()[0]
+    if not debut:
+        return 1
+    premier = op.week_start(dt.date.fromisoformat(debut))
+    return max(1, (monday - premier).days // 7 + 1)
+
+
 def contexte(conn, today=None):
     """Rassemble ce dont les pages ont besoin. Indépendant de la langue."""
     today = today or dt.datetime.now(cm.TZ).date()
@@ -674,12 +776,15 @@ def contexte(conn, today=None):
     return {
         "maj": {g: fr_jour(today.isoformat(), g) for g in T},
         "semaine": {g: fr_date(monday, g) for g in T},
+        "numero": numero_semaine(conn, monday),
         "jour_match": {g: fr_jour(best.game_date, g) for g in T},
         "meilleur": {"team": best.team, "opponent": best.opponent,
                      "home": best.home, "p": best.p,
                      "game_date": best.game_date},
         "choix": [{"team": o.team, "opponent": o.opponent, "home": o.home,
-                   "p": o.p, "e": e} for o, e in alts],
+                   "p": o.p, "e": e,
+                   "jour": {g: fr_jour(o.game_date, g) for g in T}}
+                  for o, e in alts],
         "disettes": disettes[:5],
         "joueurs": joueurs(),
     }

@@ -6,11 +6,13 @@ import page
 CTX = {
     "maj": {"fr": "mercredi 30 septembre", "en": "Wednesday September 30"},
     "semaine": {"fr": "28 septembre", "en": "September 28"},
+    "numero": 1,
     "jour_match": {"fr": "samedi 3 octobre", "en": "Saturday October 3"},
     "meilleur": {"team": "COL", "opponent": "STL", "home": True, "p": 0.709,
                  "game_date": "2026-10-03"},
     "choix": [{"team": "COL", "opponent": "STL", "home": True, "p": 0.709,
-               "e": 2.337},
+               "e": 2.337,
+               "jour": {"fr": "samedi 3 octobre", "en": "Saturday October 3"}},
               {"team": "EDM", "opponent": "SEA", "home": True, "p": 0.678,
                "e": 2.300}],
     "disettes": [{"semaine": {"fr": "19 octobre", "en": "October 19"},
@@ -231,3 +233,39 @@ def test_le_sitemap_liste_les_quatre_pages():
     for _chemin, url in list(page.CHEMINS.values()) + list(page.CONFID.values()):
         assert f"<loc>{url}</loc>" in s
     assert s.count("<url>") == 4
+
+
+def test_le_numero_de_semaine_est_dans_le_titre():
+    """Pour sortir sur « pool survivor LNH semaine 2 »."""
+    assert "<title>Pool survivor LNH, semaine 1 :" in page.rendu(CTX, "fr")
+    assert "cheat sheet, week 1:" in page.rendu(CTX, "en")
+
+
+def test_chaque_match_a_sa_phrase_de_pronostic():
+    fr = page.rendu(CTX, "fr")
+    assert ("<b>Avalanche du Colorado</b> contre Blues de St. Louis "
+            "(samedi 3 octobre) — 70.9 % de probabilité de victoire.") in fr
+    # sans date connue, la phrase reste correcte, sans parenthèses vides
+    assert "<b>Oilers d&#x27;Edmonton</b> contre Kraken de Seattle — 67.8 %" in fr
+    assert "() " not in fr
+    assert "70.9% chance of winning." in page.rendu(CTX, "en")
+
+
+def test_la_faq_est_dans_les_deux_langues():
+    for lang in ("fr", "en"):
+        h = page.rendu(CTX, lang)
+        titre, questions = page.FAQ[lang]
+        assert len(questions) >= 5
+        for q, _r in questions:
+            assert f"<h3>{page._html.escape(q)}</h3>" in h
+
+
+def test_le_numero_part_du_premier_match_de_la_saison():
+    import sqlite3
+    conn = sqlite3.connect(":memory:")
+    conn.execute("CREATE TABLE schedule (game_date TEXT)")
+    assert page.numero_semaine(conn, dt.date(2026, 10, 5)) == 1   # vide
+    conn.execute("INSERT INTO schedule VALUES ('2026-09-29'), ('2026-10-10')")
+    assert page.numero_semaine(conn, dt.date(2026, 9, 28)) == 1
+    assert page.numero_semaine(conn, dt.date(2026, 10, 5)) == 2
+    assert page.numero_semaine(conn, dt.date(2026, 12, 28)) == 14
