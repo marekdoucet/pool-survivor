@@ -25,7 +25,7 @@ DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Lower Body
 DET,Carter Bear,LW,IR,Upper Body
 DET,Chase Stillman,RW,IR,Undisclosed
-DET,J.T. Compher,LW,Day-To-Day,Undisclosed
+DET,J.T. Compher,LW,Out,Undisclosed
 DET,Jacob Bernard-Docker,D,IR,Upper Body
 DET,Marco Kasper,C,IR,Upper Body
 DET,Mason Appleton,C,IR,Undisclosed
@@ -48,7 +48,7 @@ LAK,Jan Jenik,C,IR,Undisclosed
 LAK,Kevin Fiala,LW,IR,Lower Leg
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
-MIN,Nick Foligno,LW,Day-To-Day,Upper Body
+MIN,Nick Foligno,LW,Out,Upper Body
 NJD,Connor Brown,RW,Out,Lower Body
 NJD,Johnathan Kovacevic,D,IR,Knee
 NJD,Jonas Siegenthaler,D,Day-To-Day,Undisclosed
@@ -63,7 +63,7 @@ NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Lower Body
 OTT,Andre Burakovsky,LW,IR,Upper Body
 OTT,Artem Zub,D,IR,Knee
-OTT,Jake Sanderson,D,Day-To-Day,Lower Body
+OTT,Jake Sanderson,D,Out,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
 PHI,Helge Grans,D,IR,Lower Body
 PHI,Nikita Grebenkin,RW,IR,Upper Body
@@ -73,7 +73,7 @@ PIT,Justin Brazeau,RW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
 SEA,Jacob Melanson,RW,IR,Upper Body
 SEA,Jake O'Brien,C,IR,Lower Body
-SEA,Ryan Lindgren,D,Day-To-Day,Upper Body
+SEA,Ryan Lindgren,D,IR,Upper Body
 SJS,Adam Gaudette,RW,IR,Upper Body
 SJS,Alex Barre-Boulet,C,IR,Undisclosed
 SJS,Cam Lund,C,IR,Upper Body
@@ -93,7 +93,6 @@ TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,Max Domi,C,IR,Back
 TOR,William Villeneuve,D,IR,Knee
 UTA,Maveric Lamoureux,D,IR,Shoulder
-UTA,Mikhail Sergachev,D,Day-To-Day,Upper Body
 VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Filip Chytil,C,IR,Shoulder
 VAN,Jack Thompson,D,IR,Undisclosed
