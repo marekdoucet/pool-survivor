@@ -5,3 +5,4 @@ __pycache__/
 survivor.db
 *.db.tmp
 .streamlit/secrets.toml
+reveil-echec.png

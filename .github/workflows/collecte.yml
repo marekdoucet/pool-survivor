@@ -134,41 +134,36 @@ jobs:
           echo "::error::Trois tentatives de push échouées."
           exit 1
 
-      # Streamlit Cloud eteint l'application apres une periode sans visiteur.
-      # J'ai mesure le reveil a 182 secondes : un visiteur venu de Google voit
-      # une page blanche pendant trois minutes et repart. Quatre visites par
-      # jour suffisent pour qu'elle ne s'endorme jamais.
+      # Streamlit Cloud endort l'application apres environ 12 h sans visiteur,
+      # et le reveil a ete mesure a 182 secondes : un visiteur venu de Google
+      # voit une page blanche pendant trois minutes et repart.
       #
-      # Il faut refaire le trajet d'un vrai navigateur, pas taper l'URL :
+      # Un curl ne suffit PAS : il ne compte pas comme visiteur (il n'ouvre
+      # jamais la session qui fait tourner l'app), et quand l'app dort il
+      # recoit la page « Zzzz » avec un code 200. L'ancienne version par curl
+      # se croyait donc reussie pendant que l'app s'endormait. reveil.py
+      # ouvre l'app dans un vrai Chromium, clique « Yes, get this app back
+      # up! » au besoin et attend que la vraie page s'affiche.
       #
-      # - le bocal a cookies (-c -b) est indispensable. Streamlit repond 303
-      #   vers share.streamlit.io/-/auth/app, qui repose un cookie de session.
-      #   Sans le garder, curl rebondit entre les deux adresses jusqu'a
-      #   « Maximum (50) redirects followed » et n'atteint jamais l'app.
-      # - --max-time 300, parce qu'il faut attendre la FIN du reveil.
-      #   Abandonner apres dix secondes laisserait l'application endormie, ce
-      #   qui annulerait tout l'interet de l'etape.
-      #
-      # L'URL est lue dans page.py pour ne pas l'ecrire a deux endroits.
+      # Playwright est installe ici et pas dans requirements.txt : Streamlit
+      # Cloud installe requirements.txt et n'en a aucun besoin.
       #
       # continue-on-error : garder le site chaud ne doit jamais faire echouer
-      # une collecte de donnees. Mais ce reglage rend l'etape verte meme quand
-      # elle echoue — c'est ainsi que la premiere version, cassee, est passee
-      # inapercue. D'ou le ::warning:: explicite, visible dans le resume du run.
+      # une collecte de donnees. reveil.py emet un ::warning:: explicite en
+      # cas d'echec, et la capture d'ecran est jointe au run.
       - name: Garder l'application eveillee
+        id: reveil
         if: always()
         continue-on-error: true
         run: |
-          url=$(python -c "import page; print(page.APP)")
-          jar=$(mktemp)
-          echo "Reveil de $url"
-          code=$(curl -sL -c "$jar" -b "$jar" -o /dev/null \
-                      -w '%{http_code}' --max-redirs 10 --max-time 300 \
-                      "$url" || echo "000")
-          secondes=$SECONDS
-          if [ "$code" = "200" ]; then
-            echo "Application eveillee en ${secondes}s (HTTP $code)."
-          else
-            echo "::warning::Reveil echoue (HTTP $code apres ${secondes}s) : un visiteur venu de Google attendra environ trois minutes."
-            exit 1
-          fi
+          pip install -q playwright
+          python -m playwright install --with-deps chromium
+          python reveil.py
+
+      - name: Capture du reveil rate
+        if: always() && steps.reveil.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reveil-echec
+          path: reveil-echec.png
+          if-no-files-found: ignore
