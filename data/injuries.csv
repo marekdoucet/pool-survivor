@@ -38,14 +38,14 @@ EDM,Ryan Nugent-Hopkins,C,IR,Lower Body
 EDM,Zach Hyman,LW,Out,Undisclosed
 FLA,Aaron Ekblad,D,Day-To-Day,Personal
 FLA,Aleksander Barkov,C,IR,Lower Body
-FLA,Brad Marchand,LW,Day-To-Day,Leg
+FLA,Brad Marchand,LW,Out,Leg
 FLA,Jonah Gadjovich,LW,IR,Upper Body
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
 LAK,Kevin Fiala,LW,IR,Lower Leg
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
-MIN,Nick Foligno,LW,Out,Upper Body
+MIN,Nick Foligno,LW,IR,Upper Body
 MIN,Olli Maatta,D,Day-To-Day,Lower Body
 NJD,Connor Brown,RW,Out,Lower Body
 NJD,Johnathan Kovacevic,D,IR,Knee
@@ -67,7 +67,7 @@ OTT,Artem Zub,D,IR,Knee
 OTT,Cameron Crotty,D,Day-To-Day,Illness
 OTT,Jake Sanderson,D,Day-To-Day,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
-OTT,William Eklund,LW,Day-To-Day,Lower Body
+OTT,William Eklund,LW,Out,Ankle
 PHI,Helge Grans,D,IR,Lower Body
 PHI,Nikita Grebenkin,RW,IR,Upper Body
 PHI,Rasmus Ristolainen,D,Day-To-Day,Undisclosed
@@ -87,7 +87,6 @@ STL,Alexey Toropchenko,RW,IR,Upper Body
 STL,Felix Trudeau,LW,IR,Undisclosed
 STL,Logan Mailloux,D,IR,Hand
 STL,Tyler Tucker,D,IR,Knee
-TBL,Dominic James,C,IR,Hand
 TBL,Emil Lilleberg,D,Out,Undisclosed
 TBL,Yanni Gourde,C,IR,Hip
 TOR,Cade Webber,D,IR,Elbow
@@ -107,8 +106,8 @@ VGK,Victor Olofsson,LW,Out,Undisclosed
 WPG,Connor Hellebuyck,G,IR,Suspension
 WPG,Elias Salomonsson,D,IR,Shoulder
 WPG,Garrett Brown,C,IR,Lower Body
-WPG,Josh Morrissey,D,Day-To-Day,Upper Body
+WPG,Josh Morrissey,D,Out,Upper Body
 WPG,Walker Duehr,RW,IR,Lower Body
-WSH,Matt Roy,D,Day-To-Day,Lower Body
+WSH,Matt Roy,D,Out,Lower Body
 WSH,Patrick Thomas,C,IR,Upper Body
 WSH,Rasmus Sandin,D,IR,Knee
