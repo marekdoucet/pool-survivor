@@ -8,12 +8,12 @@ BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Jason Zucker,LW,IR,Abdomen
 BUF,Topias Leinonen,G,IR,Lower Body
-CAR,Alexander Nikishin,D,Out,Contract Dispute
+CAR,Alexander Nikishin,D,Day-To-Day,Contract Dispute
 CAR,Seth Jarvis,C,IR,Shoulder
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CHI,Andrew Mangiapane,LW,IR,Lower Body
 CHI,Connor Bedard,C,IR,Shoulder
-CHI,Teuvo Teravainen,C,Out,Undisclosed
+CHI,Teuvo Teravainen,C,Day-To-Day,Undisclosed
 COL,Georgii Merkulov,C,IR,Undisclosed
 COL,Logan O'Connor,RW,IR,Lower Body
 COL,Trent Miner,G,IR,Undisclosed
@@ -46,7 +46,7 @@ LAK,Kevin Fiala,LW,IR,Lower Leg
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Nick Foligno,LW,Out,Upper Body
-MIN,Olli Maatta,D,Out,Lower Body
+MIN,Olli Maatta,D,Day-To-Day,Lower Body
 NJD,Connor Brown,RW,Out,Lower Body
 NJD,Johnathan Kovacevic,D,IR,Knee
 NJD,Jonas Siegenthaler,D,Day-To-Day,Undisclosed
@@ -64,13 +64,13 @@ NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Lower Body
 OTT,Andre Burakovsky,LW,IR,Upper Body
 OTT,Artem Zub,D,IR,Knee
-OTT,Cameron Crotty,D,Out,Illness
-OTT,Jake Sanderson,D,Out,Lower Body
+OTT,Cameron Crotty,D,Day-To-Day,Illness
+OTT,Jake Sanderson,D,Day-To-Day,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
 OTT,William Eklund,LW,Day-To-Day,Lower Body
 PHI,Helge Grans,D,IR,Lower Body
 PHI,Nikita Grebenkin,RW,IR,Upper Body
-PHI,Rasmus Ristolainen,D,Out,Undisclosed
+PHI,Rasmus Ristolainen,D,Day-To-Day,Undisclosed
 PIT,Andrei Kuzmenko,LW,IR,Personal
 PIT,Justin Brazeau,RW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
@@ -81,7 +81,7 @@ SJS,Adam Gaudette,RW,IR,Upper Body
 SJS,Alex Barre-Boulet,C,IR,Undisclosed
 SJS,Cam Lund,C,IR,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
-SJS,Macklin Celebrini,C,Out,Lower Body
+SJS,Macklin Celebrini,C,Day-To-Day,Lower Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,Alexey Toropchenko,RW,IR,Upper Body
 STL,Felix Trudeau,LW,IR,Undisclosed
@@ -94,6 +94,7 @@ TOR,Cade Webber,D,IR,Elbow
 TOR,Dakota Joshua,C,IR,Abdomen
 TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,Max Domi,C,IR,Back
+TOR,Oliver Ekman-Larsson,D,Day-To-Day,Undisclosed
 TOR,William Villeneuve,D,IR,Knee
 UTA,Maveric Lamoureux,D,IR,Shoulder
 VAN,Akil Thomas,C,IR,Undisclosed
