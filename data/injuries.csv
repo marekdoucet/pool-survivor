@@ -7,7 +7,6 @@ BUF,Alex Lyon,G,IR,Upper Body
 BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Jason Zucker,LW,IR,Abdomen
-BUF,Josh Doan,RW,Day-To-Day,Lower Body
 BUF,Topias Leinonen,G,IR,Lower Body
 CAR,Alexander Nikishin,D,Out,Contract Dispute
 CAR,Seth Jarvis,C,IR,Shoulder
@@ -47,6 +46,7 @@ LAK,Kevin Fiala,LW,IR,Lower Leg
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Nick Foligno,LW,Out,Upper Body
+MIN,Olli Maatta,D,Out,Lower Body
 NJD,Connor Brown,RW,Out,Lower Body
 NJD,Johnathan Kovacevic,D,IR,Knee
 NJD,Jonas Siegenthaler,D,Day-To-Day,Undisclosed
@@ -61,11 +61,12 @@ NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Lower Body
 OTT,Andre Burakovsky,LW,IR,Upper Body
 OTT,Artem Zub,D,IR,Knee
+OTT,Cameron Crotty,D,Out,Illness
 OTT,Jake Sanderson,D,Out,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
 PHI,Helge Grans,D,IR,Lower Body
 PHI,Nikita Grebenkin,RW,IR,Upper Body
-PHI,Rasmus Ristolainen,D,Day-To-Day,Undisclosed
+PHI,Rasmus Ristolainen,D,Out,Undisclosed
 PIT,Andrei Kuzmenko,LW,IR,Personal
 PIT,Justin Brazeau,RW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
@@ -97,8 +98,7 @@ VAN,Jack Thompson,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
 VGK,Lukas Cormier,D,IR,Undisclosed
-VGK,Raphael Lavoie,C,Day-To-Day,Undisclosed
-VGK,Victor Olofsson,LW,Day-To-Day,Undisclosed
+VGK,Victor Olofsson,LW,Out,Undisclosed
 WPG,Connor Hellebuyck,G,IR,Suspension
 WPG,Elias Salomonsson,D,IR,Shoulder
 WPG,Garrett Brown,C,IR,Lower Body
