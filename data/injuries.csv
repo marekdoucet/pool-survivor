@@ -14,7 +14,6 @@ CGY,Jonathan Huberdeau,LW,IR,Hip
 CHI,Andrew Mangiapane,LW,IR,Lower Body
 CHI,Connor Bedard,C,IR,Shoulder
 CHI,Frank Nazar,C,Suspension,Suspension
-CHI,Teuvo Teravainen,C,Day-To-Day,Undisclosed
 COL,Georgii Merkulov,C,IR,Undisclosed
 COL,Logan O'Connor,RW,IR,Lower Body
 COL,Trent Miner,G,IR,Undisclosed
@@ -56,7 +55,6 @@ NJD,Seamus Casey,D,IR,Knee
 NSH,Justus Annunen,G,IR,Undisclosed
 NSH,Mavrik Bourque,C,Day-To-Day,Upper Body
 NYI,Alexander Romanov,D,Out,Knee
-NYI,Bo Horvat,C,Day-To-Day,Upper Body
 NYI,Mathew Barzal,C,IR,Knee
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
@@ -69,6 +67,7 @@ OTT,Cameron Crotty,D,Day-To-Day,Illness
 OTT,Jake Sanderson,D,Day-To-Day,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
 OTT,William Eklund,LW,IR,Ankle
+PHI,Cam York,D,Out,Upper Body
 PHI,Helge Grans,D,IR,Lower Body
 PHI,Nikita Grebenkin,RW,IR,Upper Body
 PHI,Rasmus Ristolainen,D,Day-To-Day,Undisclosed
@@ -115,4 +114,5 @@ WPG,Josh Morrissey,D,Day-To-Day,Upper Body
 WPG,Walker Duehr,RW,IR,Lower Body
 WSH,Matt Roy,D,Day-To-Day,Lower Body
 WSH,Patrick Thomas,C,IR,Upper Body
+WSH,Pierre-Luc Dubois,LW,Day-To-Day,Illness
 WSH,Rasmus Sandin,D,IR,Knee
