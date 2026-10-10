@@ -11,12 +11,12 @@ BUF,Topias Leinonen,G,IR,Lower Body
 CAR,Alexander Nikishin,D,Out,Contract Dispute
 CAR,Seth Jarvis,C,IR,Shoulder
 CGY,Jonathan Huberdeau,LW,IR,Hip
+CGY,Samuel Honzek,LW,Out,Undisclosed
 CHI,Andrew Mangiapane,LW,IR,Lower Body
 CHI,Connor Bedard,C,IR,Shoulder
 CHI,Frank Nazar,C,Suspension,Suspension
 COL,Georgii Merkulov,C,IR,Undisclosed
 COL,Logan O'Connor,RW,IR,Lower Body
-COL,Trent Miner,G,IR,Undisclosed
 DAL,Cameron Hughes,C,IR,Upper Body
 DAL,Harrison Scott,C,IR,Undisclosed
 DAL,Joel Kiviranta,LW,Out,Lower Body
@@ -30,6 +30,7 @@ EDM,Alec Regula,D,IR,Undisclosed
 EDM,Atro Leppanen,D,IR,Undisclosed
 EDM,Colton Dach,C,IR,Undisclosed
 EDM,Frederik Andersen,G,IR,Knee
+EDM,Jake Walman,D,Out,Upper Body
 EDM,James Stefan,RW,IR,Undisclosed
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
@@ -38,54 +39,50 @@ EDM,Zach Hyman,LW,Out,Undisclosed
 FLA,Aleksander Barkov,C,IR,Lower Body
 FLA,Brad Marchand,LW,Out,Leg
 FLA,Jonah Gadjovich,LW,IR,Upper Body
-LAK,Alex Turcotte,C,Day-To-Day,Undisclosed
+LAK,Alex Turcotte,C,IR,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
 LAK,Kevin Fiala,LW,IR,Lower Leg
-LAK,Mats Zuccarello,RW,Out,Undisclosed
+LAK,Mats Zuccarello,RW,IR,Undisclosed
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
+MIN,Marcus Foligno,LW,Out,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
-MIN,Olli Maatta,D,Day-To-Day,Lower Body
+MIN,Zach Bogosian,D,Out,Lower Body
 NJD,Connor Brown,RW,Out,Lower Body
-NJD,Johnathan Kovacevic,D,IR,Knee
-NJD,Jonas Siegenthaler,D,Day-To-Day,Undisclosed
 NJD,Nick Bjugstad,C,IR,Pectoral
 NJD,Seamus Casey,D,IR,Knee
 NSH,Justus Annunen,G,IR,Undisclosed
-NSH,Mavrik Bourque,C,Day-To-Day,Upper Body
+NSH,Mavrik Bourque,C,Out,Upper Body
 NYI,Alexander Romanov,D,Out,Knee
 NYI,Mathew Barzal,C,IR,Knee
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
-NYR,Igor Shesterkin,G,Day-To-Day,Lower Body
+NYR,Igor Shesterkin,G,IR,Lower Body
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Lower Body
-NYR,Spencer Martin,G,Out,Lower Body
 OTT,Artem Zub,D,IR,Knee
 OTT,Cameron Crotty,D,Day-To-Day,Illness
 OTT,Jake Sanderson,D,Day-To-Day,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
 OTT,William Eklund,LW,IR,Ankle
 PHI,Cam York,D,Out,Upper Body
-PHI,Helge Grans,D,IR,Lower Body
-PHI,Nikita Grebenkin,RW,IR,Upper Body
-PHI,Rasmus Ristolainen,D,Day-To-Day,Undisclosed
+PHI,Nikita Grebenkin,RW,IR,Back
+PHI,Rasmus Ristolainen,D,IR,Upper Body
+PHI,Travis Konecny,RW,Out,Lower Body
 PIT,Andrei Kuzmenko,LW,IR,Personal
 PIT,Justin Brazeau,RW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
-SEA,Jacob Melanson,RW,IR,Upper Body
+PIT,Trevor van Riemsdyk,D,Out,Lower Body
+SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Ryan Lindgren,D,IR,Upper Body
-SJS,Adam Gaudette,RW,IR,Upper Body
 SJS,Alex Barre-Boulet,C,IR,Undisclosed
 SJS,Cam Lund,C,IR,Upper Body
-SJS,Kiefer Sherwood,LW,Day-To-Day,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
-SJS,Macklin Celebrini,C,Day-To-Day,Lower Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,Alexey Toropchenko,RW,IR,Upper Body
-STL,Dillon Dube,C,Out,Neck
+STL,Dillon Dube,C,IR,Neck
 STL,Felix Trudeau,LW,IR,Undisclosed
 STL,Logan Mailloux,D,IR,Hand
 STL,Tyler Tucker,D,IR,Knee
@@ -96,10 +93,9 @@ TOR,Dakota Joshua,C,IR,Abdomen
 TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,John Tavares,C,Out,Personal
 TOR,Max Domi,C,IR,Back
-TOR,Oliver Ekman-Larsson,D,Day-To-Day,Undisclosed
 TOR,William Villeneuve,D,IR,Knee
 UTA,Maveric Lamoureux,D,IR,Shoulder
-UTA,Michael Carcone,LW,Day-To-Day,Undisclosed
+UTA,Michael Carcone,LW,Out,Upper Body
 VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Filip Chytil,C,IR,Shoulder
 VAN,Jack Thompson,D,IR,Undisclosed
