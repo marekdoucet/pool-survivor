@@ -1,7 +1,5 @@
 game_date,away,home,team,goalie,status,updated
-2026-10-12,FLA,BUF,BUF,Colten Ellis,Expected,"Oct 12, 4:22 AM"
-2026-10-12,FLA,BUF,FLA,Jacob Markstrom,Expected,"Oct 12, 4:22 AM"
-2026-10-12,OTT,NJD,NJD,Jake Allen,Expected,"Oct 12, 4:22 AM"
-2026-10-12,OTT,NJD,OTT,Linus Ullmark,Expected,"Oct 12, 4:22 AM"
-2026-10-12,VGK,MIN,MIN,Jesper Wallstedt,Expected,"Oct 12, 4:22 AM"
-2026-10-12,VGK,MIN,VGK,Carter Hart,Expected,"Oct 12, 4:22 AM"
+2026-10-12,OTT,NJD,NJD,Nico Daws,Confirmed,"Oct 12, 3:22 PM"
+2026-10-12,OTT,NJD,OTT,Linus Ullmark,Confirmed,"Oct 12, 3:22 PM"
+2026-10-12,VGK,MIN,MIN,Jesper Wallstedt,Confirmed,"Oct 12, 3:22 PM"
+2026-10-12,VGK,MIN,VGK,Carter Hart,Expected,"Oct 12, 3:22 PM"

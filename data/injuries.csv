@@ -8,6 +8,7 @@ BUF,Alex Lyon,G,IR,Upper Body
 BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Jason Zucker,LW,IR,Abdomen
+BUF,Rasmus Dahlin,D,Out,Upper Body
 BUF,Topias Leinonen,G,IR,Lower Body
 CAR,Alexander Nikishin,D,Out,Contract Dispute
 CAR,Jordan Staal,C,Day-To-Day,Lower Body
@@ -74,7 +75,7 @@ PHI,Travis Konecny,RW,IR,Lower Body
 PIT,Andrei Kuzmenko,LW,IR,Personal
 PIT,Justin Brazeau,RW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
-PIT,Trevor van Riemsdyk,D,Out,Lower Body
+PIT,Trevor van Riemsdyk,D,IR,Lower Body
 SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Ryan Lindgren,D,IR,Upper Body
@@ -93,7 +94,6 @@ TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
 TOR,Dakota Joshua,C,IR,Abdomen
 TOR,Elvis Merzlikins,G,IR,Shoulder
-TOR,John Tavares,C,Day-To-Day,Personal
 TOR,Max Domi,C,IR,Back
 TOR,William Villeneuve,D,IR,Knee
 UTA,Maveric Lamoureux,D,IR,Shoulder
