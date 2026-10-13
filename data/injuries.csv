@@ -8,15 +8,17 @@ BUF,Alex Lyon,G,IR,Upper Body
 BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Jason Zucker,LW,IR,Abdomen
+BUF,Matt Grzelcyk,D,IR,Undisclosed
 BUF,Rasmus Dahlin,D,Out,Upper Body
 BUF,Topias Leinonen,G,IR,Lower Body
 CAR,Alexander Nikishin,D,Out,Contract Dispute
-CAR,Jordan Staal,C,Day-To-Day,Lower Body
+CAR,Jordan Staal,C,Out,Calf
 CAR,Seth Jarvis,C,IR,Shoulder
+CBJ,Conor Garland,RW,Day-To-Day,Illness
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Samuel Honzek,LW,Out,Lower Body
 CHI,Andrew Mangiapane,LW,IR,Lower Body
-CHI,Connor Bedard,C,IR,Shoulder
+CHI,Connor Bedard,C,IR,"Bedard (shoulder) might be available for Tuesday's tilt versus the Penguins, Ben Pope of the Chicago Sun-Times reports."
 CHI,Frank Nazar,C,Suspension,Suspension
 COL,Georgii Merkulov,C,IR,Undisclosed
 COL,Logan O'Connor,RW,IR,Lower Body
@@ -50,7 +52,7 @@ MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
-MIN,Nico Sturm,C,Out,Upper Body
+MIN,Nico Sturm,C,Day-To-Day,Upper Body
 NJD,Connor Brown,RW,IR,Lower Body
 NJD,Nick Bjugstad,C,IR,Pectoral
 NJD,Seamus Casey,D,IR,Knee
@@ -67,7 +69,7 @@ OTT,Artem Zub,D,IR,Knee
 OTT,Cameron Crotty,D,IR,Illness
 OTT,Jake Sanderson,D,Out,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
-OTT,Nikolas Matinpalo,D,Out,Upper Body
+OTT,Nikolas Matinpalo,D,Day-To-Day,Upper Body
 OTT,William Eklund,LW,IR,Ankle
 PHI,Cam York,D,Day-To-Day,Upper Body
 PHI,Nikita Grebenkin,RW,IR,Back
@@ -91,7 +93,7 @@ STL,Felix Trudeau,LW,IR,Undisclosed
 STL,Logan Mailloux,D,IR,Hand
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Emil Lilleberg,D,Day-To-Day,Undisclosed
+TBL,Dennis Hildeby,G,Day-To-Day,Undisclosed
 TBL,Yanni Gourde,C,IR,Hip
 TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
