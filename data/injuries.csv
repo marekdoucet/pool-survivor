@@ -39,7 +39,7 @@ EDM,Mattias Janmark,C,IR,Undisclosed
 EDM,Ryan Nugent-Hopkins,C,IR,Lower Body
 EDM,Zach Hyman,LW,Day-To-Day,Undisclosed
 FLA,Aleksander Barkov,C,IR,Lower Body
-FLA,Brad Marchand,LW,Out,Leg
+FLA,Brad Marchand,LW,IR,Leg
 FLA,Jonah Gadjovich,LW,IR,Upper Body
 LAK,Alex Turcotte,C,IR,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
@@ -48,10 +48,10 @@ LAK,Kevin Fiala,LW,IR,Lower Leg
 LAK,Mats Zuccarello,RW,IR,Undisclosed
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
-MIN,Marcus Foligno,LW,Out,Lower Body
+MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
+MIN,Nico Sturm,C,Out,Upper Body
 NJD,Connor Brown,RW,IR,Lower Body
-NJD,Luke Evangelista,RW,Day-To-Day,Illness
 NJD,Nick Bjugstad,C,IR,Pectoral
 NJD,Seamus Casey,D,IR,Knee
 NSH,Justus Annunen,G,IR,Undisclosed
@@ -67,6 +67,7 @@ OTT,Artem Zub,D,IR,Knee
 OTT,Cameron Crotty,D,IR,Illness
 OTT,Jake Sanderson,D,Out,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
+OTT,Nikolas Matinpalo,D,Out,Upper Body
 OTT,William Eklund,LW,IR,Ankle
 PHI,Cam York,D,Day-To-Day,Upper Body
 PHI,Nikita Grebenkin,RW,IR,Back
@@ -88,6 +89,7 @@ STL,Alexey Toropchenko,RW,IR,Upper Body
 STL,Dillon Dube,C,IR,Neck
 STL,Felix Trudeau,LW,IR,Undisclosed
 STL,Logan Mailloux,D,IR,Hand
+STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Emil Lilleberg,D,Day-To-Day,Undisclosed
 TBL,Yanni Gourde,C,IR,Hip
@@ -105,6 +107,7 @@ VAN,Jack Thompson,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
 VGK,Lukas Cormier,D,IR,Undisclosed
+VGK,Parker Wotherspoon,D,Out,Upper Body
 WPG,Connor Hellebuyck,G,IR,Suspension
 WPG,Elias Salomonsson,D,IR,Shoulder
 WPG,Garrett Brown,C,IR,Lower Body
