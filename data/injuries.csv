@@ -7,13 +7,12 @@ BUF,Alex Lyon,G,IR,Upper Body
 BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Jason Zucker,LW,IR,Abdomen
-BUF,Matt Grzelcyk,D,IR,Undisclosed
+BUF,Matt Grzelcyk,D,IR,Lower Body
 BUF,Rasmus Dahlin,D,Out,Upper Body
 BUF,Topias Leinonen,G,IR,Lower Body
 CAR,Alexander Nikishin,D,Out,Contract Dispute
 CAR,Jordan Staal,C,Out,Calf
 CAR,Seth Jarvis,C,IR,Shoulder
-CBJ,Conor Garland,RW,Day-To-Day,Illness
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Samuel Honzek,LW,Out,Lower Body
 CHI,Andrew Mangiapane,LW,IR,Lower Body
@@ -41,7 +40,9 @@ EDM,Ryan Nugent-Hopkins,C,IR,Lower Body
 EDM,Zach Hyman,LW,Out,Undisclosed
 FLA,Aleksander Barkov,C,IR,Lower Body
 FLA,Brad Marchand,LW,IR,Leg
+FLA,Jacob Markstrom,G,Out,Undisclosed
 FLA,Jonah Gadjovich,LW,IR,Upper Body
+FLA,Radko Gudas,D,Out,Undisclosed
 LAK,Alex Turcotte,C,IR,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
@@ -53,6 +54,7 @@ MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
 MIN,Nico Sturm,C,IR,Upper Body
 NJD,Connor Brown,RW,IR,Lower Body
+NJD,Luke Evangelista,RW,Out,Illness
 NJD,Nick Bjugstad,C,IR,Pectoral
 NJD,Seamus Casey,D,IR,Knee
 NYI,Alexander Romanov,D,Out,Knee
@@ -66,9 +68,9 @@ OTT,Artem Zub,D,IR,Knee
 OTT,Cameron Crotty,D,IR,Illness
 OTT,Jake Sanderson,D,Out,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
-OTT,Nikolas Matinpalo,D,Day-To-Day,Upper Body
+OTT,Nikolas Matinpalo,D,Out,Upper Body
 OTT,William Eklund,LW,IR,Ankle
-PHI,Cam York,D,Day-To-Day,Upper Body
+PHI,Cam York,D,Out,Upper Body
 PHI,Nikita Grebenkin,RW,IR,Back
 PHI,Rasmus Ristolainen,D,IR,Upper Body
 PHI,Travis Konecny,RW,IR,Lower Body
@@ -79,7 +81,6 @@ SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Ryan Lindgren,D,IR,Upper Body
 SJS,Alex Barre-Boulet,C,IR,Undisclosed
-SJS,Barclay Goodrow,C,Day-To-Day,Illness
 SJS,Cam Lund,C,IR,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
@@ -89,7 +90,7 @@ STL,Felix Trudeau,LW,IR,Undisclosed
 STL,Logan Mailloux,D,IR,Hand
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Dennis Hildeby,G,Day-To-Day,Undisclosed
+TBL,Dennis Hildeby,G,Out,Undisclosed
 TBL,Yanni Gourde,C,IR,Hip
 TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
