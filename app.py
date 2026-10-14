@@ -2046,7 +2046,7 @@ st.navigation({
         st.Page(page_evolution, title=tr("Évolution des probabilités",
                                          "Probability trends"),
                 icon=":material/show_chart:", url_path="evolution"),
-        st.Page(page_forme, title=tr("Équipes en forme", "Teams in form"),
+        st.Page(page_forme, title=tr("Équipes en forme", "Teams on fire"),
                 icon=":material/trending_up:", url_path="forme"),
     ],
     tr("Fiabilité", "Reliability"): [
