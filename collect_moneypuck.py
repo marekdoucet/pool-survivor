@@ -111,6 +111,45 @@ def init_db(conn):
     conn.execute("CREATE INDEX IF NOT EXISTS idx_probs_game ON probs (game_date, away, home)")
 
 
+def commences(conn, maintenant=None):
+    """{(game_date, away, home)} des matchs déjà commencés, d'après le calendrier."""
+    import schedule as sch      # ici et pas en tête : schedule importe ce module
+    sch.init_db(conn)
+    maintenant = maintenant or dt.datetime.now(dt.timezone.utc)
+    limite = maintenant.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return set(conn.execute(
+        "SELECT game_date, away, home FROM schedule WHERE start_utc <= ?", (limite,)))
+
+
+def ecrire_probs(conn, snapshot, source, lignes, remplacer=False, game_date=None,
+                 maintenant=None):
+    """Écrit lignes = [(collected_at, game_date, away, home, p_away, p_home)].
+
+    remplacer=True efface d'abord les lignes de `source` dans l'instantané
+    (seulement celles de `game_date` si donné) : un match retiré n'y reste pas.
+    Sinon, ajoute ou remplace match par match.
+
+    Jamais pour un match déjà commencé : passé le coup d'envoi, les sources
+    donnent des probabilités EN DIRECT (0 ou 100 % une fois le match fini).
+    Les écrire effaçait la dernière prédiction d'avant-match — celle que juge
+    « Précision des sources » et que tracent les courbes. Un match commencé
+    garde donc ce qu'il avait, et n'est pas ajouté s'il n'avait rien.
+    """
+    partis = commences(conn, maintenant)
+    gardees = []
+    if remplacer:
+        filtre, args = "snapshot=? AND source=?", [snapshot, source]
+        if game_date:
+            filtre, args = filtre + " AND game_date=?", args + [game_date]
+        gardees = [r for r in conn.execute(f"SELECT * FROM probs WHERE {filtre}", args)
+                   if (r[2], r[3], r[4]) in partis]
+        conn.execute(f"DELETE FROM probs WHERE {filtre}", args)
+    conn.executemany(
+        "INSERT OR REPLACE INTO probs VALUES (?,?,?,?,?,?,?,?)",
+        gardees + [(snapshot, ca, g, a, h, pa, ph, source)
+                   for ca, g, a, h, pa, ph in lignes if (g, a, h) not in partis])
+
+
 def save_day(conn, snapshot, collected_at, day, games, source=SOURCE):
     """Remplace l'instantané du jour pour cette date de match.
 
@@ -118,15 +157,10 @@ def save_day(conn, snapshot, collected_at, day, games, source=SOURCE):
     ne reste pas dans l'instantané.
     """
     with conn:
-        conn.execute(
-            "DELETE FROM probs WHERE snapshot=? AND game_date=? AND source=?",
-            (snapshot, day.isoformat(), source),
-        )
-        conn.executemany(
-            "INSERT INTO probs VALUES (?,?,?,?,?,?,?,?)",
-            [(snapshot, collected_at, day.isoformat(), a, h, pa, ph, source)
-             for a, h, pa, ph in games],
-        )
+        ecrire_probs(conn, snapshot, source,
+                     [(collected_at, day.isoformat(), a, h, pa, ph)
+                      for a, h, pa, ph in games],
+                     remplacer=True, game_date=day.isoformat())
 
 
 def collect(n_days=49, db_path=DB_PATH, today=None, session=None, pause=0.5):

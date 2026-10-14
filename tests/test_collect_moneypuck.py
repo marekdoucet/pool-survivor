@@ -123,3 +123,62 @@ def test_network_error_keeps_previous_snapshot(tmp_path, monkeypatch):
     assert errors == [d0]
     n = sqlite3.connect(db).execute("SELECT COUNT(*) FROM probs").fetchone()[0]
     assert n == 3
+
+
+# ── Matchs commencés : on garde la prédiction d'avant-match ───────────────
+
+def _base_avec_match(depart="2026-10-13T23:00:00Z"):
+    """STL @ OTT le 13 octobre, coup d'envoi à 19 h (heure de l'Est)."""
+    conn = sqlite3.connect(":memory:")
+    cm.init_db(conn)
+    import schedule as sch
+    sch.init_db(conn)
+    conn.execute("INSERT INTO schedule (game_id, game_date, start_utc, away, home) "
+                 "VALUES (1, '2026-10-13', ?, 'STL', 'OTT')", (depart,))
+    conn.execute("INSERT INTO schedule (game_id, game_date, start_utc, away, home) "
+                 "VALUES (2, '2026-10-14', '2026-10-14T23:00:00Z', 'BOS', 'MTL')")
+    return conn
+
+
+def _proba(conn, source="moneypuck"):
+    return dict(((a, h), pa) for a, h, pa in conn.execute(
+        "SELECT away, home, p_away FROM probs WHERE source=?", (source,)))
+
+
+MATIN = dt.datetime(2026, 10, 13, 12, 23, tzinfo=dt.timezone.utc)
+SOIR = dt.datetime(2026, 10, 14, 2, 0, tzinfo=dt.timezone.utc)   # 22 h, match fini
+
+
+def test_un_match_commence_garde_sa_prediction_davant_match():
+    """Le bogue du 13 octobre : la collecte de 22 h écrivait 100 % pour
+    STL @ OTT, déjà joué, à la place des 48 % du matin."""
+    conn = _base_avec_match()
+    lignes = lambda ca, p: [(ca, "2026-10-13", "STL", "OTT", p, 1 - p),
+                            (ca, "2026-10-14", "BOS", "MTL", 0.45, 0.55)]
+    cm.ecrire_probs(conn, "2026-10-13", "moneypuck", lignes("matin", 0.48),
+                    remplacer=True, maintenant=MATIN)
+    cm.ecrire_probs(conn, "2026-10-13", "moneypuck", lignes("soir", 1.0),
+                    remplacer=True, maintenant=SOIR)
+    assert _proba(conn)[("STL", "OTT")] == 0.48
+    assert _proba(conn)[("BOS", "MTL")] == 0.45        # match à venir : mis à jour
+
+
+def test_un_match_commence_nest_pas_ajoute_sil_navait_rien():
+    """Première collecte du jour après le coup d'envoi : pas de valeur en
+    direct non plus. L'avant-match se lira alors dans l'instantané de la veille."""
+    conn = _base_avec_match()
+    cm.ecrire_probs(conn, "2026-10-13", "kalshi",
+                    [("soir", "2026-10-13", "STL", "OTT", 0.995, 0.005)],
+                    maintenant=SOIR)
+    assert ("STL", "OTT") not in _proba(conn, "kalshi")
+
+
+def test_un_match_a_venir_retire_disparait_toujours():
+    """remplacer=True efface toujours ce qui n'est plus dans la collecte, sauf
+    les matchs commencés."""
+    conn = _base_avec_match()
+    cm.ecrire_probs(conn, "2026-10-13", "market",
+                    [("matin", "2026-10-14", "BOS", "MTL", 0.45, 0.55)],
+                    remplacer=True, maintenant=MATIN)
+    cm.ecrire_probs(conn, "2026-10-13", "market", [], remplacer=True, maintenant=MATIN)
+    assert _proba(conn, "market") == {}

@@ -85,11 +85,9 @@ def collect_dimers(db_path=cm.DB_PATH, today=None, session=None, now=None):
     conn = sqlite3.connect(db_path)
     cm.init_db(conn)
     with conn:
-        conn.executemany(
-            "INSERT OR REPLACE INTO probs VALUES (?,?,?,?,?,?,?,?)",
-            [(snapshot, collected_at, g, a, h, round(pa, 4), round(ph, 4), SOURCE)
-             for (g, a, h), (pa, ph) in games.items()],
-        )
+        cm.ecrire_probs(conn, snapshot, SOURCE,
+                        [(collected_at, g, a, h, round(pa, 4), round(ph, 4))
+                         for (g, a, h), (pa, ph) in games.items()])
     conn.close()
     return games
 

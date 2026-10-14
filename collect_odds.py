@@ -160,12 +160,9 @@ def init_db(conn):
 
 def replace_source(conn, snapshot, source, rows, collected_at):
     """rows : {(game_date, away, home): (p_away, p_home)}"""
-    conn.execute("DELETE FROM probs WHERE snapshot=? AND source=?", (snapshot, source))
-    conn.executemany(
-        "INSERT INTO probs VALUES (?,?,?,?,?,?,?,?)",
-        [(snapshot, collected_at, g, a, h, round(pa, 4), round(ph, 4), source)
-         for (g, a, h), (pa, ph) in rows.items()],
-    )
+    cm.ecrire_probs(conn, snapshot, source,
+                    [(collected_at, g, a, h, round(pa, 4), round(ph, 4))
+                     for (g, a, h), (pa, ph) in rows.items()], remplacer=True)
 
 
 def save_odds(conn, snapshot, collected_at, rows):

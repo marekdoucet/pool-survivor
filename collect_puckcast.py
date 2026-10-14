@@ -245,12 +245,9 @@ def collect_puckcast(db_path=cm.DB_PATH, today=None, session=None):
             conn.execute("DELETE FROM goalies")
             conn.executemany("INSERT OR REPLACE INTO goalies VALUES (?,?,?,?,?,?,?)",
                              gardiens)
-        conn.execute("DELETE FROM probs WHERE snapshot=? AND source=?",
-                     (today.isoformat(), SOURCE))
-        conn.executemany(
-            "INSERT INTO probs VALUES (?,?,?,?,?,?,?,?)",
-            [(today.isoformat(), collected_at, g, a, h, round(pa, 4), round(ph, 4), SOURCE)
-             for (g, a, h), (pa, ph) in probs.items()])
+        cm.ecrire_probs(conn, today.isoformat(), SOURCE,
+                        [(collected_at, g, a, h, round(pa, 4), round(ph, 4))
+                         for (g, a, h), (pa, ph) in probs.items()], remplacer=True)
     conn.close()
     return probs
 
