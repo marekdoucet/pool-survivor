@@ -821,6 +821,10 @@ def page_pick():
                                + (f" · mis à jour {maj}" if maj else "")
                                + ". « Attendu » n'est pas une certitude : le "
                                  "titulaire se confirme en général le jour du match.")
+                else:
+                    # Puckcast ne publie les gardiens que le jour du match.
+                    st.markdown(f"**Gardiens** : annoncés le jour du match "
+                                f"({fr_day(cible.game_date)}).")
                 if bl:
                     st.markdown("**Blessures**")
                 for equipe in (cible.team, cible.opponent) if bl else ():

@@ -98,3 +98,19 @@ def test_le_panneau_blessures_saffiche_vraiment():
     assert not app.exception, "\n".join(str(e.value) for e in app.exception)
     titres = [m.value for m in app.markdown if "Avant le match ·" in m.value]
     assert titres, "le panneau « Avant le match » ne s'est pas affiché"
+
+
+def test_sans_gardiens_le_panneau_dit_quand_ils_arrivent():
+    """Puckcast n'annonce les gardiens que le jour du match : avant, le panneau
+    n'en disait rien et on croyait la section cassée."""
+    import pytest
+    from streamlit.testing.v1 import AppTest
+
+    if not (APP.parent / "data" / "injuries.csv").exists():
+        pytest.skip("pas encore de data/injuries.csv")
+
+    app = AppTest.from_file(str(APP), default_timeout=300)
+    app.run()
+    assert not app.exception, "\n".join(str(e.value) for e in app.exception)
+    textes = [m.value for m in app.markdown]
+    assert any(t.startswith("**Gardiens**") for t in textes)
