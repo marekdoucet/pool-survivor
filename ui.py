@@ -13,33 +13,31 @@ import html
 import altair as alt
 import streamlit as st
 
+import page
+
 # Logos officiels de la LNH, en SVG (nets à n'importe quelle taille).
 # « dark » = variante conçue POUR un fond sombre (sur les logos noirs, le noir
 # y devient la couleur claire : BOS passe au or) ; « light » pour fond clair.
 LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/{tri}_{mode}.svg"
 
-POSITIONS = {"C": "Centre", "L": "Ailier gauche", "R": "Ailier droit",
-             "D": "Défenseur", "G": "Gardien"}
+# Noms d'équipes et postes : les mêmes tables que la vitrine, en français
+# (convention des médias d'ici, « Avalanche du Colorado ») et en anglais.
+TEAMS = page.TEAMS["fr"]
 
-# Noms français, convention des médias d'ici (« Avalanche du Colorado »).
-TEAMS = {
-    "ANA": "Ducks d'Anaheim",          "BOS": "Bruins de Boston",
-    "BUF": "Sabres de Buffalo",        "CAR": "Hurricanes de la Caroline",
-    "CBJ": "Blue Jackets de Columbus", "CGY": "Flames de Calgary",
-    "CHI": "Blackhawks de Chicago",    "COL": "Avalanche du Colorado",
-    "DAL": "Stars de Dallas",          "DET": "Red Wings de Détroit",
-    "EDM": "Oilers d'Edmonton",        "FLA": "Panthers de la Floride",
-    "LAK": "Kings de Los Angeles",     "MIN": "Wild du Minnesota",
-    "MTL": "Canadiens de Montréal",    "NJD": "Devils du New Jersey",
-    "NSH": "Predators de Nashville",   "NYI": "Islanders de New York",
-    "NYR": "Rangers de New York",      "OTT": "Sénateurs d'Ottawa",
-    "PHI": "Flyers de Philadelphie",   "PIT": "Penguins de Pittsburgh",
-    "SEA": "Kraken de Seattle",        "SJS": "Sharks de San Jose",
-    "STL": "Blues de St. Louis",       "TBL": "Lightning de Tampa Bay",
-    "TOR": "Maple Leafs de Toronto",   "UTA": "Mammoth de l'Utah",
-    "VAN": "Canucks de Vancouver",     "VGK": "Golden Knights de Vegas",
-    "WPG": "Jets de Winnipeg",         "WSH": "Capitals de Washington",
-}
+
+def langue():
+    """'fr' ou 'en', propre à chaque visiteur.
+
+    Lu dans st.session_state, jamais dans une variable de module : ce module-ci
+    est partagé par toutes les sessions du serveur, et une variable globale
+    ferait basculer la langue des autres visiteurs.
+    """
+    return "en" if st.session_state.get("lang") == "en" else "fr"
+
+
+def t(fr, en):
+    """Le texte dans la langue du visiteur."""
+    return en if langue() == "en" else fr
 
 
 def saison_libelle(player):
@@ -51,7 +49,7 @@ def saison_libelle(player):
     s = str(player.get("season") or "")
     pts = player.get("points", "")
     if len(s) == 8:
-        return f"{pts} points en {s[2:4]}-{s[6:8]}"
+        return t(f"{pts} points en {s[2:4]}-{s[6:8]}", f"{pts} points in {s[2:4]}-{s[6:8]}")
     return f"{pts} points"
 
 
@@ -61,7 +59,7 @@ def logo(tri, mode="dark"):
 
 def name(tri):
     """Nom complet de l'équipe ; le tricode si on ne le connaît pas."""
-    return TEAMS.get(tri, tri)
+    return page.TEAMS[langue()].get(tri, tri)
 
 
 def barre(texte):
@@ -469,9 +467,10 @@ def _carte(tri, player):
     if not player or not player.get("action"):
         return (f'<div class="ps-card"><div class="ps-card-inner">'
                 f'<img class="ps-card-logo" src="{logo(tri)}" '
-                f'alt="Logo des {html.escape(name(tri))}"></div></div>')
+                f'alt="{html.escape(t("Logo des " + name(tri), name(tri) + " logo"))}">'
+                f'</div></div>')
     coul = player.get("color") or "#3a3a35"
-    poste = POSITIONS.get(player.get("position", ""), player.get("position", ""))
+    poste = page.POSTES[langue()].get(player.get("position", ""), player.get("position", ""))
     joueur = f'{player["first_name"]} {player["last_name"]}'
     chip = (f'class="ps-plate-chip" '
             f'style="background:{html.escape(coul)};color:{ink(coul)}"')
@@ -521,7 +520,7 @@ def hero(tri, kicker, matchup, pct, player=None, glow=True, suite=False):
         f'</div>'
         f'<div class="ps-hero-num">'
         f'<div class="ps-pct">{pct * 100:.1f}<span>%</span></div>'
-        f'<div class="ps-pct-label">de chances de gagner</div>'
+        f'<div class="ps-pct-label">{t("de chances de gagner", "chance of winning")}</div>'
         f'</div></div>',
         unsafe_allow_html=True)
 
@@ -531,7 +530,8 @@ def chips(pairs, colors):
     out = ['<div class="ps-chips">']
     for i, (label, p) in enumerate(pairs):
         vide = " ps-vide" if p is None else ""
-        val = "pas encore de cote" if p is None else f"{p * 100:.1f} %"
+        val = (t("pas encore de cote", "no odds yet") if p is None
+               else t(f"{p * 100:.1f} %", f"{p * 100:.1f}%"))
         out.append(
             f'<div class="ps-chip{vide}">'
             f'<span class="ps-dot" style="background:{colors[i % len(colors)]}"></span>'

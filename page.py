@@ -199,7 +199,8 @@ T = {
             "Data is collected several times a day, before and after the games.",
         ],
         "cta": "Open the app",
-        "cta_note": ("The full plan, the matchup map, source accuracy. If the "
+        "cta_note": ("The full plan, the matchup map, source accuracy — in "
+                     "English, with a FR button at the top. If the "
                      "app is asleep, the first load can take a minute or two — "
                      "it is not broken."),
         "autre_langue": "Version française",
@@ -649,7 +650,7 @@ def rendu(ctx, lang):
 </div>
 
 <div class="cta">
-<a href="{APP}" rel="noopener">{t['cta']}</a>
+<a href="{APP}{'?lang=en' if lang == 'en' else ''}" rel="noopener">{t['cta']}</a>
 <span>{t['cta_note']}</span>
 </div>
 

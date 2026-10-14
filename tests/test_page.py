@@ -168,6 +168,11 @@ def test_le_bouton_mene_a_lapp_et_previent_du_delai():
         assert ("panne" if lang == "fr" else "not broken") in h
 
 
+def test_la_vitrine_anglaise_ouvre_lapp_en_anglais():
+    assert f'href="{page.APP}?lang=en"' in page.rendu(CTX, "en")
+    assert f'href="{page.APP}"' in page.rendu(CTX, "fr")
+
+
 def test_le_jeton_google_est_sur_les_deux_pages():
     """Google revalide periodiquement : si la balise disparait d'une des deux
     pages, la propriete est retiree."""
