@@ -1,6 +1,7 @@
 team,player,pos,status,injury
 ANA,Cutter Gauthier,LW,Day-To-Day,Upper Body
 ANA,Ian Moore,D,IR,Lower Body
+ANA,Mikael Granlund,C,Day-To-Day,Upper Body
 ANA,Ryan Poehling,C,IR,Lower Body
 ANA,Troy Terry,RW,IR,Hip
 BUF,Alex Lyon,G,IR,Upper Body
@@ -11,7 +12,7 @@ BUF,Matt Grzelcyk,D,IR,Lower Body
 BUF,Rasmus Dahlin,D,Out,Upper Body
 BUF,Topias Leinonen,G,IR,Lower Body
 CAR,Alexander Nikishin,D,IR,Contract Dispute
-CAR,Jordan Staal,C,Out,Calf
+CAR,Jordan Staal,C,IR,Calf
 CAR,Seth Jarvis,C,IR,Shoulder
 CAR,Taylor Hall,LW,Out,Upper Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
@@ -37,6 +38,7 @@ EDM,Colton Dach,C,IR,Undisclosed
 EDM,Frederik Andersen,G,IR,Knee
 EDM,Jake Walman,D,Out,Upper Body
 EDM,James Stefan,RW,IR,Undisclosed
+EDM,Jason Dickinson,C,Day-To-Day,Undisclosed
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
 EDM,Ryan Nugent-Hopkins,C,IR,Lower Body
@@ -59,7 +61,7 @@ MIN,Nick Foligno,LW,IR,Upper Body
 MIN,Nico Sturm,C,IR,Upper Body
 MIN,Olli Maatta,D,Out,Upper Body
 NJD,Connor Brown,RW,IR,Lower Body
-NJD,Luke Evangelista,RW,Day-To-Day,Illness
+NJD,Luke Evangelista,RW,Out,Illness
 NJD,Nick Bjugstad,C,IR,Pectoral
 NJD,Seamus Casey,D,IR,Knee
 NYI,Alexander Romanov,D,Out,Knee
@@ -83,23 +85,23 @@ PIT,Trevor van Riemsdyk,D,IR,Lower Body
 SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Ryan Lindgren,D,IR,Upper Body
-SJS,Cam Lund,C,IR,Upper Body
-SJS,Darnell Nurse,D,Day-To-Day,Undisclosed
+SJS,Darnell Nurse,D,Day-To-Day,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,Alexey Toropchenko,RW,IR,Upper Body
 STL,Dillon Dube,C,IR,Neck
 STL,Felix Trudeau,LW,IR,Undisclosed
 STL,Logan Mailloux,D,IR,Hand
+STL,Pavel Buchnevich,LW,Out,Personal
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Dennis Hildeby,G,Day-To-Day,Undisclosed
 TBL,Yanni Gourde,C,IR,Hip
 TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
 TOR,Dakota Joshua,C,IR,Abdomen
 TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,Max Domi,C,IR,Back
+TOR,Miles Wood,LW,IR,Undisclosed
 TOR,William Villeneuve,D,IR,Knee
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Michael Carcone,LW,Out,Upper Body
@@ -112,7 +114,8 @@ VGK,Parker Wotherspoon,D,Out,Upper Body
 WPG,Connor Hellebuyck,G,IR,Suspension
 WPG,Elias Salomonsson,D,IR,Shoulder
 WPG,Garrett Brown,C,IR,Lower Body
-WPG,Josh Morrissey,D,Day-To-Day,Wrist
+WPG,Josh Morrissey,D,Out,Wrist
+WPG,Vladislav Namestnikov,C,Day-To-Day,Undisclosed
 WPG,Walker Duehr,RW,IR,Lower Body
 WSH,Matt Roy,D,IR,Lower Body
 WSH,Patrick Thomas,C,IR,Upper Body
