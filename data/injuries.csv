@@ -8,7 +8,7 @@ BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Jason Zucker,LW,IR,Abdomen
 BUF,Matt Grzelcyk,D,IR,Lower Body
-BUF,Rasmus Dahlin,D,Day-To-Day,Upper Body
+BUF,Rasmus Dahlin,D,Out,Upper Body
 BUF,Topias Leinonen,G,IR,Lower Body
 CAR,Alexander Nikishin,D,IR,Contract Dispute
 CAR,Jordan Staal,C,Out,Calf
@@ -17,6 +17,7 @@ CAR,Taylor Hall,LW,Out,Upper Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Samuel Honzek,LW,Out,Lower Body
 CHI,Andrew Mangiapane,LW,IR,Lower Body
+CHI,Bowen Byram,D,Out,Upper Body
 COL,Georgii Merkulov,C,IR,Undisclosed
 COL,Logan O'Connor,RW,IR,Lower Body
 COL,Nicolas Roy,C,Day-To-Day,Lower Body
@@ -34,17 +35,17 @@ EDM,Alec Regula,D,IR,Undisclosed
 EDM,Atro Leppanen,D,IR,Undisclosed
 EDM,Colton Dach,C,IR,Undisclosed
 EDM,Frederik Andersen,G,IR,Knee
-EDM,Jake Walman,D,Day-To-Day,Upper Body
+EDM,Jake Walman,D,Out,Upper Body
 EDM,James Stefan,RW,IR,Undisclosed
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
 EDM,Ryan Nugent-Hopkins,C,IR,Lower Body
-EDM,Zach Hyman,LW,Day-To-Day,Undisclosed
+EDM,Zach Hyman,LW,Out,Undisclosed
 FLA,Aleksander Barkov,C,IR,Lower Body
 FLA,Brad Marchand,LW,IR,Leg
-FLA,Jacob Markstrom,G,Day-To-Day,Undisclosed
+FLA,Jacob Markstrom,G,Out,Undisclosed
 FLA,Jonah Gadjovich,LW,IR,Upper Body
-FLA,Radko Gudas,D,Day-To-Day,Undisclosed
+FLA,Radko Gudas,D,Out,Undisclosed
 LAK,Alex Turcotte,C,IR,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
@@ -52,15 +53,15 @@ LAK,Kevin Fiala,LW,IR,Lower Leg
 LAK,Mats Zuccarello,RW,IR,Undisclosed
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
-MIN,Jared Spurgeon,D,Day-To-Day,Upper Body
+MIN,Jared Spurgeon,D,Out,Upper Body
 MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
 MIN,Nico Sturm,C,IR,Upper Body
+MIN,Olli Maatta,D,Out,Upper Body
 NJD,Connor Brown,RW,IR,Lower Body
 NJD,Luke Evangelista,RW,Day-To-Day,Illness
 NJD,Nick Bjugstad,C,IR,Pectoral
 NJD,Seamus Casey,D,IR,Knee
-NSH,Mavrik Bourque,C,Day-To-Day,Upper Body
 NYI,Alexander Romanov,D,Out,Knee
 NYI,Mathew Barzal,C,IR,Knee
 NYR,Adam Sykora,LW,IR,Lower Body
@@ -68,12 +69,9 @@ NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Lower Body
-OTT,Artem Zub,D,IR,Knee
-OTT,Cameron Crotty,D,IR,Illness
-OTT,Jake Sanderson,D,Day-To-Day,Lower Body
+OTT,Jake Sanderson,D,Out,Lower Body
 OTT,Kurtis MacDermid,LW,IR,Upper Body
 OTT,Nikolas Matinpalo,D,Out,Upper Body
-OTT,Ridly Greig,C,Day-To-Day,Strain
 OTT,William Eklund,LW,IR,Ankle
 PHI,Cam York,D,Out,Upper Body
 PHI,Nikita Grebenkin,RW,IR,Back
@@ -106,7 +104,6 @@ TOR,William Villeneuve,D,IR,Knee
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Michael Carcone,LW,Out,Upper Body
 VAN,Akil Thomas,C,IR,Undisclosed
-VAN,Filip Chytil,C,IR,Shoulder
 VAN,Jack Thompson,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
