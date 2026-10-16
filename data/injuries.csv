@@ -28,7 +28,7 @@ COL,Zachary L'Heureux,LW,Day-To-Day,Upper Body
 DAL,Cameron Hughes,C,IR,Upper Body
 DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Abdomen
-DAL,Oskar Back,C,Day-To-Day,Upper Body
+DAL,Oskar Back,C,IR,Upper Body
 DAL,Wyatt Johnston,C,Day-To-Day,Illness
 DET,J.T. Compher,LW,IR,Undisclosed
 DET,Marco Kasper,C,IR,Upper Body
@@ -123,7 +123,8 @@ WPG,Garrett Brown,C,IR,Lower Body
 WPG,Josh Morrissey,D,Out,Wrist
 WPG,Vladislav Namestnikov,C,Day-To-Day,Undisclosed
 WPG,Walker Duehr,RW,IR,Lower Body
+WSH,Justin Sourdif,RW,Day-To-Day,Illness
 WSH,Matt Roy,D,IR,Lower Body
 WSH,Patrick Thomas,C,IR,Upper Body
-WSH,Pierre-Luc Dubois,LW,Day-To-Day,Illness
+WSH,Pierre-Luc Dubois,LW,Out,Illness
 WSH,Rasmus Sandin,D,IR,Knee
