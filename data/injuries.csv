@@ -58,12 +58,13 @@ MIN,Filip Gustavsson,G,IR,Hip
 MIN,Jared Spurgeon,D,Out,Upper Body
 MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
-MIN,Nico Sturm,C,IR,Upper Body
+MIN,Nico Sturm,C,IR,Concussion
 MIN,Olli Maatta,D,Out,Upper Body
 NJD,Connor Brown,RW,IR,Lower Body
 NJD,Luke Evangelista,RW,Out,Illness
 NJD,Nick Bjugstad,C,IR,Pectoral
 NJD,Seamus Casey,D,IR,Knee
+NSH,Mavrik Bourque,C,Out,Upper Body
 NYI,Alexander Romanov,D,Out,Knee
 NYI,Mathew Barzal,C,IR,Knee
 NYR,Adam Sykora,LW,IR,Lower Body
@@ -85,7 +86,7 @@ PIT,Trevor van Riemsdyk,D,IR,Lower Body
 SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Ryan Lindgren,D,IR,Upper Body
-SJS,Darnell Nurse,D,Day-To-Day,Upper Body
+SJS,Darnell Nurse,D,Out,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,Alexey Toropchenko,RW,IR,Upper Body
@@ -115,7 +116,7 @@ WPG,Connor Hellebuyck,G,IR,Suspension
 WPG,Elias Salomonsson,D,IR,Shoulder
 WPG,Garrett Brown,C,IR,Lower Body
 WPG,Josh Morrissey,D,Out,Wrist
-WPG,Vladislav Namestnikov,C,Day-To-Day,Undisclosed
+WPG,Vladislav Namestnikov,C,Out,Undisclosed
 WPG,Walker Duehr,RW,IR,Lower Body
 WSH,Matt Roy,D,IR,Lower Body
 WSH,Patrick Thomas,C,IR,Upper Body
