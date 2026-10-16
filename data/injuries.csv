@@ -8,6 +8,8 @@ BUF,Alex Lyon,G,IR,Upper Body
 BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Jason Zucker,LW,IR,Abdomen
+BUF,Jiri Kulich,C,Day-To-Day,Undisclosed
+BUF,Josh Norris,C,Day-To-Day,Concussion
 BUF,Matt Grzelcyk,D,IR,Lower Body
 BUF,Rasmus Dahlin,D,Out,Upper Body
 BUF,Topias Leinonen,G,IR,Lower Body
@@ -56,6 +58,7 @@ LAK,Mats Zuccarello,RW,IR,Undisclosed
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Jared Spurgeon,D,Out,Upper Body
+MIN,Kirill Kaprizov,LW,Day-To-Day,Undisclosed
 MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
 MIN,Nico Sturm,C,IR,Concussion
@@ -102,6 +105,7 @@ TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
 TOR,Dakota Joshua,C,IR,Abdomen
 TOR,Elvis Merzlikins,G,IR,Shoulder
+TOR,John Tavares,C,Day-To-Day,Undisclosed
 TOR,Max Domi,C,IR,Back
 TOR,Miles Wood,LW,IR,Undisclosed
 TOR,William Villeneuve,D,IR,Knee
