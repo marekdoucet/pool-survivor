@@ -1,6 +1,6 @@
 team,player,pos,status,injury
 ANA,,RW,IR,Hip
-BOS,,C,Out,Upper Body
+BOS,,C,Day-To-Day,Upper Body
 BUF,,LW,IR,Abdomen
 CAR,,LW,Out,Upper Body
 CGY,,LW,Out,Lower Body
@@ -19,9 +19,9 @@ LAK,,RW,IR,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
 MIN,,LW,IR,Upper Body
-NJD,,RW,Out,Illness
+NJD,,RW,IR,Lower Body
 NJD,Seamus Casey,D,IR,Knee
-NSH,,C,Out,Upper Body
+NSH,,C,Day-To-Day,Upper Body
 NYI,,LW,Day-To-Day,Lower Body
 NYR,,G,IR,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
@@ -29,8 +29,8 @@ NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Joe Veleno,C,IR,Lower Body
 OTT,,LW,IR,Ankle
 OTT,Kurtis MacDermid,LW,IR,Upper Body
-PHI,,RW,Out,Upper Body
-PIT,,RW,Out,Lower Body
+PHI,,RW,IR,Lower Body
+PIT,,RW,IR,Lower Body
 SEA,,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SJS,Kyle Keyser,G,IR,Upper Body
@@ -51,5 +51,5 @@ VGK,,D,Out,Upper Body
 VGK,Lukas Cormier,D,IR,Undisclosed
 WPG,,RW,IR,Lower Body
 WPG,Garrett Brown,C,IR,Lower Body
-WSH,,RW,Out,Illness
+WSH,,RW,Day-To-Day,Illness
 WSH,Patrick Thomas,C,IR,Upper Body
