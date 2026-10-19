@@ -2,7 +2,7 @@ team,player,pos,status,injury
 ANA,,RW,IR,Hip
 BOS,,C,Day-To-Day,Upper Body
 BUF,,LW,IR,Abdomen
-CAR,,LW,Out,Upper Body
+CAR,,LW,IR,Upper Body
 CGY,,LW,IR,Hip
 CHI,,LW,IR,Lower Body
 COL,,RW,IR,Lower Body
@@ -21,7 +21,7 @@ MIN,,LW,IR,Upper Body
 NJD,,RW,IR,Lower Body
 NJD,Seamus Casey,D,IR,Knee
 NSH,,C,Day-To-Day,Upper Body
-NYI,,LW,Day-To-Day,Lower Body
+NYI,,LW,Out,Lower Body
 NYR,,G,IR,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
@@ -50,5 +50,5 @@ VGK,,D,Out,Upper Body
 VGK,Lukas Cormier,D,IR,Undisclosed
 WPG,,RW,IR,Lower Body
 WPG,Garrett Brown,C,IR,Lower Body
-WSH,,RW,Day-To-Day,Illness
+WSH,,RW,Out,Illness
 WSH,Patrick Thomas,C,IR,Upper Body
