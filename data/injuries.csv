@@ -3,7 +3,7 @@ ANA,,RW,IR,Hip
 BOS,,C,Day-To-Day,Upper Body
 BUF,,LW,IR,Abdomen
 CAR,,LW,Out,Upper Body
-CGY,,LW,Out,Lower Body
+CGY,,LW,IR,Hip
 CHI,,LW,IR,Lower Body
 COL,,RW,IR,Lower Body
 COL,Georgii Merkulov,C,IR,Undisclosed
@@ -28,7 +28,7 @@ NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Joe Veleno,C,IR,Lower Body
 OTT,,LW,IR,Ankle
 OTT,Kurtis MacDermid,LW,IR,Upper Body
-PHI,,RW,IR,Lower Body
+PHI,,RW,Out,Upper Body
 PIT,,RW,IR,Lower Body
 SEA,,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
@@ -37,7 +37,7 @@ SJS,Quentin Musty,LW,IR,Upper Body
 STL,,RW,IR,Upper Body
 STL,Torey Krug,D,IR,Ankle
 TBL,,C,IR,Hip
-TOR,,LW,IR,Undisclosed
+TOR,,RW,Day-To-Day,Illness
 TOR,Cade Webber,D,IR,Elbow
 TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,William Villeneuve,D,IR,Knee
