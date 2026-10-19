@@ -1,13 +1,13 @@
 team,player,pos,status,injury
 ANA,,RW,IR,Hip
 BOS,,C,Day-To-Day,Upper Body
-BUF,,LW,IR,Abdomen
+BUF,,RW,Day-To-Day,Upper Body
 CAR,,LW,IR,Upper Body
 CGY,,LW,IR,Hip
 CHI,,LW,IR,Lower Body
 COL,,RW,IR,Lower Body
 COL,Georgii Merkulov,C,IR,Undisclosed
-DAL,,LW,Out,Not Injury Related
+DAL,,C,IR,Finger
 DAL,Cameron Hughes,C,IR,Upper Body
 DAL,Luke Krys,D,IR,Undisclosed
 DET,,LW,IR,Undisclosed
@@ -28,7 +28,7 @@ NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Joe Veleno,C,IR,Lower Body
 OTT,,LW,IR,Ankle
 OTT,Kurtis MacDermid,LW,IR,Upper Body
-PHI,,RW,Out,Upper Body
+PHI,,RW,IR,Upper Body
 PIT,,RW,IR,Lower Body
 SEA,,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
@@ -48,7 +48,7 @@ VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Jack Thompson,D,IR,Undisclosed
 VGK,,D,Out,Upper Body
 VGK,Lukas Cormier,D,IR,Undisclosed
-WPG,,RW,IR,Lower Body
+WPG,,G,IR,Suspension
 WPG,Garrett Brown,C,IR,Lower Body
 WSH,,RW,Out,Illness
 WSH,Patrick Thomas,C,IR,Upper Body
