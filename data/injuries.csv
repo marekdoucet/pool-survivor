@@ -1,6 +1,5 @@
 team,player,pos,status,injury
-ANA,,RW,IR,Hip
-BOS,,C,Day-To-Day,"Zacha (upper body) is considered a game-time decision for Tuesday's matchup against Dallas, Adam Pellerin of NESN reports."
+ANA,,RW,Out,Personal
 BUF,,RW,Day-To-Day,Upper Body
 CAR,,LW,IR,Upper Body
 CGY,,LW,IR,Lower Body
@@ -32,7 +31,7 @@ PHI,,RW,IR,Upper Body
 PIT,,RW,IR,Lower Body
 SEA,,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
-SJS,,C,Day-To-Day,Upper Body
+SJS,,C,Out,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,,RW,IR,Upper Body
@@ -42,7 +41,7 @@ TOR,,LW,IR,Undisclosed
 TOR,Cade Webber,D,IR,Elbow
 TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,William Villeneuve,D,IR,Knee
-UTA,,LW,Out,Upper Body
+UTA,,LW,IR,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 VAN,,LW,IR,Undisclosed
 VAN,Akil Thomas,C,IR,Undisclosed
