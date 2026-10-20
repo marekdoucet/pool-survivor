@@ -152,6 +152,11 @@ T = {
             "Les données sont recollectées plusieurs fois par jour, avant et après "
             "les matchs.",
         ],
+        # La vitrine ne connaît les picks de personne : sans cette phrase, un
+        # pick différent dans l'app ressemble à un bogue.
+        "general": ("Pick calculé pour quelqu'un qui n'a encore utilisé aucune "
+                    "équipe. Ton pick à toi dépend des équipes que tu as déjà "
+                    "prises : ouvre l'application."),
         "cta": "Ouvrir l'application",
         "cta_note": ("Le plan complet, la carte des matchups, la précision des "
                      "sources. Si l'application dort, le premier chargement "
@@ -198,6 +203,9 @@ T = {
             "that an early elimination cancels every week after it.",
             "Data is collected several times a day, before and after the games.",
         ],
+        "general": ("Pick calculated for someone who hasn't used any team yet. "
+                    "Your own pick depends on the teams you've already used: "
+                    "open the app."),
         "cta": "Open the app",
         "cta_note": ("The full plan, the matchup map, source accuracy — in "
                      "English, with a FR button at the top. If the "
@@ -648,6 +656,8 @@ def rendu(ctx, lang):
 <div class="hero-pc"><b>{pourcent(best['p'], lang)}</b>
 <span>{t['chances']}</span></div>
 </div>
+
+<p class="note">{t['general']}</p>
 
 <div class="cta">
 <a href="{APP}{'?lang=en' if lang == 'en' else ''}" rel="noopener">{t['cta']}</a>

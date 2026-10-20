@@ -132,11 +132,15 @@ def test_un_refus_de_pick_est_traduit(fichier):
 
 
 def test_eliminated_nest_jamais_enregistre_comme_une_equipe(fichier):
-    """Bob a pris COL la semaine passée, et COL a perdu : il est éliminé, et
-    sa case de cette semaine affiche « Eliminated ». Enregistrer le registre
-    en anglais ne doit pas écrire ce mot comme si c'était une équipe."""
+    """Bob est éliminé la semaine passée, et sa case de cette semaine affiche
+    « Eliminated ». Enregistrer le registre en anglais ne doit pas écrire ce
+    mot comme si c'était une équipe.
+
+    Élimination manuelle (« out »), pas une vraie défaite : la première
+    version comptait sur une défaite réelle de COL « la semaine passée », ce
+    qui n'était vrai que la semaine où le test a été écrit."""
     bob = json.loads(fichier.read_text(encoding="utf-8"))
-    bob["pool"]["Bob"]["picks"][PASSEE] = "COL"
+    bob["pool"]["Bob"].update({"force": "out", "out": PASSEE})
     fichier.write_text(json.dumps(bob), encoding="utf-8")
     app = lancer("pool", "en")
     registre = next(d for d in app.dataframe

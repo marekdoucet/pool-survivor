@@ -168,6 +168,13 @@ def test_le_bouton_mene_a_lapp_et_previent_du_delai():
         assert ("panne" if lang == "fr" else "not broken") in h
 
 
+def test_la_vitrine_dit_que_le_pick_est_general():
+    """Sans picks connus, la vitrine peut montrer BOS quand l'app montre MIN
+    à quelqu'un qui a déjà pris des équipes : elle doit le dire."""
+    assert "aucune équipe" in page.rendu(CTX, "fr")
+    assert "hasn&#x27;t used any team" in page.rendu(CTX, "en") or            "hasn't used any team" in page.rendu(CTX, "en")
+
+
 def test_la_vitrine_anglaise_ouvre_lapp_en_anglais():
     assert f'href="{page.APP}?lang=en"' in page.rendu(CTX, "en")
     assert f'href="{page.APP}"' in page.rendu(CTX, "fr")
