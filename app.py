@@ -494,10 +494,12 @@ picks, day_overrides = state["picks"], state["days"]
 # des tours précédents restent dans picks.json, mais ne bloquent plus rien.
 since = pk.last_reset(state["resets"], today)
 tour = pk.this_round(picks, since)
-# 8 semaines de base : survivre plus longtemps serait étonnant, et optimiser
-# toute la saison ferait garder des équipes pour des semaines qu'on n'atteint
-# jamais. Si le tour dépasse 8 semaines, l'horizon suit, une par semaine.
-horizon = pk.horizon(since, today)
+# Le plan vise la fin probable du tour (voir pk.horizon). Sans redépart, le
+# tour a commencé avec la saison : sa première semaine vient du calendrier.
+_premiers = premiers_matchs(VERSION) if VERSION else {}
+_debut_saison = (op.week_start(dt.date.fromisoformat(min(_premiers)))
+                 if _premiers else None)
+horizon = pk.horizon(since or _debut_saison, today)
 overrides = tuple(sorted(day_overrides.items()))   # clé de cache
 all_days = pick_days_for(VERSION, overrides) if VERSION else {}
 this_monday = op.week_start(today)
@@ -1085,11 +1087,13 @@ def page_pick():
                 break
         with ui.panel("pourquoi", tr("Pourquoi pas une autre équipe ?",
                                      "Why not another team?"),
-                      tr("Le plan est optimisé sur toute la saison d'un coup : une "
+                      tr("Le plan est optimisé jusqu'à la fin probable du pool, "
+                         "environ 10 semaines après son début, d'un coup : une "
                          "équipe forte cette semaine peut être gardée pour une semaine "
                          "où son match est encore meilleur, ou où aucune autre équipe "
                          "ne fait mieux.",
-                         "The plan is optimized over the whole season at once: a "
+                         "The plan is optimized all at once up to the pool's likely "
+                         "end, about 10 weeks after it starts: a "
                          "strong team this week may be saved for a week when its "
                          "game is even better, or when no other team does "
                          "better.")):
@@ -1218,7 +1222,7 @@ def page_plan():
         (tr("Espérance", "Expected weeks"), f"{exp_weeks:.2f} {SEMAINES}",
          tr(f"survécues sur {len(plan)}", f"survived out of {len(plan)}")),
         (tr("Semaines planifiées", "Weeks planned"), str(len(plan)),
-         tr("jusqu'à la fin de la saison", "until the end of the season")),
+         tr("jusqu'à la fin probable du pool", "until the pool's likely end")),
         # Le maillon faible plutôt que la survie cumulée : le produit de 27
         # probabilités tend vers zéro et n'apprend rien ; la semaine la plus
         # risquée, elle, dit où le plan peut casser.

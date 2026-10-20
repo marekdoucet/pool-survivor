@@ -33,6 +33,7 @@ from pathlib import Path
 
 import collect_moneypuck as cm
 import optimize as op
+import picks as pk
 import store
 
 DOCS = Path("docs")
@@ -145,7 +146,8 @@ T = {
             "équipes pour les semaines où rien d'autre ne tient la route.",
             "Ce site combine cinq sources — les cotes des casinos, "
             "Kalshi, MoneyPuck, Dimers et Puckcast — en un consensus pondéré, puis "
-            "optimise le plan sur les huit prochaines semaines d'un coup. Il "
+            "optimise d'un coup le plan jusqu'à la fin probable du pool, "
+            "environ dix semaines après son début. Il "
             "maximise l'espérance du nombre de semaines survécues, ce qui "
             "tient compte du fait qu'une élimination précoce annule toutes "
             "les semaines suivantes.",
@@ -198,7 +200,8 @@ T = {
             "saved for the weeks when nothing else holds up.",
             "This site blends five sources — sportsbook odds, Kalshi, MoneyPuck, "
             "Dimers and Puckcast — into a weighted consensus, then optimises "
-            "the plan over the next eight weeks at once. It maximises the "
+            "the plan all at once up to the pool's likely end, about ten weeks "
+            "after it starts. It maximises the "
             "expected number of weeks survived, which accounts for the fact "
             "that an early elimination cancels every week after it.",
             "Data is collected several times a day, before and after the games.",
@@ -761,20 +764,28 @@ def robots():
     return f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n"
 
 
+def premier_lundi(conn):
+    """Lundi de la première semaine de la saison au calendrier, ou None."""
+    debut = conn.execute("SELECT MIN(game_date) FROM schedule").fetchone()[0]
+    return op.week_start(dt.date.fromisoformat(debut)) if debut else None
+
+
 def numero_semaine(conn, monday):
     """Semaine 1 = celle du premier match de la saison au calendrier."""
-    debut = conn.execute("SELECT MIN(game_date) FROM schedule").fetchone()[0]
-    if not debut:
+    premier = premier_lundi(conn)
+    if not premier:
         return 1
-    premier = op.week_start(dt.date.fromisoformat(debut))
     return max(1, (monday - premier).days // 7 + 1)
 
 
 def contexte(conn, today=None):
     """Rassemble ce dont les pages ont besoin. Indépendant de la langue."""
     today = today or dt.datetime.now(cm.TZ).date()
-    plan, _e, _snap = op.optimize(conn, today, set(), horizon=8)
-    alts = op.alternatives(conn, today, set(), top=8, horizon=8)
+    # Même horizon que l'app pour un pool parti avec la saison : sinon la
+    # vitrine et l'app peuvent recommander deux équipes différentes.
+    h = pk.horizon(premier_lundi(conn), today)
+    plan, _e, _snap = op.optimize(conn, today, set(), horizon=h)
+    alts = op.alternatives(conn, today, set(), top=8, horizon=h)
     weeks, *_ = op.build_options(conn, today, set(), horizon=16)
 
     monday, best = plan[0]

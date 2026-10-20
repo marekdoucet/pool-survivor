@@ -31,7 +31,11 @@ PICKS_PATH = Path("picks.json")
 GITHUB_API = "https://api.github.com/repos/{repo}/contents/{path}"
 
 
-HORIZON = 8     # semaines planifiées par défaut
+HORIZON = 8     # repère de semaines_tour (semaines à corriger)
+# Fin probable d'un tour : un pool dure environ 8 semaines, 10 pour la marge.
+# Le plan vise cette fin au lieu d'une fenêtre qui avance avec le temps.
+DUREE_TOUR = 10
+HORIZON_MIN = 3   # jamais moins devant soi, si le tour dure plus que prévu
 
 
 def empty_state():
@@ -371,16 +375,23 @@ def round_week(since, today):
     return max(1, (op.week_start(today) - debut).days // 7 + 1)
 
 
-def horizon(since, today, base=HORIZON):
-    """Nombre de semaines à planifier.
+def horizon(since, today, duree=DUREE_TOUR, minimum=HORIZON_MIN):
+    """Nombre de semaines à planifier : jusqu'à la fin probable du tour.
 
-    `base` semaines normalement : survivre plus longtemps serait étonnant, et
-    optimiser sur toute la saison fait garder des équipes pour des semaines
-    qu'on n'atteindra jamais. Si le tour dépasse quand même cette longueur,
-    l'horizon suit — une semaine de plus par semaine — jusqu'au prochain
-    redépart.
+    Une fenêtre fixe de 8 semaines qui avance avec le temps gardait des
+    équipes pour des semaines que presque personne n'atteint (en semaine 8,
+    elle protégeait encore la semaine 15). On vise donc la fin du tour —
+    `duree` semaines après son début — et la fenêtre raccourcit au fil des
+    semaines, ce qui fait dépenser les bonnes équipes avant cette fin.
+
+    `minimum` semaines quoi qu'il arrive : si le tour dure plus que prévu, le
+    plan ne doit pas devenir aveugle et tout brûler d'un coup.
+
+    `since` : début du tour — le dernier redépart, ou à défaut la première
+    semaine de la saison (c'est à l'appelant de la fournir : sans elle, la
+    semaine courante compte comme semaine 1).
     """
-    return max(base, round_week(since, today))
+    return max(minimum, duree - round_week(since, today) + 1)
 
 
 def eliminated(state, today=None):

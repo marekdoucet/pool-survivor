@@ -240,19 +240,21 @@ def test_planning_ignore_les_picks_dun_tour_precedent():
 
 # ── Horizon et élimination ────────────────────────────────────────────────
 
-def test_horizon_de_base_puis_qui_suit_le_tour():
-    """8 semaines tant qu'on n'a pas dépassé 8 ; ensuite une de plus par semaine."""
+def test_horizon_vise_la_fin_du_tour_puis_garde_un_minimum():
+    """Fin du tour 10 semaines après son début : la fenêtre raccourcit d'une
+    semaine par semaine, sans jamais descendre sous 3."""
     assert pk.round_week(R, dt.date(2027, 1, 13)) == 1
-    assert pk.horizon(R, dt.date(2027, 1, 13)) == 8        # semaine 1
-    assert pk.horizon(R, R + dt.timedelta(weeks=7)) == 8   # semaine 8
-    assert pk.horizon(R, R + dt.timedelta(weeks=8)) == 9   # semaine 9
-    assert pk.horizon(R, R + dt.timedelta(weeks=12)) == 13
+    assert pk.horizon(R, dt.date(2027, 1, 13)) == 10       # semaine 1 : 1 à 10
+    assert pk.horizon(R, R + dt.timedelta(weeks=3)) == 7   # semaine 4 : 4 à 10
+    assert pk.horizon(R, R + dt.timedelta(weeks=7)) == 3   # semaine 8 : 8 à 10
+    assert pk.horizon(R, R + dt.timedelta(weeks=8)) == 3   # semaine 9 : minimum
+    assert pk.horizon(R, R + dt.timedelta(weeks=20)) == 3
 
 
-def test_horizon_sans_redepart_part_de_la_semaine_courante():
+def test_horizon_sans_debut_connu_part_de_la_semaine_courante():
     today = dt.date(2026, 10, 7)
     assert pk.round_week(None, today) == 1
-    assert pk.horizon(None, today) == 8
+    assert pk.horizon(None, today) == 10
 
 
 def test_elimination_et_retour():
