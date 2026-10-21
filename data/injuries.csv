@@ -1,6 +1,6 @@
 team,player,pos,status,injury
-ANA,,RW,Out,Personal
-BUF,,RW,Day-To-Day,Upper Body
+ANA,,RW,IR,Hip
+BUF,,RW,Out,Upper Body
 CAR,,LW,IR,Upper Body
 CGY,,LW,IR,Lower Body
 CHI,,LW,IR,Lower Body
@@ -31,7 +31,7 @@ PHI,,RW,IR,Upper Body
 PIT,,RW,IR,Lower Body
 SEA,,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
-SJS,,C,Out,Upper Body
+SJS,,C,Day-To-Day,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,,RW,IR,Upper Body
@@ -50,5 +50,5 @@ VGK,,D,Out,Upper Body
 VGK,Lukas Cormier,D,IR,Undisclosed
 WPG,,G,IR,Suspension
 WPG,Garrett Brown,C,IR,Lower Body
-WSH,,RW,Out,Illness
+WSH,,RW,Day-To-Day,Illness
 WSH,Patrick Thomas,C,IR,Upper Body
