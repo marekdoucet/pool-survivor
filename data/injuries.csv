@@ -1,15 +1,15 @@
 team,player,pos,status,injury
-ANA,,RW,IR,Hip
+ANA,,RW,IR,Personal
 BUF,,RW,Day-To-Day,Upper Body
 CAR,,LW,IR,Upper Body
 CGY,,LW,IR,Lower Body
 CHI,,LW,IR,Lower Body
-COL,,RW,IR,Lower Body
+COL,,LW,Out,Upper Body
 COL,Georgii Merkulov,C,IR,Undisclosed
 DAL,,D,Out,Lower Body
 DAL,Cameron Hughes,C,IR,Upper Body
 DAL,Luke Krys,D,IR,Undisclosed
-DET,,LW,IR,Undisclosed
+DET,,G,Out,Undisclosed
 EDM,,G,IR,Knee
 EDM,Atro Leppanen,D,IR,Undisclosed
 FLA,,LW,IR,Upper Body
@@ -19,7 +19,6 @@ LAK,Jan Jenik,C,IR,Undisclosed
 MIN,,LW,IR,Upper Body
 NJD,,C,IR,Pectoral
 NJD,Seamus Casey,D,IR,Knee
-NSH,,C,Day-To-Day,Upper Body
 NYI,,LW,Out,Lower Body
 NYR,,G,IR,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
@@ -28,7 +27,7 @@ NYR,Joe Veleno,C,IR,Lower Body
 OTT,,LW,IR,Ankle
 OTT,Kurtis MacDermid,LW,IR,Upper Body
 PHI,,RW,IR,Upper Body
-PIT,,RW,IR,Lower Body
+PIT,,RW,Out,Lower Body
 SEA,,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SJS,,C,Out,Upper Body
