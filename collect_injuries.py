@@ -33,7 +33,8 @@ RE_EQUIPE = re.compile(r'<h3[^>]*><a[^>]*href="/teams/[a-z]+"[^>]*>([^<]+)</a></
 RE_TABLE = re.compile(r"<table.*?</table>", re.S)
 RE_LIGNE = re.compile(r"<tr[^>]*>(.*?)</tr>", re.S)
 RE_CELLULE = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
-RE_PREMIER_SPAN = re.compile(r"<span[^>]*>([^<]*)")
+# Un <span> qui ne contient qu'un poste (le « G » des gardiens), avec ou sans classe.
+RE_MARQUE_GARDIEN = re.compile(r"<span[^>]*>\s*(?:G|C|D|LW|RW|F)\s*</span>")
 
 
 class InjuriesError(Exception):
@@ -78,10 +79,12 @@ def parse_page(page_html, inconnues=None, minimum_equipes=20):
             cellules = RE_CELLULE.findall(tr)
             if len(cellules) != 4:
                 continue
-            # La première cellule porte un second <span> (le « G » des
-            # gardiens) : le nom est le texte du premier span seulement.
-            m = RE_PREMIER_SPAN.search(cellules[0])
-            joueur = html.unescape(m.group(1)).strip() if m else _texte(cellules[0])
+            # La cellule du nom porte parfois un <span> « G » (gardiens) à
+            # retirer, et parfois un lien <a> vers la fiche du joueur : on
+            # retire le marqueur puis on garde tout le texte, lien compris.
+            joueur = _texte(RE_MARQUE_GARDIEN.sub("", cellules[0]))
+            if not joueur:
+                continue
             lignes.append((code, joueur, _texte(cellules[1]),
                            _texte(cellules[2]), _texte(cellules[3])))
     return sorted(lignes)

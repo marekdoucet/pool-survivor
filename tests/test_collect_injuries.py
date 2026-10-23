@@ -30,6 +30,25 @@ def test_le_marqueur_gardien_ne_se_colle_pas_au_nom():
     assert "Trent MinerG" not in noms
 
 
+def test_un_nom_en_lien_est_lu():
+    """Certains noms sont un lien vers la fiche du joueur : avant, ils
+    sortaient vides et deux blessés sans nom de la même équipe se fusionnaient."""
+    page = ('<h3><a href="/teams/sjs">San Jose Sharks</a></h3><table>'
+            '<tr><td><span class="inj-name__text"><a style="color:inherit" '
+            'href="/players/joueur-a-1">Joueur Alpha</a></span></td>'
+            '<td>C</td><td>Day-To-Day</td><td>Upper Body</td></tr>'
+            '<tr><td><span class="inj-name__text"><a href="/players/joueur-b-2">'
+            'Joueur Beta</a></span></td><td>D</td><td>IR</td><td>Knee</td></tr>'
+            '<tr><td><span class="inj-name__text">Gardien Gamma'
+            '<span class="inj-g">G</span></span></td>'
+            '<td>G</td><td>IR</td><td>Hip</td></tr></table>')
+    assert ci.parse_page(page, minimum_equipes=1) == [
+        ("SJS", "Gardien Gamma", "G", "IR", "Hip"),
+        ("SJS", "Joueur Alpha", "C", "Day-To-Day", "Upper Body"),
+        ("SJS", "Joueur Beta", "D", "IR", "Knee"),
+    ]
+
+
 def test_les_apostrophes_echappees_sont_decodees():
     noms = {l[1] for l in lire()}
     assert "Logan O'Connor" in noms
