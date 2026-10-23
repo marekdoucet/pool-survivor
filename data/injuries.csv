@@ -9,15 +9,15 @@ COL,Georgii Merkulov,C,IR,Undisclosed
 DAL,,D,Out,Lower Body
 DAL,Cameron Hughes,C,IR,Upper Body
 DAL,Luke Krys,D,IR,Undisclosed
-DET,,G,Out,Undisclosed
+DET,,G,Day-To-Day,Upper Body
 EDM,,G,IR,Knee
 EDM,Atro Leppanen,D,IR,Undisclosed
 FLA,,LW,IR,Upper Body
-LAK,,RW,Out,Upper Body
+LAK,,RW,Day-To-Day,Upper Body
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
-MIN,,RW,Out,Upper Body
-NJD,,C,IR,Pectoral
+MIN,,RW,Day-To-Day,Upper Body
+NJD,,G,Day-To-Day,Not Injury Related
 NJD,Seamus Casey,D,IR,Knee
 NYI,,LW,Out,Lower Body
 NYR,,G,IR,Lower Body
@@ -27,7 +27,7 @@ NYR,Joe Veleno,C,IR,Lower Body
 OTT,,LW,IR,Ankle
 OTT,Kurtis MacDermid,LW,IR,Upper Body
 PHI,,RW,IR,Upper Body
-PIT,,RW,Out,Lower Body
+PIT,,RW,IR,Lower Body
 SEA,,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SJS,,LW,Out,Upper Body
@@ -45,7 +45,7 @@ UTA,Maveric Lamoureux,D,IR,Shoulder
 VAN,,LW,IR,Undisclosed
 VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Jack Thompson,D,IR,Undisclosed
-VGK,,RW,Out,Personal
+VGK,,RW,Day-To-Day,Personal
 WPG,,RW,Day-To-Day,Upper Body
 WPG,Garrett Brown,C,IR,Lower Body
 WSH,,RW,Day-To-Day,Illness
