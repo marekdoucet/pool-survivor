@@ -19,9 +19,9 @@ CAR,Taylor Hall,LW,IR,Upper Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Mikael Backlund,C,Day-To-Day,Upper Body
 CGY,Samuel Honzek,LW,IR,Lower Body
-CHI,Bowen Byram,D,Out,Upper Body
+CHI,Bowen Byram,D,Day-To-Day,Upper Body
 COL,Georgii Merkulov,C,IR,Undisclosed
-COL,Nicolas Roy,C,Out,Lower Body
+COL,Nicolas Roy,C,Day-To-Day,Lower Body
 COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Cameron Hughes,C,IR,Upper Body
 DAL,Esa Lindell,D,Out,Lower Body
@@ -65,7 +65,6 @@ NYI,Mathew Barzal,C,IR,Knee
 NYI,Matias Maccelli,LW,Out,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
-NYR,Eeli Tolvanen,RW,Day-To-Day,Personal
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Lower Body
@@ -76,15 +75,15 @@ OTT,William Eklund,LW,IR,Ankle
 PHI,Cam York,D,IR,Upper Body
 PHI,Nikita Grebenkin,RW,IR,Back
 PHI,Owen Tippett,RW,IR,Upper Body
-PHI,Rasmus Ristolainen,D,IR,Upper Body
+PHI,Rasmus Ristolainen,D,IR,Hand
 PHI,Travis Konecny,RW,IR,Lower Body
 PIT,Ben Kindel,C,IR,Undisclosed
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Egor Chinakhov,RW,Day-To-Day,Lower Body
-PIT,Evgeni Malkin,C,Day-To-Day,Illness
+PIT,Evgeni Malkin,C,Out,Illness
 PIT,Justin Brazeau,RW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
-PIT,Samuel Girard,D,Day-To-Day,Undisclosed
+PIT,Samuel Girard,D,IR,Undisclosed
 PIT,Trevor van Riemsdyk,D,IR,Lower Body
 SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
@@ -125,9 +124,7 @@ WPG,Josh Morrissey,D,IR,Wrist
 WPG,Nick Bjugstad,C,IR,Pectoral
 WPG,Nino Niederreiter,RW,Day-To-Day,Upper Body
 WPG,Vladislav Namestnikov,C,IR,Undisclosed
-WSH,Justin Sourdif,RW,Day-To-Day,Illness
-WSH,Logan Thompson,G,Day-To-Day,Lower Body
+WSH,Logan Thompson,G,Out,Lower Body
 WSH,Patrick Thomas,C,IR,Upper Body
-WSH,Pierre-Luc Dubois,LW,IR,Illness
 WSH,Rasmus Sandin,D,IR,Knee
 WSH,Vincent Desharnais,D,IR,Abdomen
