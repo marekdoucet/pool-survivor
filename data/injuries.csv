@@ -7,15 +7,15 @@ BUF,Alex Lyon,G,IR,Upper Body
 BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Jiri Kulich,C,Out,Face
-BUF,Justin Danforth,RW,Out,Upper Body
+BUF,Justin Danforth,RW,Day-To-Day,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
 BUF,Sam Carrick,C,IR,Upper Body
 CAR,Alexander Nikishin,D,IR,Contract Dispute
 CAR,Jordan Staal,C,IR,Calf
-CAR,Mark Jankowski,C,Out,Lower Body
+CAR,Mark Jankowski,C,Day-To-Day,Lower Body
 CAR,Taylor Hall,LW,IR,Upper Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
-CGY,Mikael Backlund,C,Out,Upper Body
+CGY,Mikael Backlund,C,Day-To-Day,Upper Body
 CGY,Samuel Honzek,LW,IR,Lower Body
 CHI,Bowen Byram,D,Out,Upper Body
 COL,Nicolas Roy,C,Out,Lower Body
@@ -48,11 +48,10 @@ LAK,Alex Turcotte,C,IR,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
 LAK,Kevin Fiala,LW,IR,Lower Leg
-LAK,Quinton Byfield,RW,Out,Upper Body
+LAK,Quinton Byfield,RW,Day-To-Day,Upper Body
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Marcus Foligno,LW,IR,Lower Body
-MIN,Maxim Shabanov,RW,Day-To-Day,Upper Body
 MIN,Nick Foligno,LW,IR,Upper Body
 NJD,Connor Hellebuyck,G,Out,Not Injury Related
 NJD,Seamus Casey,D,IR,Knee
@@ -94,8 +93,9 @@ STL,Logan Mailloux,D,IR,Hand
 STL,Ross Johnston,LW,IR,Lower Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Victor Hedman,D,Out,Lower Body
+TBL,Victor Hedman,D,Day-To-Day,Lower Body
 TBL,Yanni Gourde,C,IR,Hip
+TBL,Zemgus Girgensons,C,Day-To-Day,Undisclosed
 TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
 TOR,Dakota Joshua,C,IR,Abdomen
