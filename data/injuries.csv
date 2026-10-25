@@ -73,8 +73,8 @@ PHI,Owen Tippett,RW,IR,Upper Body
 PHI,Travis Konecny,RW,IR,Lower Body
 PIT,Ben Kindel,C,IR,Undisclosed
 PIT,Bryan Rust,RW,IR,Lower Body
-PIT,Egor Chinakhov,RW,Out,Lower Body
-PIT,Evgeni Malkin,C,Out,Illness
+PIT,Egor Chinakhov,RW,Day-To-Day,Lower Body
+PIT,Evgeni Malkin,C,Day-To-Day,Illness
 PIT,Justin Brazeau,RW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
 PIT,Samuel Girard,D,IR,Undisclosed
@@ -113,7 +113,7 @@ VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Jack Thompson,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
-VGK,Mitch Marner,RW,Out,Personal
+VGK,Mitch Marner,RW,Day-To-Day,Personal
 VGK,Parker Wotherspoon,D,IR,Upper Body
 WPG,Garrett Brown,C,IR,Lower Body
 WPG,Josh Morrissey,D,IR,Wrist
