@@ -6,14 +6,13 @@ ANA,Troy Terry,RW,IR,Hip
 BUF,Alex Lyon,G,IR,Upper Body
 BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
-BUF,Jiri Kulich,C,Out,Face
+BUF,Jiri Kulich,C,Out,Concussion
 BUF,Justin Danforth,RW,Day-To-Day,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
 BUF,Sam Carrick,C,IR,Upper Body
 CAR,Alexander Nikishin,D,Out,Not Injury Related
 CAR,Jordan Staal,C,IR,Calf
 CAR,Mark Jankowski,C,Out,Lower Body
-CAR,Taylor Hall,LW,IR,Upper Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Mikael Backlund,C,Day-To-Day,Upper Body
 CGY,Samuel Honzek,LW,IR,Lower Body
@@ -47,8 +46,7 @@ LAK,Alex Turcotte,C,IR,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
 LAK,Kevin Fiala,LW,IR,Lower Leg
-LAK,Mats Zuccarello,RW,Out,Upper Body
-LAK,Quinton Byfield,RW,Day-To-Day,Upper Body
+LAK,Mats Zuccarello,RW,IR,Upper Body
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Marcus Foligno,LW,IR,Lower Body
@@ -113,7 +111,6 @@ UTA,Michael Carcone,LW,IR,Upper Body
 VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
-VGK,Mitch Marner,RW,Day-To-Day,Personal
 VGK,Parker Wotherspoon,D,IR,Upper Body
 WPG,Garrett Brown,C,IR,Lower Body
 WPG,Josh Morrissey,D,IR,Wrist
