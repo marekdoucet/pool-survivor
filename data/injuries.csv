@@ -22,8 +22,8 @@ DAL,Esa Lindell,D,IR,Lower Body
 DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Abdomen
 DAL,Oskar Back,C,IR,Finger
-DAL,Radek Faksa,C,Day-To-Day,Lower Body
-DAL,Sam Steel,C,Day-To-Day,Undisclosed
+DAL,Radek Faksa,C,Out,Lower Body
+DAL,Sam Steel,C,Out,Undisclosed
 DET,Albert Johansson,D,Day-To-Day,Undisclosed
 DET,Daniil Tarasov,G,Day-To-Day,Undisclosed
 DET,Marco Kasper,C,IR,Upper Body
@@ -51,7 +51,6 @@ MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
-NJD,Connor Hellebuyck,G,Out,Not Injury Related
 NJD,Seamus Casey,D,IR,Knee
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
@@ -60,6 +59,7 @@ NYI,Matias Maccelli,LW,IR,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Igor Shesterkin,G,IR,Knee
+NYR,James Reimer,G,Day-To-Day,Upper Body
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Foot
 OTT,Linus Ullmark,G,IR,Lower Body
@@ -86,7 +86,6 @@ SJS,Alexander Wennberg,C,Out,Upper Body
 SJS,Igor Chernyshov,LW,Out,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
-STL,Alexey Toropchenko,RW,IR,Upper Body
 STL,Dillon Dube,C,IR,Neck
 STL,Logan Mailloux,D,IR,Hand
 STL,Ross Johnston,LW,IR,Lower Body
