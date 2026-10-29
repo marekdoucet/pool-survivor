@@ -12,7 +12,7 @@ BUF,Matt Grzelcyk,D,IR,Lower Body
 BUF,Sam Carrick,C,IR,Upper Body
 CAR,Alexander Nikishin,D,Out,Not Injury Related
 CAR,Jordan Staal,C,IR,Calf
-CAR,Taylor Hall,LW,Out,Undisclosed
+CAR,Taylor Hall,LW,Out,Upper Body
 CGY,Brennan Othmann,LW,Day-To-Day,Upper Body
 CGY,Devin Cooley,G,Day-To-Day,Lower Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
@@ -29,7 +29,7 @@ DAL,Oskar Back,C,IR,Finger
 DAL,Radek Faksa,C,Out,Lower Body
 DAL,Sam Steel,C,Day-To-Day,Undisclosed
 DET,Albert Johansson,D,Out,Undisclosed
-DET,Daniil Tarasov,G,Day-To-Day,Undisclosed
+DET,Dylan Larkin,C,Out,Not Injury Related
 DET,Marco Kasper,C,IR,Upper Body
 DET,Mason Appleton,C,IR,Undisclosed
 DET,Simon Edvinsson,D,IR,Contract Dispute
@@ -53,7 +53,7 @@ LAK,Kevin Fiala,LW,IR,Lower Leg
 LAK,Mats Zuccarello,RW,IR,Upper Body
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
-MIN,Jared Spurgeon,D,Day-To-Day,Undisclosed
+MIN,Jared Spurgeon,D,Out,Undisclosed
 MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
 NJD,Seamus Casey,D,IR,Knee
@@ -75,11 +75,8 @@ PHI,Nikita Grebenkin,RW,IR,Back
 PHI,Owen Tippett,RW,IR,Upper Body
 PHI,Rasmus Ristolainen,D,IR,Hand
 PHI,Travis Konecny,RW,IR,Lower Body
-PIT,Ben Kindel,C,IR,Undisclosed
 PIT,Bryan Rust,RW,IR,Lower Body
-PIT,Egor Chinakhov,RW,Day-To-Day,Lower Body
 PIT,Elmer Soderblom,LW,IR,Upper Body
-PIT,Evgeni Malkin,C,Day-To-Day,Illness
 PIT,Justin Brazeau,RW,Out,Lower Body
 PIT,Ryan Graves,D,IR,Knee
 PIT,Samuel Girard,D,IR,Undisclosed
@@ -97,8 +94,6 @@ STL,Logan Mailloux,D,IR,Hand
 STL,Ross Johnston,LW,IR,Lower Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Brandon Hagel,LW,Day-To-Day,Undisclosed
-TBL,Victor Hedman,D,Day-To-Day,Lower Body
 TBL,Yanni Gourde,C,IR,Hip
 TBL,Zemgus Girgensons,C,Out,Lower Body
 TOR,Cade Webber,D,IR,Elbow
