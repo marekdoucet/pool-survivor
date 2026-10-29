@@ -17,7 +17,8 @@ CGY,Brennan Othmann,LW,Day-To-Day,Upper Body
 CGY,Devin Cooley,G,Day-To-Day,Lower Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Samuel Honzek,LW,IR,Lower Body
-CHI,Bowen Byram,D,Day-To-Day,Upper Body
+CHI,Alex Vlasic,D,Day-To-Day,Illness
+CHI,Bowen Byram,D,Out,Upper Body
 COL,Josh Manson,D,Out,Lower Body
 COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Cameron Hughes,C,IR,Upper Body
@@ -27,7 +28,6 @@ DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Abdomen
 DAL,Oskar Back,C,IR,Finger
 DAL,Radek Faksa,C,Out,Lower Body
-DAL,Sam Steel,C,Day-To-Day,Undisclosed
 DET,Albert Johansson,D,Out,Undisclosed
 DET,Dylan Larkin,C,Out,Not Injury Related
 DET,Marco Kasper,C,IR,Upper Body
@@ -100,7 +100,7 @@ TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
 TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,John Tavares,C,IR,Lower Body
-TOR,Kirill Marchenko,RW,Out,Lower Body
+TOR,Kirill Marchenko,RW,IR,Lower Body
 TOR,Marshall Rifai,D,IR,Lower Body
 TOR,Max Domi,C,IR,Back
 TOR,Miles Wood,LW,IR,Undisclosed
