@@ -34,7 +34,6 @@ EDM,Alec Regula,D,IR,Undisclosed
 EDM,Atro Leppanen,D,IR,Undisclosed
 EDM,Devon Levi,G,IR,Undisclosed
 EDM,Frederik Andersen,G,IR,Knee
-EDM,Jason Dickinson,C,IR,Undisclosed
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
 EDM,Zach Hyman,LW,IR,Neck
@@ -76,9 +75,9 @@ PHI,Travis Konecny,RW,IR,Lower Body
 PIT,Ben Kindel,C,IR,Undisclosed
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Egor Chinakhov,RW,Day-To-Day,Lower Body
-PIT,Elmer Soderblom,LW,Day-To-Day,Upper Body
+PIT,Elmer Soderblom,LW,IR,Upper Body
 PIT,Evgeni Malkin,C,Day-To-Day,Illness
-PIT,Justin Brazeau,RW,IR,Lower Body
+PIT,Justin Brazeau,RW,Out,Lower Body
 PIT,Ryan Graves,D,IR,Knee
 PIT,Samuel Girard,D,IR,Undisclosed
 PIT,Trevor van Riemsdyk,D,IR,Lower Body
@@ -101,10 +100,9 @@ TBL,Yanni Gourde,C,IR,Hip
 TBL,Zemgus Girgensons,C,Out,Lower Body
 TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
-TOR,Dakota Joshua,C,IR,Abdomen
 TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,John Tavares,C,IR,Lower Body
-TOR,Kirill Marchenko,RW,Day-To-Day,Lower Body
+TOR,Kirill Marchenko,RW,Out,Lower Body
 TOR,Marshall Rifai,D,IR,Lower Body
 TOR,Max Domi,C,IR,Back
 TOR,Miles Wood,LW,IR,Undisclosed
