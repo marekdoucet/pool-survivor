@@ -17,7 +17,7 @@ CGY,Brennan Othmann,LW,Day-To-Day,Upper Body
 CGY,Devin Cooley,G,Day-To-Day,Lower Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Samuel Honzek,LW,IR,Lower Body
-CHI,Bowen Byram,D,Out,Upper Body
+CHI,Bowen Byram,D,Day-To-Day,Upper Body
 COL,Josh Manson,D,Out,Lower Body
 COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Esa Lindell,D,IR,Lower Body
@@ -26,7 +26,7 @@ DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Abdomen
 DAL,Oskar Back,C,IR,Finger
 DAL,Radek Faksa,C,Out,Lower Body
-DET,Albert Johansson,D,Out,Undisclosed
+DET,Albert Johansson,D,Day-To-Day,Undisclosed
 DET,Dylan Larkin,C,IR,Suspension
 DET,Marco Kasper,C,IR,Upper Body
 DET,Mason Appleton,C,IR,Undisclosed
@@ -43,6 +43,7 @@ FLA,Brad Marchand,LW,IR,Leg
 FLA,Jacob Markstrom,G,IR,Upper Body
 FLA,Jonah Gadjovich,LW,IR,Upper Body
 LAK,Alex Turcotte,C,IR,Undisclosed
+LAK,Brandt Clarke,D,Day-To-Day,Upper Body
 LAK,Jakub Dvorak,D,IR,Upper Body
 LAK,Jan Jenik,C,IR,Undisclosed
 LAK,Kevin Fiala,LW,IR,Lower Leg
@@ -64,6 +65,7 @@ NYR,Igor Shesterkin,G,IR,Knee
 NYR,James Reimer,G,Day-To-Day,Upper Body
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Foot
+OTT,Andre Burakovsky,LW,Day-To-Day,Lower Body
 OTT,Linus Ullmark,G,IR,Lower Body
 OTT,Warren Foegele,LW,Out,Knee
 OTT,William Eklund,LW,IR,Ankle
@@ -90,7 +92,7 @@ STL,Ross Johnston,LW,IR,Lower Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Yanni Gourde,C,IR,Hip
-TBL,Zemgus Girgensons,C,Out,Lower Body
+TBL,Zemgus Girgensons,C,Day-To-Day,Lower Body
 TOR,Cade Webber,D,IR,Elbow
 TOR,Chris Tanev,D,IR,Upper Body
 TOR,Elvis Merzlikins,G,IR,Shoulder
