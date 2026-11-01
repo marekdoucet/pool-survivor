@@ -1,6 +1,5 @@
 team,player,pos,status,injury
 ANA,Ian Moore,D,IR,Lower Body
-ANA,Pavel Mintyukov,D,IR,Lower Body
 ANA,Ryan Poehling,C,IR,Lower Body
 ANA,Troy Terry,RW,IR,Hip
 BUF,Alex Lyon,G,IR,Upper Body
@@ -61,23 +60,20 @@ NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
 NYI,Mathew Barzal,C,IR,Knee
 NYI,Matias Maccelli,LW,IR,Lower Body
-NYI,Ryan Pulock,D,Day-To-Day,Upper Body
+NYI,Ryan Pulock,D,Out,Upper Body
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
-NYR,Braden Schneider,D,Day-To-Day,Illness
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Foot
-NYR,Sean Durzi,D,Day-To-Day,Undisclosed
+NYR,Sean Durzi,D,Out,Undisclosed
 OTT,Andre Burakovsky,LW,IR,Lower Body
 OTT,Hayden Hodgson,RW,Suspension,Suspension
 OTT,Linus Ullmark,G,IR,Lower Body
 OTT,Warren Foegele,LW,IR,Knee
 OTT,William Eklund,LW,IR,Ankle
 PHI,Nikita Grebenkin,RW,IR,Back
-PHI,Owen Tippett,RW,IR,Upper Body
 PHI,Rasmus Ristolainen,D,IR,Hand
-PHI,Travis Konecny,RW,IR,Lower Body
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Elmer Soderblom,LW,IR,Upper Body
 PIT,Justin Brazeau,RW,Out,Lower Body
@@ -109,14 +105,15 @@ TOR,Max Domi,C,IR,Back
 TOR,Miles Wood,LW,IR,Undisclosed
 TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
-UTA,John Marino,D,Out,Upper Body
+UTA,John Marino,D,IR,Upper Body
+UTA,Kailer Yamamoto,RW,Out,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
-UTA,Michael Carcone,LW,IR,Upper Body
 VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Filip Chytil,C,IR,Upper Body
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
 VGK,Parker Wotherspoon,D,IR,Upper Body
+WPG,Cole Koepke,LW,Out,Undisclosed
 WPG,Garrett Brown,C,IR,Lower Body
 WPG,Josh Morrissey,D,IR,Wrist
 WPG,Nick Bjugstad,C,IR,Pectoral
