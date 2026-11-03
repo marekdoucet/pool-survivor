@@ -57,6 +57,7 @@ MIN,Nick Foligno,LW,IR,Upper Body
 NJD,Anthony Mantha,RW,Day-To-Day,Undisclosed
 NJD,Evan Rodrigues,C,Day-To-Day,Illness
 NJD,Seamus Casey,D,IR,Knee
+NSH,Jonathan Marchessault,RW,Day-To-Day,Undisclosed
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
 NYI,Mathew Barzal,C,IR,Knee
@@ -76,8 +77,7 @@ PHI,Nikita Grebenkin,RW,IR,Back
 PHI,Rasmus Ristolainen,D,IR,Hand
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Elmer Soderblom,LW,IR,Upper Body
-PIT,Evgeni Malkin,C,Day-To-Day,Lower Body
-PIT,Kaedan Korczak,D,Day-To-Day,Lower Body
+PIT,Evgeni Malkin,C,Out,Lower Body
 PIT,Ryan Graves,D,IR,Knee
 PIT,Trevor van Riemsdyk,D,IR,Lower Body
 SEA,Jacob Melanson,RW,IR,Chest
@@ -94,12 +94,12 @@ STL,Logan Mailloux,D,IR,Hand
 STL,Ross Johnston,LW,IR,Lower Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Erik Cernak,D,Day-To-Day,Undisclosed
+TBL,Erik Cernak,D,Day-To-Day,day-to-day
 TBL,Yanni Gourde,C,IR,Hip
 TBL,Zemgus Girgensons,C,Out,Lower Body
 TOR,Cade Webber,D,IR,Elbow
 TOR,Elvis Merzlikins,G,IR,Shoulder
-TOR,John Tavares,C,IR,Lower Body
+TOR,John Tavares,C,Out,Lower Body
 TOR,Kirill Marchenko,RW,IR,Lower Body
 TOR,Marshall Rifai,D,IR,Lower Body
 TOR,Max Domi,C,IR,Back
