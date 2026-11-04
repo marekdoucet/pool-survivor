@@ -7,14 +7,14 @@ BOS,Matthew Poitras,C,Day-To-Day,Undisclosed
 BUF,Alex Lyon,G,IR,Upper Body
 BUF,Conor Timmins,D,IR,Lower Body
 BUF,Jack Rathbone,D,IR,Undisclosed
-BUF,Jiri Kulich,C,Day-To-Day,Concussion
+BUF,Jiri Kulich,C,Day-To-Day,"Kulich (concussion) participated in Tuesday's practice and is close to being ready to return, according to Rachel Lenzi of The Buffalo News."
 BUF,Justin Danforth,RW,IR,Upper Body
 BUF,Konsta Helenius,C,Out,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
 CAR,Alexander Nikishin,D,Out,Not Injury Related
 CAR,Jordan Staal,C,IR,Calf
-CAR,Taylor Hall,LW,Out,Upper Body
-CGY,Brennan Othmann,LW,Out,Upper Body
+CAR,Taylor Hall,LW,Day-To-Day,Upper Body
+CGY,Brennan Othmann,LW,Day-To-Day,Upper Body
 CGY,Connor Zary,C,Out,Knee
 CGY,Devin Cooley,G,IR,Lower Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
@@ -28,7 +28,7 @@ DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Abdomen
 DAL,Miro Heiskanen,D,Day-To-Day,Upper Body
 DAL,Oskar Back,C,IR,Finger
-DET,Albert Johansson,D,Out,Undisclosed
+DET,Albert Johansson,D,Day-To-Day,Undisclosed
 DET,Dylan Larkin,C,IR,Suspension
 DET,John Gibson,G,Day-To-Day,Lower Body
 DET,Marco Kasper,C,IR,Upper Body
@@ -57,6 +57,7 @@ MIN,Jared Spurgeon,D,IR,Lower Body
 MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
 NJD,Seamus Casey,D,IR,Knee
+NSH,Jonathan Marchessault,RW,Day-To-Day,Lower Body
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
 NYI,Mathew Barzal,C,IR,Knee
@@ -67,7 +68,7 @@ NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Foot
-NYR,Sean Durzi,D,Out,Undisclosed
+NYR,Sean Durzi,D,Day-To-Day,Undisclosed
 OTT,Andre Burakovsky,LW,IR,Lower Body
 OTT,Linus Ullmark,G,IR,Lower Body
 OTT,Warren Foegele,LW,IR,Knee
@@ -76,7 +77,7 @@ PHI,Nikita Grebenkin,RW,IR,Back
 PHI,Rasmus Ristolainen,D,IR,Hand
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Elmer Soderblom,LW,IR,Upper Body
-PIT,Evgeni Malkin,C,Out,Lower Body
+PIT,Evgeni Malkin,C,Day-To-Day,Lower Body
 PIT,Ryan Graves,D,IR,Knee
 PIT,Trevor van Riemsdyk,D,IR,Lower Body
 SEA,Curtis Douglas,C,Day-To-Day,Upper Body
@@ -88,16 +89,16 @@ SJS,Alexander Wennberg,C,IR,Upper Body
 SJS,Igor Chernyshov,LW,IR,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
-STL,Colton Parayko,D,Out,Upper Body
+STL,Colton Parayko,D,Day-To-Day,Upper Body
 STL,Dillon Dube,C,IR,Neck
 STL,Logan Mailloux,D,IR,Hand
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Yanni Gourde,C,IR,Hip
-TBL,Zemgus Girgensons,C,Out,Lower Body
+TBL,Zemgus Girgensons,C,Day-To-Day,Lower Body
 TOR,Cade Webber,D,IR,Elbow
 TOR,Elvis Merzlikins,G,IR,Shoulder
-TOR,John Tavares,C,Out,Lower Body
+TOR,John Tavares,C,IR,Lower Body
 TOR,Kirill Marchenko,RW,IR,Lower Body
 TOR,Marshall Rifai,D,IR,Lower Body
 TOR,Max Domi,C,IR,Back
@@ -105,15 +106,14 @@ TOR,Miles Wood,LW,IR,Undisclosed
 TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
 UTA,John Marino,D,IR,Upper Body
-UTA,Kailer Yamamoto,RW,Out,Upper Body
+UTA,Kailer Yamamoto,RW,Day-To-Day,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Filip Chytil,C,IR,Upper Body
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
-VAN,Tom Willander,D,Out,Lower Body
+VAN,Tom Willander,D,Day-To-Day,Lower Body
 VGK,Parker Wotherspoon,D,IR,Upper Body
-WPG,Garrett Brown,C,IR,Lower Body
 WPG,Josh Morrissey,D,IR,Wrist
 WPG,Nick Bjugstad,C,IR,Pectoral
 WPG,Vladislav Namestnikov,C,IR,Undisclosed
