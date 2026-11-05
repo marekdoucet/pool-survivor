@@ -24,11 +24,12 @@ COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Kyle Capobianco,D,IR,Leg
 DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Abdomen
-DAL,Miro Heiskanen,D,Day-To-Day,Upper Body
+DAL,Miro Heiskanen,D,Out,Upper Body
 DAL,Oskar Back,C,IR,Finger
+DAL,Sam Steel,C,Out,Personal
 DET,Albert Johansson,D,IR,Undisclosed
 DET,Dylan Larkin,C,IR,Suspension
-DET,John Gibson,G,Day-To-Day,Lower Body
+DET,John Gibson,G,Out,Lower Body
 DET,Marco Kasper,C,IR,Upper Body
 DET,Mason Appleton,C,IR,Undisclosed
 DET,Simon Edvinsson,D,IR,Contract Dispute
@@ -65,7 +66,7 @@ NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Foot
-NYR,Sean Durzi,D,Day-To-Day,Undisclosed
+NYR,Sean Durzi,D,Out,Undisclosed
 OTT,Andre Burakovsky,LW,IR,Lower Body
 OTT,Linus Ullmark,G,IR,Lower Body
 OTT,Ridly Greig,C,Day-To-Day,Lower Body
@@ -76,7 +77,6 @@ PHI,Nikita Grebenkin,RW,IR,Back
 PHI,Rasmus Ristolainen,D,IR,Hand
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Elmer Soderblom,LW,IR,Upper Body
-PIT,Evgeni Malkin,C,Day-To-Day,Lower Body
 PIT,Ryan Graves,D,IR,Knee
 PIT,Trevor van Riemsdyk,D,IR,Lower Body
 SEA,Curtis Douglas,C,IR,Upper Body
@@ -88,7 +88,6 @@ SJS,Alexander Wennberg,C,IR,Upper Body
 SJS,Igor Chernyshov,LW,IR,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
-STL,Colton Parayko,D,Day-To-Day,Upper Body
 STL,Dillon Dube,C,IR,Neck
 STL,Logan Mailloux,D,IR,Hand
 STL,Torey Krug,D,IR,Ankle
