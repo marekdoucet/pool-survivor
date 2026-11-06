@@ -3,7 +3,7 @@ ANA,A.J. Greer,LW,IR,Upper Body
 ANA,Ian Moore,D,IR,Lower Body
 ANA,Ryan Poehling,C,IR,Lower Body
 ANA,Troy Terry,RW,IR,Hip
-BOS,Matthew Poitras,C,Day-To-Day,Nose
+BOS,Matthew Poitras,C,Out,Nose
 BUF,Alex Lyon,G,IR,Upper Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Justin Danforth,RW,IR,Upper Body
@@ -11,7 +11,6 @@ BUF,Konsta Helenius,C,Out,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
 CAR,Alexander Nikishin,D,Out,Not Injury Related
 CAR,Jordan Staal,C,IR,Calf
-CAR,Taylor Hall,LW,Day-To-Day,Upper Body
 CGY,Brennan Othmann,LW,Day-To-Day,Upper Body
 CGY,Connor Zary,C,Out,Knee
 CGY,Jonathan Huberdeau,LW,IR,Hip
@@ -36,9 +35,10 @@ EDM,Alec Regula,D,IR,Undisclosed
 EDM,Atro Leppanen,D,IR,Undisclosed
 EDM,Devon Levi,G,IR,Undisclosed
 EDM,Frederik Andersen,G,IR,Knee
-EDM,Isaac Howard,LW,Out,Knee
+EDM,Isaac Howard,LW,IR,Knee
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
+EDM,Tristan Jarry,G,Out,Illness
 EDM,Zach Hyman,LW,IR,Neck
 FLA,Aleksander Barkov,C,IR,Knee
 FLA,Brad Marchand,LW,IR,Knee
@@ -65,7 +65,7 @@ NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Joonas Korpisalo,G,IR,Foot
-NYR,Sean Durzi,D,Out,Undisclosed
+NYR,Sean Durzi,D,IR,Undisclosed
 OTT,Andre Burakovsky,LW,IR,Lower Body
 OTT,Linus Ullmark,G,IR,Lower Body
 OTT,Ridly Greig,C,Day-To-Day,Lower Body
@@ -92,7 +92,6 @@ STL,Logan Mailloux,D,IR,Hand
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Yanni Gourde,C,IR,Hip
-TBL,Zemgus Girgensons,C,Day-To-Day,Lower Body
 TOR,Cade Webber,D,IR,Elbow
 TOR,Elvis Merzlikins,G,IR,Shoulder
 TOR,John Tavares,C,IR,Lower Body
@@ -103,13 +102,13 @@ TOR,Miles Wood,LW,IR,Undisclosed
 TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
 UTA,John Marino,D,IR,Upper Body
-UTA,Kailer Yamamoto,RW,Day-To-Day,Upper Body
+UTA,Kailer Yamamoto,RW,Out,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Filip Chytil,C,IR,Upper Body
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
-VAN,Tom Willander,D,Day-To-Day,Lower Body
+VAN,Tom Willander,D,Out,Lower Body
 VGK,Parker Wotherspoon,D,IR,Upper Body
 WPG,Josh Morrissey,D,IR,Wrist
 WPG,Nick Bjugstad,C,IR,Pectoral
