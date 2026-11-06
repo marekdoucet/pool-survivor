@@ -3,13 +3,14 @@ ANA,A.J. Greer,LW,IR,Upper Body
 ANA,Ian Moore,D,IR,Lower Body
 ANA,Ryan Poehling,C,IR,Lower Body
 ANA,Troy Terry,RW,IR,Hip
-BOS,Matthew Poitras,C,Out,Nose
+BOS,James Hagens,C,Day-To-Day,Back
+BOS,Matthew Poitras,C,Day-To-Day,Nose
 BUF,Alex Lyon,G,IR,Upper Body
 BUF,Jack Rathbone,D,IR,Undisclosed
 BUF,Justin Danforth,RW,IR,Upper Body
 BUF,Konsta Helenius,C,Out,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
-CAR,Alexander Nikishin,D,Out,Not Injury Related
+CAR,Alexander Nikishin,D,Day-To-Day,Not Injury Related
 CAR,Jordan Staal,C,IR,Calf
 CGY,Brennan Othmann,LW,Day-To-Day,Upper Body
 CGY,Connor Zary,C,Out,Knee
@@ -22,12 +23,12 @@ COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Kyle Capobianco,D,IR,Leg
 DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Abdomen
-DAL,Miro Heiskanen,D,Out,Upper Body
+DAL,Miro Heiskanen,D,Day-To-Day,Upper Body
 DAL,Oskar Back,C,IR,Finger
-DAL,Sam Steel,C,Out,Personal
+DAL,Sam Steel,C,Day-To-Day,Personal
 DET,Albert Johansson,D,IR,Undisclosed
 DET,Dylan Larkin,C,IR,Suspension
-DET,John Gibson,G,Out,Lower Body
+DET,John Gibson,G,Day-To-Day,Lower Body
 DET,Marco Kasper,C,IR,Upper Body
 DET,Mason Appleton,C,IR,Undisclosed
 DET,Simon Edvinsson,D,IR,Contract Dispute
@@ -38,7 +39,7 @@ EDM,Frederik Andersen,G,IR,Knee
 EDM,Isaac Howard,LW,IR,Knee
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
-EDM,Tristan Jarry,G,Out,Illness
+EDM,Tristan Jarry,G,Day-To-Day,Illness
 EDM,Zach Hyman,LW,IR,Neck
 FLA,Aleksander Barkov,C,IR,Knee
 FLA,Brad Marchand,LW,IR,Knee
@@ -54,6 +55,7 @@ MIN,Jared Spurgeon,D,IR,Lower Body
 MIN,Marcus Foligno,LW,IR,Lower Body
 MIN,Nick Foligno,LW,IR,Upper Body
 NJD,Seamus Casey,D,IR,Knee
+NSH,Jonathan Marchessault,RW,Day-To-Day,Lower Body
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
 NYI,Mathew Barzal,C,IR,Knee
@@ -101,15 +103,16 @@ TOR,Miles Wood,LW,IR,Undisclosed
 TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
 UTA,John Marino,D,IR,Upper Body
-UTA,Kailer Yamamoto,RW,Out,Upper Body
+UTA,Kailer Yamamoto,RW,Day-To-Day,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Nate Schmidt,D,Day-To-Day,Upper Body
 VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Filip Chytil,C,IR,Upper Body
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
-VAN,Tom Willander,D,Out,Lower Body
+VAN,Tom Willander,D,Day-To-Day,Lower Body
 VGK,Parker Wotherspoon,D,IR,Upper Body
+WPG,Haydn Fleury,D,Day-To-Day,Hand
 WPG,Josh Morrissey,D,IR,Wrist
 WPG,Nick Bjugstad,C,IR,Pectoral
 WPG,Vladislav Namestnikov,C,IR,Undisclosed
