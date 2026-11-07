@@ -3,7 +3,7 @@ ANA,A.J. Greer,LW,IR,Upper Body
 ANA,Ian Moore,D,IR,Lower Body
 ANA,Ryan Poehling,C,IR,Lower Body
 ANA,Troy Terry,RW,IR,Hip
-BOS,James Hagens,C,Day-To-Day,Back
+BOS,James Hagens,C,IR,Back
 BOS,Matthew Poitras,C,Day-To-Day,Nose
 BUF,Alex Lyon,G,IR,Upper Body
 BUF,Justin Danforth,RW,IR,Upper Body
@@ -44,6 +44,7 @@ EDM,Mattias Janmark,C,IR,Undisclosed
 EDM,Tristan Jarry,G,Day-To-Day,Illness
 EDM,Zach Hyman,LW,IR,Neck
 FLA,Aleksander Barkov,C,IR,Knee
+FLA,Anton Lundell,C,Out,Undisclosed
 FLA,Brad Marchand,LW,IR,Knee
 FLA,Jonah Gadjovich,LW,IR,Upper Body
 LAK,Alex Turcotte,C,IR,Undisclosed
@@ -96,7 +97,6 @@ STL,Tyler Tucker,D,IR,Knee
 TBL,Yanni Gourde,C,IR,Hip
 TOR,Cade Webber,D,IR,Elbow
 TOR,Elvis Merzlikins,G,IR,Shoulder
-TOR,John Tavares,C,IR,Lower Body
 TOR,Kirill Marchenko,RW,IR,Lower Body
 TOR,Marshall Rifai,D,IR,Lower Body
 TOR,Max Domi,C,IR,Back
@@ -104,7 +104,7 @@ TOR,Miles Wood,LW,IR,Undisclosed
 TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
 UTA,John Marino,D,IR,Upper Body
-UTA,Kailer Yamamoto,RW,Day-To-Day,Upper Body
+UTA,Kailer Yamamoto,RW,IR,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Nate Schmidt,D,Day-To-Day,Upper Body
 VAN,Akil Thomas,C,IR,Undisclosed
