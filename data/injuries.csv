@@ -9,7 +9,6 @@ BUF,Alex Lyon,G,IR,Upper Body
 BUF,Justin Danforth,RW,IR,Upper Body
 BUF,Konsta Helenius,C,Out,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
-CAR,Alexander Nikishin,D,Day-To-Day,Not Injury Related
 CAR,Jordan Staal,C,IR,Calf
 CBJ,Dmitri Voronkov,LW,Day-To-Day,Upper Body
 CBJ,Sean Monahan,C,Day-To-Day,Lower Body
@@ -92,6 +91,7 @@ SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,Dillon Dube,C,IR,Neck
 STL,Logan Mailloux,D,IR,Hand
+STL,Mason McTavish,C,Day-To-Day,Undisclosed
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Yanni Gourde,C,IR,Hip
@@ -113,6 +113,7 @@ VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
 VAN,Tom Willander,D,Day-To-Day,Lower Body
 VGK,Parker Wotherspoon,D,IR,Upper Body
+WPG,Elias Salomonsson,D,Day-To-Day,Illness
 WPG,Haydn Fleury,D,Day-To-Day,Hand
 WPG,Josh Morrissey,D,IR,Wrist
 WPG,Nick Bjugstad,C,IR,Pectoral
