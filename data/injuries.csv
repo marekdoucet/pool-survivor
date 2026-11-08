@@ -28,7 +28,7 @@ DAL,Miro Heiskanen,D,Out,Upper Body
 DAL,Oskar Back,C,IR,Finger
 DET,Albert Johansson,D,IR,Undisclosed
 DET,Dylan Larkin,C,IR,Suspension
-DET,John Gibson,G,Day-To-Day,Lower Body
+DET,John Gibson,G,Out,Lower Body
 DET,Marco Kasper,C,IR,Upper Body
 DET,Mason Appleton,C,IR,Undisclosed
 DET,Simon Edvinsson,D,IR,Contract Dispute
@@ -49,7 +49,7 @@ LAK,Mats Zuccarello,RW,IR,Upper Body
 MIN,Brock Faber,D,IR,Skull
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Jared Spurgeon,D,IR,Lower Body
-MIN,Michael McCarron,C,Out,Undisclosed
+MIN,Michael McCarron,C,Out,Upper Body
 NJD,Seamus Casey,D,IR,Knee
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
@@ -94,6 +94,7 @@ TOR,Kirill Marchenko,RW,IR,Lower Body
 TOR,Marshall Rifai,D,IR,Lower Body
 TOR,Max Domi,C,IR,Back
 TOR,Miles Wood,LW,IR,Undisclosed
+TOR,Morgan Rielly,D,Day-To-Day,Lower Body
 TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
 UTA,John Marino,D,IR,Upper Body
