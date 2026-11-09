@@ -1265,8 +1265,13 @@ def page_carte():
                   "cells are the plan's picks. Read a team from left to right: you "
                   "see when it is worth the most."))
     mondays_all = list(options)
-    n_weeks = st.slider(tr("Semaines affichées", "Weeks shown"), 4, len(mondays_all),
-                        min(12, len(mondays_all)))
+    # Streamlit refuse un curseur dont le min n'est pas sous le max : en fin de
+    # saison (4 semaines ou moins), on montre tout sans curseur.
+    if len(mondays_all) > 4:
+        n_weeks = st.slider(tr("Semaines affichées", "Weeks shown"), 4, len(mondays_all),
+                            min(12, len(mondays_all)))
+    else:
+        n_weeks = len(mondays_all)
     shown = mondays_all[:n_weeks]
     labels = [fr_date(m) for m in shown]
     order = sorted(cm.TEAMS - set(used),
