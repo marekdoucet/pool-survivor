@@ -31,7 +31,7 @@ DET,Marco Kasper,C,IR,Upper Body
 DET,Mason Appleton,C,IR,Undisclosed
 DET,Simon Edvinsson,D,IR,Contract Dispute
 EDM,Alec Regula,D,IR,Undisclosed
-EDM,Colton Dach,C,Out,Illness
+EDM,Colton Dach,C,Day-To-Day,Illness
 EDM,Frederik Andersen,G,IR,Knee
 EDM,Isaac Howard,LW,IR,Knee
 EDM,Matt Savoie,C,IR,Lower Body
@@ -85,16 +85,15 @@ SJS,Quentin Musty,LW,IR,Upper Body
 STL,Dillon Dube,C,IR,Neck
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Brayden Point,C,Day-To-Day,Undisclosed
+TBL,Brayden Point,C,IR,Undisclosed
 TOR,Cade Webber,D,IR,Elbow
-TOR,Colton Sissons,C,Day-To-Day,Lower Body
+TOR,Colton Sissons,C,Out,Lower Body
 TOR,Elvis Merzlikins,G,IR,Shoulder
-TOR,Jack Roslovic,C,Day-To-Day,Lower Body
 TOR,Kirill Marchenko,RW,IR,Lower Body
 TOR,Marshall Rifai,D,IR,Lower Body
 TOR,Max Domi,C,IR,Back
 TOR,Miles Wood,LW,IR,Undisclosed
-TOR,Morgan Rielly,D,Day-To-Day,Lower Body
+TOR,Morgan Rielly,D,Out,Lower Body
 TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
 UTA,John Marino,D,IR,Upper Body
@@ -105,7 +104,7 @@ VAN,Akil Thomas,C,IR,Undisclosed
 VAN,Filip Chytil,C,IR,Shoulder
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
-VAN,Tom Willander,D,Out,Lower Body
+VAN,Tom Willander,D,Day-To-Day,Lower Body
 VGK,Parker Wotherspoon,D,IR,Upper Body
 WPG,Elias Salomonsson,D,IR,Personal
 WPG,Josh Morrissey,D,IR,Wrist
