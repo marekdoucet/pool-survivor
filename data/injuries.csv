@@ -7,7 +7,6 @@ BUF,Justin Danforth,RW,IR,Upper Body
 BUF,Konsta Helenius,C,IR,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
 CAR,Jordan Staal,C,IR,Calf
-CBJ,Sean Monahan,C,Day-To-Day,Upper Body
 CGY,Connor Zary,C,Out,Knee
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Kevin Bahl,D,IR,Achilles
@@ -18,9 +17,8 @@ COL,Nathan MacKinnon,C,Day-To-Day,Lower Body
 COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Kyle Capobianco,D,IR,Leg
 DAL,Lian Bichsel,D,Out,Lower Body
-DAL,Luke Krys,D,IR,Undisclosed
 DAL,Matt Duchene,C,IR,Abdomen
-DAL,Miro Heiskanen,D,Day-To-Day,Upper Body
+DAL,Miro Heiskanen,D,Out,Upper Body
 DAL,Oskar Back,C,IR,Finger
 DET,Albert Johansson,D,IR,Undisclosed
 DET,Dylan Larkin,C,IR,Suspension
@@ -40,7 +38,7 @@ MIN,Filip Gustavsson,G,IR,Hip
 MIN,Joel Eriksson Ek,C,Day-To-Day,Upper Body
 NJD,Anthony Mantha,RW,IR,Neck
 NJD,Brett Pesce,D,Day-To-Day,Illness
-NJD,Johnathan Kovacevic,D,Out,Undisclosed
+NJD,Johnathan Kovacevic,D,IR,Ankle
 NJD,Seamus Casey,D,IR,Knee
 NSH,Jonathan Marchessault,RW,Day-To-Day,Lower Body
 NYI,Alexander Romanov,D,IR,Knee
@@ -97,10 +95,10 @@ UTA,Nick Schmaltz,C,Day-To-Day,Lower Body
 VAN,Filip Chytil,C,IR,Shoulder
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
-VAN,Tom Willander,D,Day-To-Day,Lower Body
 VGK,Noah Hanifin,D,Out,Undisclosed
 WPG,Dylan DeMelo,D,IR,Lower Body
 WPG,Elias Salomonsson,D,IR,Personal
+WPG,Isak Rosen,RW,Day-To-Day,Undisclosed
 WPG,Nick Bjugstad,C,IR,Pectoral
 WPG,Vladislav Namestnikov,C,IR,Undisclosed
 WSH,Rasmus Sandin,D,IR,Knee
