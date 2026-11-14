@@ -30,18 +30,19 @@ EDM,Mattias Janmark,C,IR,Undisclosed
 FLA,Aleksander Barkov,C,IR,Knee
 FLA,Brad Marchand,LW,IR,Knee
 FLA,Jonah Gadjovich,LW,IR,Neck
-LAK,Erik Gustafsson,D,Day-To-Day,Undisclosed
+LAK,Artemi Panarin,LW,Out,Personal
+LAK,Erik Gustafsson,D,Out,Undisclosed
 LAK,Jakub Dvorak,D,IR,Upper Body
 MIN,Filip Gustavsson,G,IR,Hip
 NJD,Anthony Mantha,RW,IR,Neck
-NJD,Brett Pesce,D,Day-To-Day,Illness
+NJD,Brett Pesce,D,Out,Illness
 NJD,Johnathan Kovacevic,D,IR,Ankle
 NJD,Seamus Casey,D,IR,Knee
+NJD,Vladislav Kolyachonok,D,Out,Illness
 NSH,Jonathan Marchessault,RW,Day-To-Day,Lower Body
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
 NYI,Jean-Gabriel Pageau,C,Day-To-Day,Lower Body
-NYI,Mathew Barzal,C,IR,Knee
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Alberts Smits,D,IR,Upper Body
@@ -53,7 +54,6 @@ OTT,Nick Cousins,C,Out,Upper Body
 OTT,Warren Foegele,LW,IR,Knee
 OTT,William Eklund,LW,IR,Ankle
 PHI,Nikita Grebenkin,RW,IR,Back
-PHI,Noel Acciari,C,Day-To-Day,Upper Body
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Elmer Soderblom,LW,IR,Upper Body
 PIT,Ryan Graves,D,IR,Knee
@@ -63,16 +63,16 @@ SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Jared McCann,LW,IR,Lower Body
 SEA,Nikke Kokko,G,IR,Not Injury Related
-SJS,Alexander Wennberg,C,Day-To-Day,Undisclosed
+SJS,Alexander Wennberg,C,Out,Upper Body
 SJS,Igor Chernyshov,LW,IR,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,Dillon Dube,C,IR,Neck
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Anthony Cirelli,C,Day-To-Day,Lower Body
+TBL,Anthony Cirelli,C,Out,Lower Body
 TBL,Brayden Point,C,IR,Undisclosed
-TBL,Erik Cernak,D,Day-To-Day,Upper Body
+TBL,Erik Cernak,D,Out,Upper Body
 TOR,Cade Webber,D,IR,Elbow
 TOR,Colton Sissons,C,IR,Lower Body
 TOR,Elvis Merzlikins,G,IR,Shoulder
@@ -88,7 +88,7 @@ UTA,John Marino,D,IR,Upper Body
 UTA,Logan Cooley,C,Out,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Nate Schmidt,D,IR,Upper Body
-UTA,Nick Schmaltz,C,Day-To-Day,Lower Body
+UTA,Nick Schmaltz,C,Out,Lower Body
 VAN,Guillaume Brisebois,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
