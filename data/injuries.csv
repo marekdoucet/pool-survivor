@@ -40,7 +40,7 @@ NJD,Anthony Mantha,RW,IR,Neck
 NJD,Brett Pesce,D,Day-To-Day,Illness
 NJD,Johnathan Kovacevic,D,IR,Ankle
 NJD,Seamus Casey,D,IR,Knee
-NSH,Jonathan Marchessault,RW,Day-To-Day,Lower Body
+NSH,Jonathan Marchessault,RW,Out,Lower Body
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
 NYI,Jean-Gabriel Pageau,C,Day-To-Day,Lower Body
@@ -67,6 +67,7 @@ SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Jared McCann,LW,IR,Lower Body
 SEA,Nikke Kokko,G,IR,Not Injury Related
 SEA,Ryan Lindgren,D,IR,Upper Body
+SJS,Alexander Wennberg,C,Day-To-Day,Undisclosed
 SJS,Igor Chernyshov,LW,IR,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
@@ -88,17 +89,17 @@ TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
 UTA,Dylan Guenther,RW,IR,Upper Body
 UTA,John Marino,D,IR,Upper Body
-UTA,Logan Cooley,C,Day-To-Day,Upper Body
+UTA,Logan Cooley,C,Out,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Nate Schmidt,D,IR,Upper Body
 UTA,Nick Schmaltz,C,Day-To-Day,Lower Body
-VAN,Filip Chytil,C,IR,Shoulder
+VAN,Guillaume Brisebois,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
 VGK,Noah Hanifin,D,Out,Undisclosed
 WPG,Dylan DeMelo,D,IR,Lower Body
 WPG,Elias Salomonsson,D,IR,Personal
-WPG,Isak Rosen,RW,Day-To-Day,Undisclosed
+WPG,Isak Rosen,RW,Out,Undisclosed
 WPG,Nick Bjugstad,C,IR,Pectoral
 WPG,Vladislav Namestnikov,C,IR,Undisclosed
 WSH,Rasmus Sandin,D,IR,Knee
