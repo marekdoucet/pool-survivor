@@ -1,6 +1,5 @@
 team,player,pos,status,injury
 ANA,A.J. Greer,LW,IR,Upper Body
-ANA,Ian Moore,D,IR,Lower Body
 ANA,Ryan Poehling,C,IR,Knee
 BOS,James Hagens,C,IR,Back
 BUF,Justin Danforth,RW,IR,Upper Body
@@ -29,6 +28,7 @@ EDM,Frederik Andersen,G,IR,Knee
 EDM,Isaac Howard,LW,IR,Knee
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
+EDM,Ryan Nugent-Hopkins,C,Out,Undisclosed
 FLA,Aleksander Barkov,C,IR,Knee
 FLA,Brad Marchand,LW,IR,Knee
 FLA,Jonah Gadjovich,LW,IR,Neck
@@ -58,6 +58,7 @@ OTT,Hayden Hodgson,RW,Day-To-Day,Groin
 OTT,Nick Cousins,C,Out,Upper Body
 OTT,Warren Foegele,LW,IR,Knee
 OTT,William Eklund,LW,IR,Ankle
+PHI,Denver Barkey,C,Out,Illness
 PHI,Nikita Grebenkin,RW,IR,Back
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Elmer Soderblom,LW,IR,Upper Body
@@ -67,12 +68,13 @@ SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Jared McCann,LW,IR,Lower Body
 SEA,Nikke Kokko,G,IR,Not Injury Related
-SJS,Alexander Wennberg,C,Day-To-Day,Upper Body
+SJS,Alexander Wennberg,C,Out,Upper Body
 SJS,Igor Chernyshov,LW,IR,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,Aleksanteri Kaskimaki,C,Day-To-Day,Undisclosed
 STL,Dillon Dube,C,IR,Neck
+STL,Jake Neighbours,LW,Day-To-Day,Upper Body
 STL,Philip Broberg,D,Day-To-Day,Lower Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
