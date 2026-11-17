@@ -14,13 +14,13 @@ CHI,Bowen Byram,D,IR,Upper Body
 COL,Cale Makar,D,Out,Lower Body
 COL,Josh Manson,D,IR,Ankle
 COL,Nathan MacKinnon,C,Out,Lower Body
+COL,Scott Wedgewood,G,Day-To-Day,Illness
 COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Kyle Capobianco,D,IR,Leg
 DAL,Lian Bichsel,D,IR,Lower Body
 DAL,Matt Duchene,C,IR,Abdomen
-DAL,Miro Heiskanen,D,Day-To-Day,Upper Body
 DAL,Oskar Back,C,IR,Finger
-DAL,Tyler Myers,D,Day-To-Day,Upper Body
+DAL,Tyler Myers,D,Out,Upper Body
 DET,Albert Johansson,D,IR,Undisclosed
 DET,Dylan Larkin,C,IR,Suspension
 DET,Simon Edvinsson,D,IR,Contract Dispute
@@ -43,7 +43,7 @@ NJD,Seamus Casey,D,IR,Knee
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
 NYI,Jean-Gabriel Pageau,C,Day-To-Day,Lower Body
-NYI,Logan Stanley,D,Day-To-Day,Lower Body
+NYI,Logan Stanley,D,Out,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Alberts Smits,D,IR,Upper Body
@@ -65,12 +65,10 @@ SEA,Jacob Melanson,RW,IR,Chest
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Jared McCann,LW,IR,Lower Body
 SEA,Nikke Kokko,G,IR,Not Injury Related
-SJS,Alexander Wennberg,C,Day-To-Day,Upper Body
 SJS,Igor Chernyshov,LW,IR,Upper Body
-SJS,Kiefer Sherwood,LW,Day-To-Day,Arm
+SJS,Kiefer Sherwood,LW,Out,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
-STL,Aleksanteri Kaskimaki,C,Day-To-Day,"Kaskimaki sustained an undisclosed injury near the end of Saturday's game versus the Panthers, Lou Korac of NHL.com reports."
 STL,Dillon Dube,C,IR,Neck
 STL,Ross Johnston,LW,Out,Upper Body
 STL,Torey Krug,D,IR,Ankle
