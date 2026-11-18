@@ -1,5 +1,6 @@
 team,player,pos,status,injury
 ANA,A.J. Greer,LW,IR,Upper Body
+ANA,Beckett Sennecke,RW,Out,Illness
 ANA,Ryan Poehling,C,IR,Knee
 BOS,James Hagens,C,IR,Back
 BUF,Justin Danforth,RW,IR,Upper Body
@@ -42,7 +43,7 @@ NJD,Johnathan Kovacevic,D,IR,Ankle
 NJD,Seamus Casey,D,IR,Knee
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Calum Ritchie,C,IR,Lower Body
-NYI,Jean-Gabriel Pageau,C,Day-To-Day,Lower Body
+NYI,Jean-Gabriel Pageau,C,Out,Lower Body
 NYI,Logan Stanley,D,Out,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
@@ -73,9 +74,8 @@ STL,Dillon Dube,C,IR,Neck
 STL,Ross Johnston,LW,Out,Upper Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
-TBL,Anthony Cirelli,C,Day-To-Day,Lower Body
-TBL,Conor Geekie,C,IR,Undisclosed
-TBL,Erik Cernak,D,Day-To-Day,Upper Body
+TBL,Brandon Hagel,LW,Out,Lower Body
+TBL,Conor Geekie,C,IR,Upper Body
 TOR,Cade Webber,D,IR,Elbow
 TOR,Colton Sissons,C,IR,Lower Body
 TOR,Elvis Merzlikins,G,IR,Shoulder
@@ -89,7 +89,7 @@ UTA,Dylan Guenther,RW,IR,Upper Body
 UTA,John Marino,D,IR,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Nate Schmidt,D,IR,Upper Body
-UTA,Nick Schmaltz,C,Out,Lower Body
+UTA,Nick Schmaltz,C,IR,Lower Body
 VAN,Guillaume Brisebois,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
