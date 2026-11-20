@@ -634,6 +634,7 @@ def rendu(ctx, lang):
 <link rel="alternate" hreflang="en" href="{CHEMINS['en'][1]}">
 <link rel="alternate" hreflang="x-default" href="{CHEMINS['fr'][1]}">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Pool Survivor LNH">
 <meta property="og:title" content="{e(titre)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{CHEMINS[lang][1]}">
