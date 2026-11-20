@@ -5,6 +5,7 @@ BOS,James Hagens,C,IR,Back
 BUF,Justin Danforth,RW,IR,Upper Body
 BUF,Konsta Helenius,C,IR,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
+CBJ,Mathieu Olivier,RW,Day-To-Day,Undisclosed
 CBJ,Sean Monahan,C,Out,Upper Body
 CGY,Connor Zary,C,Out,Knee
 CGY,Jonathan Huberdeau,LW,IR,Hip
@@ -12,7 +13,7 @@ CGY,Kevin Bahl,D,IR,Achilles
 CHI,Bowen Byram,D,IR,Upper Body
 CHI,Connor Bedard,C,Out,Shoulder
 COL,Cale Makar,D,IR,Lower Body
-COL,Gavin Brindley,C,Out,Upper Body
+COL,Gavin Brindley,C,Day-To-Day,Concussion
 COL,Josh Manson,D,IR,Ankle
 COL,Nathan MacKinnon,C,Out,Lower Body
 COL,Zachary L'Heureux,LW,IR,Upper Body
@@ -20,7 +21,7 @@ DAL,Kyle Capobianco,D,IR,Leg
 DAL,Lian Bichsel,D,IR,Lower Body
 DAL,Matt Duchene,C,IR,Abdomen
 DAL,Oskar Back,C,IR,Finger
-DAL,Tyler Myers,D,Out,Upper Body
+DAL,Tyler Myers,D,Day-To-Day,Upper Body
 DET,Albert Johansson,D,IR,Undisclosed
 DET,Dylan Larkin,C,IR,Suspension
 DET,Simon Edvinsson,D,IR,Contract Dispute
@@ -29,38 +30,41 @@ EDM,Alec Regula,D,IR,Undisclosed
 EDM,Frederik Andersen,G,IR,Knee
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
-EDM,Ryan Nugent-Hopkins,C,Out,Undisclosed
+EDM,Ryan Nugent-Hopkins,C,Day-To-Day,Undisclosed
 FLA,Aleksander Barkov,C,IR,Knee
 FLA,Brad Marchand,LW,IR,Knee
 FLA,Jonah Gadjovich,LW,IR,Neck
-LAK,Artemi Panarin,LW,Out,Personal
+LAK,Artemi Panarin,LW,Day-To-Day,Personal
 LAK,Jakub Dvorak,D,IR,Upper Body
-LAK,Trevor Moore,LW,Out,Undisclosed
+LAK,Trevor Moore,LW,Day-To-Day,Undisclosed
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Olli Maatta,D,IR,Upper Body
-MIN,Yakov Trenin,C,Out,Personal
+MIN,Quinn Hughes,D,Day-To-Day,Upper Body
+MIN,Yakov Trenin,C,Day-To-Day,Personal
 NJD,Anthony Mantha,RW,IR,Neck
 NJD,Johnathan Kovacevic,D,IR,Ankle
 NJD,Seamus Casey,D,IR,Knee
 NYI,Alexander Romanov,D,IR,Knee
-NYI,Logan Stanley,D,Out,Lower Body
+NYI,Logan Stanley,D,Day-To-Day,Lower Body
 NYI,Ryan Pulock,D,Day-To-Day,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Alberts Smits,D,IR,Upper Body
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
+NYR,Oliver Bjorkstrand,RW,Day-To-Day,Upper Body
 NYR,Pavel Dorofeyev,RW,Day-To-Day,Lower Body
 NYR,Sean Durzi,D,IR,Lower Body
 OTT,Andre Burakovsky,LW,IR,Lower Body
-OTT,Hayden Hodgson,RW,Out,Groin
-OTT,Nick Cousins,C,Out,Upper Body
+OTT,Hayden Hodgson,RW,Day-To-Day,Groin
+OTT,Nick Cousins,C,Day-To-Day,Upper Body
 OTT,Warren Foegele,LW,IR,Knee
 OTT,William Eklund,LW,IR,Ankle
 PHI,Nikita Grebenkin,RW,IR,Back
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Elmer Soderblom,LW,IR,Upper Body
-PIT,Nick Robertson,LW,Out,Lower Body
+PIT,Evgeni Malkin,C,Out,Upper Body
+PIT,Nick Robertson,LW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
 SEA,Curtis Douglas,C,IR,Upper Body
 SEA,Jake O'Brien,C,IR,Lower Body
@@ -71,12 +75,12 @@ SJS,Kiefer Sherwood,LW,Out,Upper Body
 SJS,Kyle Keyser,G,IR,Upper Body
 SJS,Quentin Musty,LW,IR,Upper Body
 STL,Dillon Dube,C,IR,Neck
-STL,Ross Johnston,LW,Out,Upper Body
+STL,Ross Johnston,LW,Day-To-Day,Upper Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Brandon Hagel,LW,IR,Lower Body
 TBL,Conor Geekie,C,IR,Upper Body
-TBL,Zemgus Girgensons,C,Out,Upper Body
+TBL,Zemgus Girgensons,C,Day-To-Day,Upper Body
 TOR,Cade Webber,D,IR,Elbow
 TOR,Colton Sissons,C,IR,Lower Body
 TOR,Elvis Merzlikins,G,IR,Shoulder
@@ -91,6 +95,7 @@ UTA,John Marino,D,IR,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Nate Schmidt,D,IR,Upper Body
 UTA,Nick Schmaltz,C,IR,Lower Body
+VAN,Brendan Gallagher,RW,Day-To-Day,Lower Body
 VAN,Guillaume Brisebois,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip

@@ -1,5 +1,5 @@
 team,player_id,first_name,last_name,position,games,goals,points,headshot,action,color,season
-ANA,8483445,Cutter,Gauthier,L,21,21,29,https://assets.nhle.com/mugs/nhl/20262027/ANA/8483445.png,https://assets.nhle.com/mugs/actionshots/1296x729/8483445.jpg,#cf4520,20262027
+ANA,8483445,Cutter,Gauthier,L,22,21,29,https://assets.nhle.com/mugs/nhl/20262027/ANA/8483445.png,https://assets.nhle.com/mugs/actionshots/1296x729/8483445.jpg,#cf4520,20262027
 BOS,8477956,David,Pastrnak,R,22,10,28,https://assets.nhle.com/mugs/nhl/20262027/BOS/8477956.png,https://assets.nhle.com/mugs/actionshots/1296x729/8477956.jpg,#ffb81c,20262027
 BUF,8479420,Tage,Thompson,C,22,14,24,https://assets.nhle.com/mugs/nhl/20262027/BUF/8479420.png,https://assets.nhle.com/mugs/actionshots/1296x729/8479420.jpg,#ffb81c,20262027
 CAR,8478427,Sebastian,Aho,C,22,12,29,https://assets.nhle.com/mugs/nhl/20262027/CAR/8478427.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478427.jpg,#cd001a,20262027
@@ -7,7 +7,7 @@ CBJ,8482660,Kent,Johnson,C,20,9,21,https://assets.nhle.com/mugs/nhl/20262027/CBJ
 CGY,8480797,Joel,Farabee,L,23,7,18,https://assets.nhle.com/mugs/nhl/20262027/CGY/8480797.png,https://assets.nhle.com/mugs/actionshots/1296x729/8480797.jpg,#c8102e,20262027
 CHI,8484144,Connor,Bedard,C,15,7,18,https://assets.nhle.com/mugs/nhl/20262027/CHI/8484144.png,https://assets.nhle.com/mugs/actionshots/1296x729/8484144.jpg,#fedd00,20262027
 COL,8477492,Nathan,MacKinnon,C,20,10,30,https://assets.nhle.com/mugs/nhl/20262027/COL/8477492.png,https://assets.nhle.com/mugs/actionshots/1296x729/8477492.jpg,#236192,20262027
-DAL,8478420,Mikko,Rantanen,R,21,10,26,https://assets.nhle.com/mugs/nhl/20262027/DAL/8478420.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478420.jpg,#00843d,20262027
+DAL,8478420,Mikko,Rantanen,R,22,10,27,https://assets.nhle.com/mugs/nhl/20262027/DAL/8478420.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478420.jpg,#00843d,20262027
 DET,8482078,Lucas,Raymond,L,22,9,22,https://assets.nhle.com/mugs/nhl/20262027/DET/8482078.png,https://assets.nhle.com/mugs/actionshots/1296x729/8482078.jpg,#c8102e,20262027
 EDM,8478402,Connor,McDavid,C,24,13,55,https://assets.nhle.com/mugs/nhl/20262027/EDM/8478402.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478402.jpg,#cf4520,20262027
 FLA,8479314,Matthew,Tkachuk,L,23,7,32,https://assets.nhle.com/mugs/nhl/20262027/FLA/8479314.png,https://assets.nhle.com/mugs/actionshots/1296x729/8479314.jpg,#c8102e,20262027
@@ -27,7 +27,7 @@ STL,8480023,Robert,Thomas,C,22,4,20,https://assets.nhle.com/mugs/nhl/20262027/ST
 TBL,8476453,Nikita,Kucherov,R,22,9,31,https://assets.nhle.com/mugs/nhl/20262027/TBL/8476453.png,https://assets.nhle.com/mugs/actionshots/1296x729/8476453.jpg,#3a3a35,20262027
 TOR,8479318,Auston,Matthews,C,24,13,32,https://assets.nhle.com/mugs/nhl/20262027/TOR/8479318.png,https://assets.nhle.com/mugs/actionshots/1296x729/8479318.jpg,#00205b,20262027
 UTA,8479343,Clayton,Keller,R,23,5,29,https://assets.nhle.com/mugs/nhl/20262027/UTA/8479343.png,https://assets.nhle.com/mugs/actionshots/1296x729/8479343.jpg,#6cace4,20262027
-VAN,8478444,Brock,Boeser,R,23,8,23,https://assets.nhle.com/mugs/nhl/20262027/VAN/8478444.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478444.jpg,#00205b,20262027
-VGK,8478403,Jack,Eichel,C,23,9,28,https://assets.nhle.com/mugs/nhl/20262027/VGK/8478403.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478403.jpg,#b9975b,20262027
+VAN,8478444,Brock,Boeser,R,24,8,24,https://assets.nhle.com/mugs/nhl/20262027/VAN/8478444.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478444.jpg,#00205b,20262027
+VGK,8478403,Jack,Eichel,C,24,9,29,https://assets.nhle.com/mugs/nhl/20262027/VGK/8478403.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478403.jpg,#b9975b,20262027
 WPG,8476460,Mark,Scheifele,C,23,7,29,https://assets.nhle.com/mugs/nhl/20262027/WPG/8476460.png,https://assets.nhle.com/mugs/actionshots/1296x729/8476460.jpg,#a6192e,20262027
 WSH,8477949,Alex,Tuch,R,20,13,16,https://assets.nhle.com/mugs/nhl/20262027/WSH/8477949.png,https://assets.nhle.com/mugs/actionshots/1296x729/8477949.jpg,#c8102e,20262027
