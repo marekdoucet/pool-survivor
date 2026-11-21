@@ -1,11 +1,11 @@
 team,player,pos,status,injury
 ANA,A.J. Greer,LW,IR,Upper Body
+ANA,Beckett Sennecke,RW,IR,Upper Body
 ANA,Ryan Poehling,C,IR,Knee
 BOS,James Hagens,C,IR,Back
 BUF,Justin Danforth,RW,IR,Upper Body
 BUF,Konsta Helenius,C,IR,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
-CBJ,Mathieu Olivier,RW,Day-To-Day,Undisclosed
 CBJ,Sean Monahan,C,Out,Upper Body
 CGY,Connor Zary,C,Out,Knee
 CGY,Jonathan Huberdeau,LW,IR,Hip
@@ -29,23 +29,23 @@ EDM,Alec Regula,D,IR,Undisclosed
 EDM,Frederik Andersen,G,IR,Knee
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
-EDM,Ryan Nugent-Hopkins,C,Day-To-Day,Undisclosed
+EDM,Ryan Nugent-Hopkins,C,Out,Undisclosed
 FLA,Aleksander Barkov,C,IR,Knee
 FLA,Brad Marchand,LW,IR,Knee
 FLA,Jonah Gadjovich,LW,IR,Neck
-LAK,Artemi Panarin,LW,Day-To-Day,Personal
+LAK,Artemi Panarin,LW,Out,Personal
 LAK,Jakub Dvorak,D,IR,Upper Body
-LAK,Trevor Moore,LW,Day-To-Day,Undisclosed
+LAK,Trevor Moore,LW,Out,Undisclosed
 MIN,Filip Gustavsson,G,IR,Hip
 MIN,Olli Maatta,D,IR,Upper Body
-MIN,Quinn Hughes,D,Day-To-Day,Upper Body
+MIN,Quinn Hughes,D,Out,Upper Body
 MIN,Yakov Trenin,C,Day-To-Day,Personal
 NJD,Anthony Mantha,RW,IR,Neck
 NJD,Johnathan Kovacevic,D,IR,Ankle
 NJD,Seamus Casey,D,IR,Knee
 NYI,Alexander Romanov,D,IR,Knee
 NYI,Logan Stanley,D,Day-To-Day,Lower Body
-NYI,Ryan Pulock,D,Day-To-Day,Lower Body
+NYI,Ryan Pulock,D,Out,Lower Body
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Alberts Smits,D,IR,Upper Body
@@ -64,7 +64,6 @@ PIT,Elmer Soderblom,LW,IR,Upper Body
 PIT,Evgeni Malkin,C,Out,Upper Body
 PIT,Nick Robertson,LW,IR,Lower Body
 PIT,Ryan Graves,D,IR,Knee
-SEA,Curtis Douglas,C,IR,Upper Body
 SEA,Jake O'Brien,C,IR,Lower Body
 SEA,Jared McCann,LW,IR,Lower Body
 SJS,Igor Chernyshov,LW,IR,Upper Body
@@ -93,7 +92,8 @@ UTA,John Marino,D,IR,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
 UTA,Nate Schmidt,D,IR,Upper Body
 UTA,Nick Schmaltz,C,IR,Lower Body
-VAN,Brendan Gallagher,RW,Day-To-Day,Lower Body
+VAN,Brendan Gallagher,RW,IR,Lower Body
+VAN,Elias Pettersson,C,Out,Upper Body
 VAN,Guillaume Brisebois,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
