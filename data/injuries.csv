@@ -1,7 +1,7 @@
 team,player,pos,status,injury
 ANA,A.J. Greer,LW,IR,Upper Body
 ANA,Beckett Sennecke,RW,IR,Upper Body
-ANA,Leo Carlsson,C,Day-To-Day,Upper Body
+ANA,Leo Carlsson,C,Out,Upper Body
 ANA,Ryan Poehling,C,IR,Knee
 BOS,James Hagens,C,IR,Back
 BUF,Justin Danforth,RW,IR,Upper Body
@@ -75,8 +75,8 @@ SJS,Quentin Musty,LW,IR,Upper Body
 STL,Brandon Carlo,D,IR,Lower Body
 STL,Connor McMichael,LW,IR,Lower Body
 STL,Dillon Dube,C,IR,Neck
-STL,Jimmy Snuggerud,RW,Day-To-Day,Upper Body
-STL,Pavel Buchnevich,LW,Day-To-Day,Upper Body
+STL,Jimmy Snuggerud,RW,Out,Upper Body
+STL,Pavel Buchnevich,LW,Out,Upper Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Conor Geekie,C,IR,Shoulder
