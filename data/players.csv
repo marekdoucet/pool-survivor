@@ -1,11 +1,11 @@
 team,player_id,first_name,last_name,position,games,goals,points,headshot,action,color,season
-ANA,8483445,Cutter,Gauthier,L,24,22,31,https://assets.nhle.com/mugs/nhl/20262027/ANA/8483445.png,https://assets.nhle.com/mugs/actionshots/1296x729/8483445.jpg,#cf4520,20262027
+ANA,8483445,Cutter,Gauthier,L,25,23,32,https://assets.nhle.com/mugs/nhl/20262027/ANA/8483445.png,https://assets.nhle.com/mugs/actionshots/1296x729/8483445.jpg,#cf4520,20262027
 BOS,8477956,David,Pastrnak,R,24,11,32,https://assets.nhle.com/mugs/nhl/20262027/BOS/8477956.png,https://assets.nhle.com/mugs/actionshots/1296x729/8477956.jpg,#ffb81c,20262027
 BUF,8479420,Tage,Thompson,C,25,17,30,https://assets.nhle.com/mugs/nhl/20262027/BUF/8479420.png,https://assets.nhle.com/mugs/actionshots/1296x729/8479420.jpg,#ffb81c,20262027
 CAR,8478427,Sebastian,Aho,C,25,13,34,https://assets.nhle.com/mugs/nhl/20262027/CAR/8478427.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478427.jpg,#cd001a,20262027
 CBJ,8482660,Kent,Johnson,C,23,9,23,https://assets.nhle.com/mugs/nhl/20262027/CBJ/8482660.png,https://assets.nhle.com/mugs/actionshots/1296x729/8482660.jpg,#c8102e,20262027
 CGY,8480797,Joel,Farabee,L,26,8,21,https://assets.nhle.com/mugs/nhl/20262027/CGY/8480797.png,https://assets.nhle.com/mugs/actionshots/1296x729/8480797.jpg,#c8102e,20262027
-CHI,8484390,Roman,Kantserov,R,24,13,18,https://assets.nhle.com/mugs/nhl/20262027/CHI/8484390.png,https://assets.nhle.com/mugs/actionshots/1296x729/8484390.jpg,#fedd00,20262027
+CHI,8484390,Roman,Kantserov,R,25,15,20,https://assets.nhle.com/mugs/nhl/20262027/CHI/8484390.png,https://assets.nhle.com/mugs/actionshots/1296x729/8484390.jpg,#fedd00,20262027
 COL,8477492,Nathan,MacKinnon,C,20,10,30,https://assets.nhle.com/mugs/nhl/20262027/COL/8477492.png,https://assets.nhle.com/mugs/actionshots/1296x729/8477492.jpg,#236192,20262027
 DAL,8478420,Mikko,Rantanen,R,24,10,28,https://assets.nhle.com/mugs/nhl/20262027/DAL/8478420.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478420.jpg,#00843d,20262027
 DET,8482078,Lucas,Raymond,L,24,10,23,https://assets.nhle.com/mugs/nhl/20262027/DET/8482078.png,https://assets.nhle.com/mugs/actionshots/1296x729/8482078.jpg,#c8102e,20262027
@@ -13,7 +13,7 @@ EDM,8478402,Connor,McDavid,C,27,14,59,https://assets.nhle.com/mugs/nhl/20262027/
 FLA,8479314,Matthew,Tkachuk,L,25,7,33,https://assets.nhle.com/mugs/nhl/20262027/FLA/8479314.png,https://assets.nhle.com/mugs/actionshots/1296x729/8479314.jpg,#c8102e,20262027
 LAK,8478550,Artemi,Panarin,L,18,8,20,https://assets.nhle.com/mugs/nhl/20262027/LAK/8478550.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478550.jpg,#3a3a35,20262027
 MIN,8478864,Kirill,Kaprizov,L,27,19,49,https://assets.nhle.com/mugs/nhl/20262027/MIN/8478864.png,https://assets.nhle.com/mugs/actionshots/1296x729/8478864.jpg,#eaaa00,20262027
-MTL,8483457,Lane,Hutson,D,25,5,24,https://assets.nhle.com/mugs/nhl/20262027/MTL/8483457.png,https://assets.nhle.com/mugs/actionshots/1296x729/8483457.jpg,#a6192e,20262027
+MTL,8483457,Lane,Hutson,D,26,5,24,https://assets.nhle.com/mugs/nhl/20262027/MTL/8483457.png,https://assets.nhle.com/mugs/actionshots/1296x729/8483457.jpg,#a6192e,20262027
 NJD,8481559,Jack,Hughes,C,25,10,30,https://assets.nhle.com/mugs/nhl/20262027/NJD/8481559.png,https://assets.nhle.com/mugs/actionshots/1296x729/8481559.jpg,#cd001a,20262027
 NSH,8476887,Filip,Forsberg,L,24,9,26,https://assets.nhle.com/mugs/nhl/20262027/NSH/8476887.png,https://assets.nhle.com/mugs/actionshots/1296x729/8476887.jpg,#ffb81c,20262027
 NYI,8485366,Matthew,Schaefer,D,24,9,26,https://assets.nhle.com/mugs/nhl/20262027/NYI/8485366.png,https://assets.nhle.com/mugs/actionshots/1296x729/8485366.jpg,#fc4c02,20262027
@@ -21,8 +21,8 @@ NYR,8479323,Adam,Fox,D,24,2,27,https://assets.nhle.com/mugs/nhl/20262027/NYR/847
 OTT,8482116,Tim,Stützle,C,26,13,31,https://assets.nhle.com/mugs/nhl/20262027/OTT/8482116.png,https://assets.nhle.com/mugs/actionshots/1296x729/8482116.jpg,#c8102e,20262027
 PHI,8484387,Matvei,Michkov,R,27,11,20,https://assets.nhle.com/mugs/nhl/20262027/PHI/8484387.png,https://assets.nhle.com/mugs/actionshots/1296x729/8484387.jpg,#dc4405,20262027
 PIT,8471215,Evgeni,Malkin,C,20,7,20,https://assets.nhle.com/mugs/nhl/20262027/PIT/8471215.png,https://assets.nhle.com/mugs/actionshots/1296x729/8471215.jpg,#ffb81c,20262027
-SEA,8484800,Berkly,Catton,C,21,8,18,https://assets.nhle.com/mugs/nhl/20262027/SEA/8484800.png,https://assets.nhle.com/mugs/actionshots/1296x729/8484800.jpg,#c8102e,20262027
-SJS,8484801,Macklin,Celebrini,C,24,10,31,https://assets.nhle.com/mugs/nhl/20262027/SJS/8484801.png,https://assets.nhle.com/mugs/actionshots/1296x729/8484801.jpg,#e57200,20262027
+SEA,8484800,Berkly,Catton,C,22,8,19,https://assets.nhle.com/mugs/nhl/20262027/SEA/8484800.png,https://assets.nhle.com/mugs/actionshots/1296x729/8484800.jpg,#c8102e,20262027
+SJS,8484801,Macklin,Celebrini,C,25,10,31,https://assets.nhle.com/mugs/nhl/20262027/SJS/8484801.png,https://assets.nhle.com/mugs/actionshots/1296x729/8484801.jpg,#e57200,20262027
 STL,8480023,Robert,Thomas,C,25,5,25,https://assets.nhle.com/mugs/nhl/20262027/STL/8480023.png,https://assets.nhle.com/mugs/actionshots/1296x729/8480023.jpg,#ffb81c,20262027
 TBL,8476453,Nikita,Kucherov,R,24,10,33,https://assets.nhle.com/mugs/nhl/20262027/TBL/8476453.png,https://assets.nhle.com/mugs/actionshots/1296x729/8476453.jpg,#3a3a35,20262027
 TOR,8479318,Auston,Matthews,C,26,14,34,https://assets.nhle.com/mugs/nhl/20262027/TOR/8479318.png,https://assets.nhle.com/mugs/actionshots/1296x729/8479318.jpg,#00205b,20262027

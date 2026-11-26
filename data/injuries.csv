@@ -1,24 +1,23 @@
 team,player,pos,status,injury
 ANA,A.J. Greer,LW,IR,Upper Body
 ANA,Beckett Sennecke,RW,IR,Upper Body
-ANA,Leo Carlsson,C,Out,Upper Body
+ANA,Leo Carlsson,C,Day-To-Day,Upper Body
 ANA,Ryan Poehling,C,IR,Knee
 BOS,James Hagens,C,IR,Back
 BUF,Justin Danforth,RW,IR,Upper Body
 BUF,Konsta Helenius,C,IR,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
-BUF,Tyson Kozak,C,Out,Undisclosed
-CAR,K'Andre Miller,D,Out,Illness
-CAR,Nikolaj Ehlers,LW,Out,Lower Body
+BUF,Tyson Kozak,C,Day-To-Day,Undisclosed
+CAR,K'Andre Miller,D,Day-To-Day,Illness
+CAR,Nikolaj Ehlers,LW,Day-To-Day,Lower Body
 CBJ,Denton Mateychuk,D,Day-To-Day,Concussion
-CBJ,Mathieu Olivier,RW,IR,Upper Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Kevin Bahl,D,IR,Achilles
 CGY,Martin Pospisil,C,Out,Upper Body
-CGY,Morgan Frost,C,Out,Upper Body
+CGY,Morgan Frost,C,Day-To-Day,Upper Body
 CHI,Bowen Byram,D,IR,Upper Body
 CHI,Connor Bedard,C,IR,Shoulder
-CHI,Tyler Bertuzzi,LW,Out,Illness
+CHI,Tyler Bertuzzi,LW,Day-To-Day,Illness
 CHI,Wyatt Kaiser,D,Suspension,Suspension
 COL,Gavin Brindley,C,Out,Concussion
 COL,Josh Manson,D,IR,Ankle
@@ -29,7 +28,7 @@ DAL,Lian Bichsel,D,IR,Lower Body
 DAL,Matt Duchene,C,IR,Abdomen
 DET,Sam Montembeault,G,IR,Lower Body
 DET,Simon Edvinsson,D,IR,Contract Dispute
-DET,William Wallinder,D,Out,Upper Body
+DET,William Wallinder,D,Day-To-Day,Upper Body
 EDM,Alec Regula,D,IR,Undisclosed
 EDM,Filip Hallander,C,Day-To-Day,Lower Body
 EDM,Frederik Andersen,G,IR,Knee
@@ -50,6 +49,7 @@ NYI,Ryan Pulock,D,Out,Shoulder
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Alberts Smits,D,IR,Upper Body
+NYR,Gabe Perreault,RW,Out,Lower Body
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Oliver Bjorkstrand,RW,IR,Upper Body
@@ -74,19 +74,19 @@ SJS,Quentin Musty,LW,IR,Upper Body
 STL,Brandon Carlo,D,IR,Lower Body
 STL,Connor McMichael,LW,IR,Lower Body
 STL,Dillon Dube,C,IR,Neck
-STL,Jimmy Snuggerud,RW,Out,Upper Body
-STL,Pavel Buchnevich,LW,Out,Upper Body
+STL,Jimmy Snuggerud,RW,Day-To-Day,Upper Body
+STL,Pavel Buchnevich,LW,Day-To-Day,Upper Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Conor Geekie,C,IR,Shoulder
-TBL,Erik Cernak,D,Out,Illness
+TBL,Erik Cernak,D,Day-To-Day,Illness
 TBL,Pontus Holmberg,RW,Out,Undisclosed
-TBL,Victor Hedman,D,Out,Illness
+TBL,Victor Hedman,D,Day-To-Day,Illness
 TOR,Cade Webber,D,IR,Elbow
 TOR,Cole McWard,D,IR,Lower Body
 TOR,Colton Sissons,C,IR,Lower Body
 TOR,Elvis Merzlikins,G,IR,Shoulder
-TOR,Jack Roslovic,C,Day-To-Day,Upper Body
+TOR,Jack Roslovic,C,Out,Upper Body
 TOR,Kirill Marchenko,RW,IR,Lower Body
 TOR,Marshall Rifai,D,IR,Lower Body
 TOR,Max Domi,C,IR,Back
