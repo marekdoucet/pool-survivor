@@ -7,18 +7,17 @@ BOS,James Hagens,C,IR,Back
 BUF,Justin Danforth,RW,IR,Upper Body
 BUF,Konsta Helenius,C,IR,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
-BUF,Mattias Samuelsson,D,Day-To-Day,Undisclosed
-BUF,Tyson Kozak,C,Day-To-Day,Undisclosed
-CAR,K'Andre Miller,D,Day-To-Day,Illness
+BUF,Tyson Kozak,C,Out,Undisclosed
+CAR,K'Andre Miller,D,Out,Illness
 CAR,Nikolaj Ehlers,LW,Out,Lower Body
 CBJ,Mathieu Olivier,RW,IR,Upper Body
 CGY,Jonathan Huberdeau,LW,IR,Hip
 CGY,Kevin Bahl,D,IR,Achilles
 CGY,Martin Pospisil,C,Out,Upper Body
 CGY,Morgan Frost,C,Out,Upper Body
-CHI,Anton Frondell,C,Day-To-Day,Undisclosed
 CHI,Bowen Byram,D,IR,Upper Body
 CHI,Connor Bedard,C,IR,Shoulder
+CHI,Tyler Bertuzzi,LW,Out,Illness
 CHI,Wyatt Kaiser,D,Suspension,Suspension
 COL,Gavin Brindley,C,Out,Concussion
 COL,Josh Manson,D,IR,Ankle
@@ -27,10 +26,9 @@ COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Kyle Capobianco,D,IR,Leg
 DAL,Lian Bichsel,D,IR,Lower Body
 DAL,Matt Duchene,C,IR,Abdomen
-DAL,Oskar Back,C,IR,Finger
 DET,Sam Montembeault,G,IR,Lower Body
 DET,Simon Edvinsson,D,IR,Contract Dispute
-DET,William Wallinder,D,Day-To-Day,Upper Body
+DET,William Wallinder,D,Out,Upper Body
 EDM,Alec Regula,D,IR,Undisclosed
 EDM,Filip Hallander,C,Day-To-Day,Lower Body
 EDM,Frederik Andersen,G,IR,Knee
@@ -80,6 +78,9 @@ STL,Pavel Buchnevich,LW,Out,Upper Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Conor Geekie,C,IR,Shoulder
+TBL,Erik Cernak,D,Out,Illness
+TBL,Pontus Holmberg,RW,Day-To-Day,Undisclosed
+TBL,Victor Hedman,D,Out,Illness
 TOR,Cade Webber,D,IR,Elbow
 TOR,Cole McWard,D,IR,Lower Body
 TOR,Colton Sissons,C,IR,Lower Body
@@ -93,7 +94,7 @@ TOR,Nick Blankenburg,D,IR,Upper Body
 TOR,William Villeneuve,D,IR,Knee
 UTA,John Marino,D,IR,Upper Body
 UTA,Maveric Lamoureux,D,IR,Shoulder
-UTA,Michael Carcone,LW,Out,Upper Body
+UTA,Michael Carcone,LW,IR,Upper Body
 UTA,Nate Schmidt,D,IR,Upper Body
 UTA,Nick Schmaltz,C,IR,Lower Body
 VAN,Brendan Gallagher,RW,IR,Lower Body
