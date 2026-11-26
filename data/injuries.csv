@@ -1,6 +1,5 @@
 team,player,pos,status,injury
 ANA,A.J. Greer,LW,IR,Upper Body
-ANA,Beckett Sennecke,RW,IR,Upper Body
 ANA,Leo Carlsson,C,Day-To-Day,Upper Body
 ANA,Ryan Poehling,C,IR,Knee
 BOS,James Hagens,C,IR,Back
@@ -50,7 +49,7 @@ NYI,Ryan Pulock,D,Out,Shoulder
 NYR,Adam Sykora,LW,IR,Lower Body
 NYR,Aidan Thompson,C,IR,Undisclosed
 NYR,Alberts Smits,D,IR,Upper Body
-NYR,Gabe Perreault,RW,Out,Lower Body
+NYR,Gabe Perreault,RW,IR,Lower Body
 NYR,Igor Shesterkin,G,IR,Knee
 NYR,Joe Veleno,C,IR,Lower Body
 NYR,Oliver Bjorkstrand,RW,IR,Upper Body
