@@ -6,8 +6,8 @@ BOS,David Pastrnak,RW,Day-To-Day,Lower Body
 BOS,James Hagens,C,IR,Back
 BUF,Konsta Helenius,C,IR,Upper Body
 BUF,Matt Grzelcyk,D,IR,Lower Body
-BUF,Noah Ostlund,C,Out,Undisclosed
-BUF,Tyson Kozak,C,Day-To-Day,Undisclosed
+BUF,Noah Ostlund,C,IR,Undisclosed
+BUF,Tyson Kozak,C,IR,Undisclosed
 BUF,Zach Benson,LW,Out,Upper Body
 CAR,Nikolaj Ehlers,LW,Day-To-Day,Lower Body
 CBJ,Denton Mateychuk,D,Out,Concussion
@@ -28,7 +28,7 @@ DAL,Lian Bichsel,D,IR,Lower Body
 DAL,Matt Duchene,C,IR,Abdomen
 DET,Sam Montembeault,G,IR,Lower Body
 DET,Simon Edvinsson,D,IR,Contract Dispute
-DET,William Wallinder,D,Day-To-Day,Upper Body
+DET,William Wallinder,D,Out,Upper Body
 EDM,Alec Regula,D,IR,Undisclosed
 EDM,Filip Hallander,C,Out,Knee
 EDM,Frederik Andersen,G,IR,Knee
@@ -78,10 +78,10 @@ STL,Jimmy Snuggerud,RW,IR,Upper Body
 STL,Torey Krug,D,IR,Ankle
 STL,Tyler Tucker,D,IR,Knee
 TBL,Conor Geekie,C,IR,Shoulder
-TBL,Erik Cernak,D,Day-To-Day,Illness
-TBL,Pontus Holmberg,RW,Out,Undisclosed
-TBL,Victor Hedman,D,Day-To-Day,Illness
+TBL,Erik Cernak,D,Out,Illness
+TBL,Pontus Holmberg,RW,IR,Lower Body
 TOR,Cade Webber,D,IR,Elbow
+TOR,Chris Tanev,D,Day-To-Day,Lower Body
 TOR,Cole McWard,D,IR,Lower Body
 TOR,Dakota Joshua,C,Out,Illness
 TOR,Elvis Merzlikins,G,IR,Shoulder
