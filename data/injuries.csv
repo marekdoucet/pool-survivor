@@ -16,11 +16,13 @@ CGY,Kevin Bahl,D,IR,Achilles
 CGY,Martin Pospisil,C,Out,Upper Body
 CHI,Bowen Byram,D,IR,Upper Body
 CHI,Connor Bedard,C,IR,Shoulder
-CHI,Patrick Kane,RW,IR,Foot
-CHI,Tyler Bertuzzi,LW,Day-To-Day,Illness
+CHI,Jordan Greenway,LW,Day-To-Day,Upper Body
+CHI,Patrick Kane,RW,IR,Lower Body
+CHI,Tyler Bertuzzi,LW,Out,Illness
 CHI,Wyatt Kaiser,D,Suspension,Suspension
 COL,Gavin Brindley,C,IR,Concussion
 COL,Josh Manson,D,IR,Ankle
+COL,Martin Necas,C,Out,Upper Body
 COL,Nathan MacKinnon,C,Out,Lower Body
 COL,Zachary L'Heureux,LW,IR,Upper Body
 DAL,Kyle Capobianco,D,IR,Leg
@@ -35,6 +37,7 @@ EDM,Frederik Andersen,G,IR,Knee
 EDM,Matt Savoie,C,IR,Lower Body
 EDM,Mattias Janmark,C,IR,Undisclosed
 EDM,Zach Hyman,LW,Out,Impaired Vision
+FLA,Garnet Hathaway,RW,Out,Lower Body
 FLA,Jonah Gadjovich,LW,IR,Neck
 LAK,Erik Gustafsson,D,IR,Hand
 LAK,Jakub Dvorak,D,IR,Upper Body
@@ -58,8 +61,8 @@ NYR,Oliver Bjorkstrand,RW,IR,Upper Body
 NYR,Pavel Dorofeyev,RW,IR,Lower Body
 OTT,Warren Foegele,LW,IR,Knee
 OTT,William Eklund,LW,IR,Ankle
-PHI,Matvei Michkov,RW,Out,Coach's Decision
 PHI,Nikita Grebenkin,RW,IR,Back
+PHI,Owen Tippett,RW,Out,Lower Body
 PIT,Bryan Rust,RW,IR,Lower Body
 PIT,Egor Chinakhov,RW,IR,Undisclosed
 PIT,Elmer Soderblom,LW,IR,Upper Body
@@ -80,8 +83,9 @@ STL,Tyler Tucker,D,IR,Knee
 TBL,Conor Geekie,C,IR,Shoulder
 TBL,Erik Cernak,D,Out,Illness
 TBL,Pontus Holmberg,RW,IR,Lower Body
+TBL,Victor Hedman,D,Day-To-Day,Undisclosed
 TOR,Cade Webber,D,IR,Elbow
-TOR,Chris Tanev,D,Day-To-Day,Lower Body
+TOR,Chris Tanev,D,Out,Lower Body
 TOR,Cole McWard,D,IR,Lower Body
 TOR,Dakota Joshua,C,Out,Illness
 TOR,Elvis Merzlikins,G,IR,Shoulder
@@ -98,10 +102,10 @@ UTA,Nate Schmidt,D,IR,Upper Body
 UTA,Nick Schmaltz,C,IR,Lower Body
 VAN,Brendan Gallagher,RW,IR,Lower Body
 VAN,Elias Pettersson,C,Out,Upper Body
+VAN,Filip Chytil,C,Day-To-Day,Undisclosed
 VAN,Guillaume Brisebois,D,IR,Undisclosed
 VAN,Mackenzie MacEachern,LW,IR,Undisclosed
 VAN,Thatcher Demko,G,IR,Hip
-VGK,Marc Gatcomb,C,Day-To-Day,Face
 WPG,Dylan DeMelo,D,IR,Lower Body
 WPG,Isak Rosen,RW,IR,Undisclosed
 WPG,Nick Bjugstad,C,IR,Pectoral
